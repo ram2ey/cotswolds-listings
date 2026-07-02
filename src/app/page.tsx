@@ -109,68 +109,35 @@ export default async function Home() {
         </div>
       </header>
 
-      {/* 2. Hero Section with Embedded Search Bar */}
+      {/* 2. Hero Section */}
       <section 
-        className="relative overflow-hidden bg-stone-950 text-white min-h-[460px] flex flex-col justify-center py-16 border-b border-amber-500/20 bg-cover bg-center"
+        className="relative overflow-hidden bg-stone-950 text-white min-h-[440px] flex flex-col justify-center py-16 border-b border-amber-500/20 bg-cover bg-center"
         style={{ backgroundImage: `url('/hero-bridge.jpg')` }}
       >
         <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-[1px]" />
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center md:text-left">
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight font-serif text-white leading-tight">
-              Explore CotswoldXL <br />
-              Digital Business Directory
+              Discover the Heart <br />
+              of the <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Cotswolds</span>
             </h1>
             <p className="mt-4 text-stone-200 leading-relaxed font-normal max-w-xl text-sm sm:text-base opacity-95">
-              CotswoldXL Online Directory is your comprehensive guide to local businesses, historic venues, boutique stays, and cozy gastro pubs across the region.
+              Handpicked boutique hotels, historic coaching inns, cozy gastropubs, and artisan shops across Gloucestershire, Oxfordshire, and Warwickshire.
             </p>
-
-            {/* Embedded Search Console overlay */}
-            <form action="#search" className="mt-8 bg-white/10 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl md:rounded-full shadow-2xl flex flex-col md:flex-row items-center gap-2 max-w-4xl w-full">
-              <div className="w-full md:flex-1 flex items-center gap-2.5 px-4 py-2 border-b md:border-b-0 md:border-r border-white/15">
-                <Search className="h-5 w-5 text-amber-400 shrink-0" />
-                <input
-                  type="text"
-                  name="keyword"
-                  placeholder="What are you looking for?"
-                  className="w-full text-sm bg-transparent text-white placeholder-stone-300 focus:outline-hidden"
-                />
-              </div>
-              <div className="w-full md:w-52 flex items-center gap-2 px-4 py-2 border-b md:border-b-0 md:border-r border-white/15">
-                <select
-                  name="region"
-                  className="w-full text-sm bg-transparent text-white focus:outline-hidden cursor-pointer"
-                >
-                  <option value="" className="text-stone-900">All Regions</option>
-                  <option value="Broadway" className="text-stone-900">Broadway</option>
-                  <option value="Chipping Campden" className="text-stone-900">Chipping Campden</option>
-                  <option value="Stow-on-the-Wold" className="text-stone-900">Stow-on-the-Wold</option>
-                  <option value="Bourton-on-the-Water" className="text-stone-900">Bourton-on-the-Water</option>
-                  <option value="Kingham" className="text-stone-900">Kingham</option>
-                  <option value="Cirencester" className="text-stone-900">Cirencester</option>
-                  <option value="Burford" className="text-stone-900">Burford</option>
-                </select>
-              </div>
-              <div className="w-full md:w-52 flex items-center gap-2 px-4 py-2">
-                <select
-                  name="category"
-                  className="w-full text-sm bg-transparent text-white focus:outline-hidden cursor-pointer animate-none"
-                >
-                  <option value="" className="text-stone-900">Choose a category...</option>
-                  <option value="Hotel & Accommodation" className="text-stone-900">Hotel & Accommodation</option>
-                  <option value="Pub & Restaurant" className="text-stone-900">Pub & Restaurant</option>
-                  <option value="Gastropub & Inn" className="text-stone-900">Gastropub & Inn</option>
-                  <option value="Boutique Shop" className="text-stone-900">Boutique Shop</option>
-                  <option value="Attraction & Tour" className="text-stone-900">Attraction & Tour</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="w-full md:w-auto px-7 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl md:rounded-full text-xs font-bold transition shadow-md shrink-0 cursor-pointer"
+            <div className="mt-8 flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+              <a
+                href="#search"
+                className="px-6 py-3 bg-amber-500 text-stone-950 text-xs font-bold rounded-xl shadow-md hover:bg-amber-600 transition"
               >
-                Search
-              </button>
-            </form>
+                Search Directory
+              </a>
+              <a
+                href="#featured"
+                className="px-6 py-3 border border-white/20 text-white text-xs font-bold rounded-xl backdrop-blur-xs hover:bg-white/10 transition"
+              >
+                Featured Venues
+              </a>
+            </div>
           </div>
         </div>
       </section>
