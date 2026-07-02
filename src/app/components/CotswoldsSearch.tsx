@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { 
   Search, 
   MapPin, 
@@ -74,6 +75,7 @@ const COUNTY_CARDS = [
 ];
 
 export default function CotswoldsSearch() {
+  const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [allListings, setAllListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -98,6 +100,19 @@ export default function CotswoldsSearch() {
   useEffect(() => {
     setVisibleCount(9);
   }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWhatsApp, hasWebsite, sortBy]);
+
+  // Synchronize state with URL search parameters (triggered by clicking home category/county cards)
+  useEffect(() => {
+    const categoryQuery = searchParams.get('category');
+    const regionQuery = searchParams.get('region');
+
+    if (categoryQuery) {
+      setSelectedCategory(categoryQuery);
+    }
+    if (regionQuery) {
+      setSelectedRegion(regionQuery);
+    }
+  }, [searchParams]);
 
   // Debounce keyword typing to prevent sluggish re-renders on keystroke
   useEffect(() => {
