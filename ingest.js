@@ -108,13 +108,66 @@ async function runIngestion() {
     // Configure the Google Maps Scraper Actor
     const input = {
       searchStringsArray: [
-        "historic hotels in Cotswolds UK",
-        "traditional pubs in Bourton-on-the-Water, Cotswolds"
+        // --- HOTELS & ACCOMMODATION ---
+        "boutique hotels Chipping Campden Cotswolds",
+        "historic hotels Broadway Cotswolds",
+        "luxury hotels Burford Cotswolds",
+        "country house hotels Stow-on-the-Wold",
+        "hotels Bourton-on-the-Water Cotswolds",
+        "B&B bed and breakfast Cheltenham Cotswolds",
+        "boutique hotels Cirencester Cotswolds",
+        "hotels Moreton-in-Marsh Cotswolds",
+        "hotels Chipping Norton Oxfordshire Cotswolds",
+        "inns and hotels Tetbury Gloucestershire",
+        
+        // --- PUBS & GASTRO PUBS ---
+        "traditional pubs Bourton-on-the-Water Cotswolds",
+        "gastropubs Broadway Worcestershire Cotswolds",
+        "village pubs Chipping Campden Cotswolds",
+        "country pubs Stow-on-the-Wold Gloucestershire",
+        "pubs Burford Oxfordshire Cotswolds",
+        "gastro pubs Cirencester Gloucestershire",
+        "best pubs Moreton-in-Marsh Cotswolds",
+        "historic coaching inns Cotswolds",
+        
+        // --- RESTAURANTS & DINING ---
+        "restaurants Chipping Campden Cotswolds",
+        "fine dining restaurants Cheltenham Cotswolds",
+        "restaurants Burford Oxfordshire",
+        "tea rooms Bourton-on-the-Water Cotswolds",
+        "restaurants Broadway Cotswolds",
+        "restaurants Stow-on-the-Wold Gloucestershire",
+        "restaurants Cirencester Gloucestershire",
+        
+        // --- CAFES & BAKERIES ---
+        "cafes and coffee shops Cotswolds",
+        "bakeries and tea rooms Chipping Campden",
+        "cafes Bourton-on-the-Water",
+        
+        // --- SHOPS & RETAIL ---
+        "antique shops Stow-on-the-Wold Cotswolds",
+        "art galleries Chipping Campden Cotswolds",
+        "independent shops Burford Oxfordshire",
+        "gift shops Bourton-on-the-Water Cotswolds",
+        "farm shops Cotswolds Gloucestershire",
+        
+        // --- SPAS & WELLNESS ---
+        "spas and wellness retreats Cotswolds",
+        "day spas Cheltenham Cotswolds",
+        
+        // --- WEDDING VENUES ---
+        "wedding venues Cotswolds Gloucestershire",
+        "barn wedding venues Cotswolds",
+        
+        // --- ATTRACTIONS & ACTIVITIES ---
+        "visitor attractions Cotswolds UK",
+        "gardens and National Trust Cotswolds",
+        "horse riding Cotswolds Gloucestershire",
+        "walking tours Cotswolds"
       ],
-      maxCrawledPlacesPerSearch: 3, // Safe limit for test running
+      maxCrawledPlacesPerSearch: 10,
       language: "en",
-      extractImages: true,
-      maxImages: 4
+      extractImages: false
     };
 
     try {
@@ -263,7 +316,7 @@ async function runIngestion() {
       });
     }
 
-    const targetImages = rawImageUrls.slice(0, 4);
+    const targetImages = rawImageUrls.slice(0, 1);
     for (let i = 0; i < targetImages.length; i++) {
       const storedUrl = await uploadToSupabaseStorage(slug, targetImages[i], i);
       if (storedUrl) {
@@ -306,17 +359,33 @@ async function runIngestion() {
   }
 
   if (upsertListings.length > 0) {
-    console.log(`Executing bulk upsert of ${upsertListings.length} listings into 'listings' table...`);
-    const { data, error } = await supabase
-      .from('listings')
-      .upsert(upsertListings, { onConflict: 'slug' });
+    const BATCH_SIZE = 50;
+    let totalUpserted = 0;
+    let hasError = false;
 
-    if (error) {
-      console.error('Database Upsert Error:', error.message);
-      console.log('Database error details. Do listings table exist? Run schema.sql first.');
-    } else {
+    for (let i = 0; i < upsertListings.length; i += BATCH_SIZE) {
+      const batch = upsertListings.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(upsertListings.length / BATCH_SIZE);
+      console.log(`Upserting batch ${batchNum}/${totalBatches} (${batch.length} listings)...`);
+
+      const { error } = await supabase
+        .from('listings')
+        .upsert(batch, { onConflict: 'slug' });
+
+      if (error) {
+        console.error(`Batch ${batchNum} upsert error:`, error.message);
+        hasError = true;
+      } else {
+        totalUpserted += batch.length;
+      }
+    }
+
+    if (!hasError) {
       console.log('--- INGESTION WORKFLOW COMPLETED SUCCESSFULLY ---');
-      console.log(`Upserted listings: ${upsertListings.map(l => l.slug).join(', ')}`);
+      console.log(`Total listings upserted: ${totalUpserted}`);
+    } else {
+      console.log(`Partial completion: ${totalUpserted}/${upsertListings.length} listings upserted.`);
     }
   }
 }

@@ -3,6 +3,38 @@ import { createClient } from '@supabase/supabase-js';
 import { ApifyClient } from 'apify-client';
 import axios from 'axios';
 
+// Helper function to download and upload images to Supabase Storage on-demand
+async function downloadAndUploadImage(supabase: any, imageSrc: string, slug: string, idx: number): Promise<string | null> {
+  try {
+    const res = await axios.get(imageSrc, { responseType: 'arraybuffer', timeout: 12000 });
+    const buffer = Buffer.from(res.data, 'binary');
+    const contentType = res.headers['content-type'] || 'image/jpeg';
+    const extension = contentType.split('/')[1] || 'jpg';
+    const filePath = `listings/${slug}-${idx}.${extension}`;
+
+    const { data, error } = await supabase.storage
+      .from('listing-images')
+      .upload(filePath, buffer, {
+        contentType,
+        upsert: true
+      });
+
+    if (error) {
+      console.error(`Error uploading storage object (index ${idx}) for ${slug}:`, error.message);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('listing-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error: any) {
+    console.error(`Error in downloadAndUploadImage for ${slug} at index ${idx}:`, error.message);
+    return null;
+  }
+}
+
 // Helper function to generate premium metadata fallback
 function generateMockMetadata(title: string, category: string, subRegion: string): any {
   const isFood = /pub|restaurant|caf|gastropub|inn/i.test(category);
@@ -111,8 +143,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameters (id, tier, website)' }, { status: 400 });
     }
 
-    if (tier !== 'silver' && tier !== 'gold') {
-      return NextResponse.json({ error: 'Invalid plan selected' }, { status: 400 });
+    if (tier !== 'gold') {
+      return NextResponse.json({ error: 'Invalid plan selected. Only Gold tier is available for claims.' }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -127,6 +159,7 @@ export async function POST(request: NextRequest) {
       listing = {
         id,
         title: "Arlington Row Cottages",
+        slug: "arlington-row-cottages-bibury",
         category: "Historic Landmark",
         sub_region: "Bibury",
         website,
@@ -158,20 +191,29 @@ export async function POST(request: NextRequest) {
     }
 
     let premiumMetadata = null;
+    let premiumImages: string[] = [];
     const apifyToken = process.env.APIFY_API_TOKEN;
     const isMockApify = !apifyToken || apifyToken === 'your-apify-api-token-here';
 
-    // Run Scrape & AI enrichment
+    // Run Scrape, AI enrichment & Premium Photo Extraction
     if (isMockApify || !website || website.includes('example.com')) {
       console.log(`Running mock scrape for Claim Flow: ${listing.title}`);
       premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
+      
+      // Seed high-quality mock unsplash gallery photos for offline testing
+      premiumImages = [
+        listing.images?.[0] || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1582719478250-c89cae4db85b?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80"
+      ];
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated processing time
     } else {
       console.log(`Starting real website crawl for Claim Flow on: ${website}`);
+      const client = new ApifyClient({ token: apifyToken });
+
+      // 1. Crawl Website & Extract copywriting using Gemini AI
       try {
-        const client = new ApifyClient({ token: apifyToken });
-        
-        // Execute Apify Website Content Crawler
         const run = await client.actor("apify/website-content-crawler").call({
           startUrls: [{ url: website }],
           maxPagesPerCrawl: 3,
@@ -188,15 +230,60 @@ export async function POST(request: NextRequest) {
         console.error("Deep website crawl failed in claim, falling back to mock:", err.message);
         premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
       }
+
+      // 2. Perform live Google Maps photo extraction on-demand (only at the time of claim)
+      try {
+        const mapsQuery = listing.google_place_id 
+          ? `https://www.google.com/maps/place/?q=place_id:${listing.google_place_id}`
+          : `${listing.title}, ${listing.sub_region || 'Cotswolds'}, UK`;
+
+        console.log(`Running Apify Google Maps Scraper actor for Gold partner photos: ${mapsQuery}`);
+        const mapsRun = await client.actor("compass/crawler-google-places").call({
+          searchStringsArray: [mapsQuery],
+          maxCrawledPlacesPerSearch: 1,
+          extractImages: true,
+          maxImages: 4,
+          language: "en"
+        });
+
+        const { items: mapsItems } = await client.dataset(mapsRun.defaultDatasetId).listItems();
+        if (mapsItems && mapsItems.length > 0) {
+          const mapItem = mapsItems[0];
+          const rawImageUrls: string[] = [];
+          if (mapItem.imageUrl) rawImageUrls.push(mapItem.imageUrl);
+          if (mapItem.imageUrls && Array.isArray(mapItem.imageUrls)) {
+            mapItem.imageUrls.forEach((url: string) => {
+              if (url && !rawImageUrls.includes(url)) {
+                rawImageUrls.push(url);
+              }
+            });
+          }
+
+          const targetImages = rawImageUrls.slice(0, 4);
+          const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+          for (let i = 0; i < targetImages.length; i++) {
+            const storedUrl = await downloadAndUploadImage(supabase, targetImages[i], listing.slug, i);
+            if (storedUrl) {
+              premiumImages.push(storedUrl);
+            }
+          }
+        }
+      } catch (err: any) {
+        console.error("Google Maps photo scraping failed during claim:", err.message);
+      }
     }
 
-    // Save metadata back to DB
+    // Save metadata and unlocked premium images to DB
     if (!isMock) {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
       
       const updates: any = {
         premium_metadata: premiumMetadata
       };
+
+      if (premiumImages && premiumImages.length > 0) {
+        updates.images = premiumImages;
+      }
 
       // Seed reviews/rating if empty to make it look full
       if (!listing.rating) {
@@ -218,7 +305,7 @@ export async function POST(request: NextRequest) {
         throw new Error(updateError.message);
       }
     } else {
-      console.log("Mock Claim Flow Completed. Premium Metadata: ", premiumMetadata);
+      console.log("Mock Claim Flow Completed. Premium Metadata: ", premiumMetadata, "Premium Images: ", premiumImages);
     }
 
     return NextResponse.json({ success: true, tier, metadata: premiumMetadata });
