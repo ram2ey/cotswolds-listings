@@ -105,12 +105,16 @@ export default function CotswoldsSearch() {
   useEffect(() => {
     const categoryQuery = searchParams.get('category');
     const regionQuery = searchParams.get('region');
+    const keywordQuery = searchParams.get('keyword');
 
     if (categoryQuery) {
       setSelectedCategory(categoryQuery);
     }
     if (regionQuery) {
       setSelectedRegion(regionQuery);
+    }
+    if (keywordQuery) {
+      setKeyword(keywordQuery);
     }
   }, [searchParams]);
 

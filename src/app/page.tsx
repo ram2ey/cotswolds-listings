@@ -1,12 +1,12 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, ArrowRight, Loader2 } from "lucide-react";
+import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, Search, HelpCircle, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-// Try/catch data fetcher to load live Gold Partner featured listings
+// Fetch live Gold Partner featured listings
 async function getFeaturedListings() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-supabase-url-here')) {
     // Return mock gold listings if offline
@@ -18,9 +18,8 @@ async function getFeaturedListings() {
         description: "Historic 16th-century coaching inn offering luxury rooms and fine dining.",
         category: "Hotel & Accommodation",
         address: "High St, Broadway",
-        sub_region: "Broadway",
+        phone: "+44 1386 852255",
         rating: 4.8,
-        reviews_count: 142,
         images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"]
       },
       {
@@ -30,10 +29,20 @@ async function getFeaturedListings() {
         description: "Chic gastropub serving local organic ingredients in a cozy setting in Kingham.",
         category: "Gastropub & Inn",
         address: "Church St, Kingham",
-        sub_region: "Kingham",
+        phone: "+44 1608 658389",
         rating: 4.7,
-        reviews_count: 98,
         images: ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: "mock-3",
+        title: "The Porch House",
+        slug: "the-porch-house-stow-on-the-wold",
+        description: "England's oldest inn dating back to 947 AD, serving classic British food.",
+        category: "Gastropub & Inn",
+        address: "Digbeth St, Stow-on-the-Wold",
+        phone: "+44 1451 870048",
+        rating: 4.6,
+        images: ["https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80"]
       }
     ];
   }
@@ -44,11 +53,11 @@ async function getFeaturedListings() {
         apikey: supabaseAnonKey,
         Authorization: `Bearer ${supabaseAnonKey}`
       },
-      next: { revalidate: 30 } // Cache for 30 seconds
+      next: { revalidate: 30 }
     });
     if (!res.ok) throw new Error("Failed to fetch");
     const data = await res.json();
-    return data.slice(0, 3); // Limit to top 3 featured partners
+    return data.slice(0, 3); // Limit to top 3 featured partners for the template
   } catch (error) {
     console.error("Error loading featured listings, using fallbacks:", error);
     return [];
@@ -59,98 +68,126 @@ export default async function Home() {
   const featured = await getFeaturedListings();
 
   const categories = [
-    { name: "Hotel & Accommodation", icon: Hotel, desc: "Boutique hotels, B&Bs, and historic inns", count: "Browse Stays", color: "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20" },
-    { name: "Pub & Restaurant", icon: Utensils, desc: "Gastropubs, tea rooms, and fine dining", count: "Browse Dining", color: "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20" },
-    { name: "Boutique Shop", icon: Store, desc: "Antiques, artisan markets, and farm shops", count: "Browse Shops", color: "bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20" },
-    { name: "Attraction & Tour", icon: Compass, desc: "Historic houses, walking tours, and activities", count: "Browse Activities", color: "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20" }
+    { name: "Hotel & Accommodation", icon: Hotel, desc: "Boutique stays, estates & historic inns", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80" },
+    { name: "Pub & Restaurant", icon: Utensils, desc: "Gastropubs, tea rooms & fine dining", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80" },
+    { name: "Gastropub & Inn", icon: Hotel, desc: "Traditional coaching inns & taverns", img: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=500&q=80" },
+    { name: "Boutique Shop", icon: Store, desc: "Artisans, antiques & local farm shops", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=500&q=80" },
+    { name: "Attraction & Tour", icon: Compass, desc: "Landmarks, manor estates & walking trails", img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=500&q=80" }
   ];
 
-  const counties = [
-    { name: 'Gloucestershire', desc: 'Heart of the Cotswolds (Bourton, Stow, Cirencester)', gradient: 'from-amber-800 to-amber-950 shadow-amber-950/15' },
-    { name: 'Oxfordshire', desc: 'Gateway villages (Burford, Kingham, Chipping Norton)', gradient: 'from-emerald-800 to-emerald-950 shadow-emerald-950/15' },
-    { name: 'Warwickshire', desc: 'Northern countryside edges & trails', gradient: 'from-rose-800 to-rose-950 shadow-rose-950/15' },
-    { name: 'Wiltshire', desc: 'Charming southern lanes & Castle Combe', gradient: 'from-slate-700 to-slate-900 shadow-slate-950/15' },
-    { name: 'Worcestershire', desc: 'Western orchards, hills & Broadway village', gradient: 'from-purple-800 to-indigo-950 shadow-purple-950/15' }
+  const locations = [
+    { name: 'Broadway', desc: 'Gateway views & Broadway Tower', img: 'https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Bourton-on-the-Water', desc: 'Little Venice of the Cotswolds', img: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Stow-on-the-Wold', desc: 'Historic market squares & portals', img: 'https://images.unsplash.com/photo-1505873242700-f289a29e1e0f?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Burford', desc: 'Iconic sloping streets & old bridges', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Cirencester', desc: 'Roman capital & historic markets', img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=500&q=80' }
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-stone-50 text-stone-900 font-sans scroll-smooth">
-      {/* 1. Premium Hero Banner */}
-      <section 
-        className="relative overflow-hidden bg-stone-950 text-white min-h-[440px] flex flex-col justify-between py-8 border-b border-amber-500/20 bg-cover bg-center"
-        style={{ backgroundImage: `url('/hero-bridge.jpg')` }}
-      >
-        <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-[1px]" />
-        
-        {/* Navigation & Header */}
-        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-between">
+      {/* 1. Header/Navigation */}
+      <header className="bg-white border-b border-stone-200 py-4">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <span className="h-3.5 w-3.5 rounded-full bg-amber-500 shadow-md shadow-amber-500/50 animate-pulse" />
-            <span className="font-serif text-xl font-extrabold tracking-tight text-white">
-              Cotswolds<span className="text-amber-500">.UK</span>
+            <span className="font-serif text-xl font-extrabold tracking-tight text-stone-950">
+              Cotswold<span className="text-amber-500 font-sans">XL</span> Directory
             </span>
           </Link>
-          
-          <div className="flex items-center gap-3 text-xs font-bold">
+          <div className="flex items-center gap-4 text-xs font-bold">
+            <a href="#search" className="text-stone-605 hover:text-stone-900 transition hidden sm:inline-block">Find Businesses</a>
+            <a href="#how-it-works" className="text-stone-605 hover:text-stone-900 transition hidden sm:inline-block">How it Works</a>
             <Link
               href="/listings/submit"
-              className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl shadow-lg transition cursor-pointer"
+              className="flex items-center gap-1.5 px-4.5 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              List Your Business
+              Add Your Listing
             </Link>
           </div>
         </div>
+      </header>
 
-        {/* Hero Central Content */}
-        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12">
+      {/* 2. Hero Section with Embedded Search Bar */}
+      <section 
+        className="relative overflow-hidden bg-stone-950 text-white min-h-[460px] flex flex-col justify-center py-16 border-b border-amber-500/20 bg-cover bg-center"
+        style={{ backgroundImage: `url('/hero-bridge.jpg')` }}
+      >
+        <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-[1px]" />
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center md:text-left">
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight font-serif text-white leading-tight">
-              Discover the Heart <br />
-              of the <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Cotswolds</span>
+              Explore CotswoldXL <br />
+              Digital Business Directory
             </h1>
             <p className="mt-4 text-stone-200 leading-relaxed font-normal max-w-xl text-sm sm:text-base opacity-95">
-              Handpicked boutique hotels, historic coaching inns, cozy gastropubs, and artisan shops across Gloucestershire, Oxfordshire, and Warwickshire.
+              CotswoldXL Online Directory is your comprehensive guide to local businesses, historic venues, boutique stays, and cozy gastro pubs across the region.
             </p>
-            <div className="mt-8 flex gap-4">
-              <a
-                href="#search"
-                className="px-6 py-3 bg-amber-500 text-stone-950 text-xs font-bold rounded-xl shadow-md hover:bg-amber-600 transition"
+
+            {/* Embedded Search Console overlay */}
+            <form action="#search" className="mt-8 bg-white/10 backdrop-blur-md border border-white/20 p-2.5 rounded-2xl md:rounded-full shadow-2xl flex flex-col md:flex-row items-center gap-2 max-w-4xl w-full">
+              <div className="w-full md:flex-1 flex items-center gap-2.5 px-4 py-2 border-b md:border-b-0 md:border-r border-white/15">
+                <Search className="h-5 w-5 text-amber-400 shrink-0" />
+                <input
+                  type="text"
+                  name="keyword"
+                  placeholder="What are you looking for?"
+                  className="w-full text-sm bg-transparent text-white placeholder-stone-300 focus:outline-hidden"
+                />
+              </div>
+              <div className="w-full md:w-52 flex items-center gap-2 px-4 py-2 border-b md:border-b-0 md:border-r border-white/15">
+                <select
+                  name="region"
+                  className="w-full text-sm bg-transparent text-white focus:outline-hidden cursor-pointer"
+                >
+                  <option value="" className="text-stone-900">All Regions</option>
+                  <option value="Broadway" className="text-stone-900">Broadway</option>
+                  <option value="Chipping Campden" className="text-stone-900">Chipping Campden</option>
+                  <option value="Stow-on-the-Wold" className="text-stone-900">Stow-on-the-Wold</option>
+                  <option value="Bourton-on-the-Water" className="text-stone-900">Bourton-on-the-Water</option>
+                  <option value="Kingham" className="text-stone-900">Kingham</option>
+                  <option value="Cirencester" className="text-stone-900">Cirencester</option>
+                  <option value="Burford" className="text-stone-900">Burford</option>
+                </select>
+              </div>
+              <div className="w-full md:w-52 flex items-center gap-2 px-4 py-2">
+                <select
+                  name="category"
+                  className="w-full text-sm bg-transparent text-white focus:outline-hidden cursor-pointer animate-none"
+                >
+                  <option value="" className="text-stone-900">Choose a category...</option>
+                  <option value="Hotel & Accommodation" className="text-stone-900">Hotel & Accommodation</option>
+                  <option value="Pub & Restaurant" className="text-stone-900">Pub & Restaurant</option>
+                  <option value="Gastropub & Inn" className="text-stone-900">Gastropub & Inn</option>
+                  <option value="Boutique Shop" className="text-stone-900">Boutique Shop</option>
+                  <option value="Attraction & Tour" className="text-stone-900">Attraction & Tour</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="w-full md:w-auto px-7 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl md:rounded-full text-xs font-bold transition shadow-md shrink-0 cursor-pointer"
               >
-                Search Directory
-              </a>
-              <a
-                href="#featured"
-                className="px-6 py-3 border border-white/20 text-white text-xs font-bold rounded-xl backdrop-blur-xs hover:bg-white/10 transition"
-              >
-                Featured Venues
-              </a>
-            </div>
+                Search
+              </button>
+            </form>
           </div>
         </div>
-
-        <div className="h-8 relative z-10" />
       </section>
 
-      {/* SECTION 1: Featured Listings (Gold Partners) */}
+      {/* 3. Featured Listings Section */}
       {featured && featured.length > 0 && (
         <section id="featured" className="py-16 bg-white border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Elite Partners</span>
-                <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Featured Cotswolds Venues</h2>
-              </div>
-              <p className="text-stone-500 text-xs mt-2 md:mt-0 max-w-md">
-                Highly recommended hotels, inns, and restaurants with verified status and premium guest experiences.
-              </p>
+            <div className="text-center max-w-xl mx-auto mb-12">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Featured Listings</span>
+              <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Discover Some of Our Best Listings</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {featured.map((item: any) => (
                 <div 
                   key={item.id} 
-                  className="bg-stone-50 rounded-2xl overflow-hidden border-2 border-amber-500/30 hover:border-amber-500 transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
+                  className="bg-stone-50 rounded-2xl overflow-hidden border border-stone-200/80 transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
                 >
                   <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-200">
                     {item.images?.[0] ? (
@@ -158,29 +195,26 @@ export default async function Home() {
                       <img 
                         src={item.images[0]} 
                         alt={item.title} 
-                        className="object-cover w-full h-full hover:scale-103 transition-transform duration-300"
+                        className="object-cover w-full h-full hover:scale-102 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-stone-400">
                         <MapPin className="h-8 w-8 stroke-1" />
                       </div>
                     )}
-                    <span className="absolute top-3 right-3 bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-sm">
-                      Gold Partner
-                    </span>
+                    <div className="absolute top-3 left-3 flex gap-1.5">
+                      <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                        Featured
+                      </span>
+                      <span className="bg-stone-900/90 text-amber-400 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                        Gold
+                      </span>
+                    </div>
                   </Link>
 
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
-                      <div className="flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-amber-700 mb-1.5">
-                        <span>{item.category}</span>
-                        {item.rating && (
-                          <span className="flex items-center gap-0.5 text-stone-900">
-                            <Star className="h-3 w-3 fill-current text-amber-500" />
-                            {item.rating}
-                          </span>
-                        )}
-                      </div>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1.5">{item.category}</span>
                       <h3 className="text-md font-bold font-serif text-stone-950 hover:text-amber-700 transition">
                         <Link href={`/listings/${item.slug}`}>{item.title}</Link>
                       </h3>
@@ -189,9 +223,17 @@ export default async function Home() {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[10px] text-stone-400 font-medium mt-4 pt-3 border-t border-stone-200/60">
-                      <MapPin className="h-3.5 w-3.5 text-stone-400" />
-                      <span>{item.address || `${item.sub_region}, Cotswolds`}</span>
+                    <div className="mt-4 pt-3 border-t border-stone-200/60 flex flex-col gap-1.5 text-[10px] text-stone-400 font-medium">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                        <span className="truncate">{item.address || `${item.sub_region}, Cotswolds`}</span>
+                      </span>
+                      {item.phone && (
+                        <span className="flex items-center gap-1 text-stone-605">
+                          <PlusCircle className="h-3.5 w-3.5 rotate-45 text-stone-400 shrink-0" />
+                          <span>{item.phone}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -201,97 +243,125 @@ export default async function Home() {
         </section>
       )}
 
-      {/* SECTION 2: Browse by Category */}
+      {/* 4. Explore Popular Categories */}
       <section className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Tailored Navigation</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Browse by Category</h2>
-            <p className="text-stone-500 text-xs mt-2">
-              Explore handpicked entries organized by their trade and specific travel interests.
-            </p>
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Tailored Search</span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Explore Popular Categories</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <Link
-                  key={cat.name}
-                  href={`/?category=${encodeURIComponent(cat.name)}#search`}
-                  className="bg-white border border-stone-200 p-6 rounded-2xl shadow-xs hover:shadow-md hover:border-stone-300 transition text-left flex flex-col justify-between h-44 cursor-pointer group"
-                >
-                  <div>
-                    <div className={`p-3 rounded-xl w-11 h-11 flex items-center justify-center mb-4 transition ${cat.color}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-sm font-bold text-stone-950 group-hover:text-amber-700 transition">
-                      {cat.name}
-                    </h3>
-                    <p className="text-[10px] text-stone-500 mt-1 leading-normal">
-                      {cat.desc}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-[9px] uppercase font-extrabold tracking-wider text-stone-400 mt-3 group-hover:text-amber-700 transition">
-                    <span>{cat.count}</span>
-                    <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: Explore by County */}
-      <section className="py-16 bg-white border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Geographic Regions</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Explore by County</h2>
-            <p className="text-stone-500 text-xs mt-2">
-              Filter venues based on their local county borders across the Cotswold region.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-            {counties.map((cty) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {categories.map((cat) => (
               <Link
-                key={cty.name}
-                href={`/?region=${encodeURIComponent(cty.name)}#search`}
-                className={`relative overflow-hidden rounded-2xl p-6 h-36 flex flex-col justify-between text-white bg-gradient-to-br ${cty.gradient} hover:scale-102 transition-all shadow-xs hover:shadow-md cursor-pointer group`}
+                key={cat.name}
+                href={`/?category=${encodeURIComponent(cat.name)}#search`}
+                className="relative group overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-6 text-white shadow-xs hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
               >
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <MapPin className="h-16 w-16" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={cat.img} 
+                  alt={cat.name}
+                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-103 transition-transform duration-500" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/25 to-transparent group-hover:via-stone-950/35 transition-all" />
+                <div className="relative z-10">
+                  <h3 className="font-bold text-md font-serif group-hover:text-amber-400 transition">{cat.name}</h3>
+                  <p className="text-[10px] text-stone-300 mt-1 leading-normal">{cat.desc}</p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-black font-serif tracking-tight">{cty.name}</h3>
-                  <p className="text-[9px] opacity-80 leading-normal mt-1.5 pr-2">
-                    {cty.desc}
-                  </p>
-                </div>
-                <span className="text-[9px] uppercase font-bold tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">
-                  Explore →
-                </span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* MAIN SEARCH SECTION */}
-      <main id="search" className="flex-1 bg-stone-50 py-16 scroll-mt-6">
+      {/* 5. Explore Popular Locations */}
+      <section className="py-16 bg-white border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Cotswold Villages</span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Explore Popular Locations</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {locations.map((loc) => (
+              <Link
+                key={loc.name}
+                href={`/?region=${encodeURIComponent(loc.name)}#search`}
+                className="relative group overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-6 text-white shadow-xs hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={loc.img} 
+                  alt={loc.name}
+                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-103 transition-transform duration-500" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/25 to-transparent group-hover:via-stone-950/35 transition-all" />
+                <div className="relative z-10">
+                  <h3 className="font-bold text-md font-serif group-hover:text-amber-400 transition">{loc.name}</h3>
+                  <p className="text-[10px] text-stone-300 mt-1 leading-normal">{loc.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. How it Works Section */}
+      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">How does CotswoldXL Directory work?</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
+                <HelpCircle className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">Find Stays, Dining & Services</h3>
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+                Search our comprehensive business indexes filtered by specific Cotswolds villages or trade classes to discover exactly what you need.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
+                <Zap className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">Interactive Location Sorting</h3>
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+                Use your device's shared GPS coordinates to immediately filter and sort results by radial mileage distance proximity.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">Empowering Local Venues</h3>
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+                Claim your listing to unlock premium Gold Partner visibility, custom Highlights, reviews, menus, and on-demand live image synchronization.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MAIN SEARCH SECTION (The Directory catalog) */}
+      <main id="search" className="flex-1 bg-stone-50 py-16 scroll-mt-6 border-b border-stone-200">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-xl mx-auto mb-10 px-4">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Search Engine</span>
             <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Search the Directory</h2>
             <p className="text-stone-500 text-xs mt-2">
-              Refine your selection, sort alphabetically or by GPS proximity, and filter verified Gold Partners.
+              Browse through our live verified database entries. Sort alphabetically or by GPS proximity.
             </p>
           </div>
           <Suspense fallback={
             <div className="text-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-amber-500 mx-auto" />
+              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
               <p className="text-xs text-stone-500 mt-2">Loading search console...</p>
             </div>
           }>
@@ -300,16 +370,74 @@ export default async function Home() {
         </div>
       </main>
 
-      {/* Premium Footer */}
-      <footer className="border-t border-stone-200 bg-white py-12 text-center text-xs text-stone-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="font-serif font-bold text-stone-800 tracking-tight text-sm">Cotswolds.UK Directory</p>
-          <p className="mt-2 text-stone-400">
-            A high-performance localized directory service. Powered by Next.js, PostGIS & Supabase.
+      {/* 8. Call to Action (CTA) Section */}
+      <section className="py-16 bg-stone-950 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[1px]" />
+        <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-serif font-black text-white leading-tight">
+            CotswoldXL Business Directory is the best way to find & discover great local businesses
+          </h2>
+          <p className="text-stone-300 text-xs mt-4 max-w-xl mx-auto leading-relaxed">
+            Verify ownership of your business listing to gain priority rankings, unlock photo galleries, add custom FAQs, and start getting direct client leads on WhatsApp.
           </p>
-          <p className="mt-6 text-stone-300">
-            © {new Date().getFullYear()} Cotswolds Local Business Directory. All rights reserved.
-          </p>
+          <div className="mt-8 flex flex-col items-center gap-2">
+            <Link
+              href="/listings/submit"
+              className="px-8 py-3.5 bg-amber-500 text-stone-950 font-bold text-xs rounded-xl shadow-lg hover:bg-amber-600 transition"
+            >
+              Claim Your Free Listing
+            </Link>
+            <span className="text-[10px] text-stone-400">and get started in minutes</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. Footer Section */}
+      <footer className="bg-white border-t border-stone-200 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
+          {/* Column 1: Branding */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="h-3.5 w-3.5 rounded-full bg-amber-500" />
+              <span className="font-serif text-lg font-extrabold tracking-tight text-stone-950">
+                Cotswold<span className="text-amber-500 font-sans">XL</span> Directory
+              </span>
+            </div>
+            <p className="text-xs text-stone-500 leading-relaxed pr-6">
+              A high-performance digital business directory service. Connecting visitors and locals to premium boutique hotels, coaching inns, and artisan shops.
+            </p>
+          </div>
+
+          {/* Column 2: Navigation */}
+          <div>
+            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Navigation</h4>
+            <ul className="space-y-2 text-xs font-semibold text-stone-605">
+              <li><a href="#featured" className="hover:text-stone-950 transition">Featured Venues</a></li>
+              <li><a href="#how-it-works" className="hover:text-stone-950 transition">How it Works</a></li>
+              <li><a href="#search" className="hover:text-stone-950 transition">Search Directory</a></li>
+              <li><Link href="/listings/submit" className="hover:text-stone-950 transition">List Your Business</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Contact */}
+          <div>
+            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Contact Us</h4>
+            <ul className="space-y-2 text-xs text-stone-505 leading-relaxed">
+              <li>Email: <a href="mailto:info@cotswoldxldirectory.co.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswoldxldirectory.co.uk</a></li>
+              <li>Website: <a href="https://cotswoldxldirectory.co.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswoldxldirectory.co.uk</a></li>
+              <li className="pt-2 flex gap-3 text-stone-400">
+                <a href="#" className="hover:text-stone-700">Facebook</a>
+                <span>•</span>
+                <a href="#" className="hover:text-stone-700">Instagram</a>
+                <span>•</span>
+                <a href="#" className="hover:text-stone-700">YouTube</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-100 mt-12 pt-8 text-center text-[10px] text-stone-400">
+          <p>© {new Date().getFullYear()} CotswoldXL Digital Business Directory. All rights reserved.</p>
         </div>
       </footer>
     </div>
