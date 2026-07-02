@@ -8,7 +8,8 @@ async function downloadAndUploadImage(supabase: any, imageSrc: string, slug: str
   try {
     const res = await axios.get(imageSrc, { responseType: 'arraybuffer', timeout: 12000 });
     const buffer = Buffer.from(res.data, 'binary');
-    const contentType = res.headers['content-type'] || 'image/jpeg';
+    const contentTypeHeader = res.headers['content-type'];
+    const contentType = typeof contentTypeHeader === 'string' ? contentTypeHeader : 'image/jpeg';
     const extension = contentType.split('/')[1] || 'jpg';
     const filePath = `listings/${slug}-${idx}.${extension}`;
 
