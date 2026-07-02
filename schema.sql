@@ -4,12 +4,10 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Enable UUID-OSSP extension for gen_random_uuid() or uuid_generate_v4() if needed
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Drop existing trigger/function/table if they exist for clean environment reset
-DROP TRIGGER IF EXISTS trg_update_listings_geom ON listings;
-DROP TRIGGER IF EXISTS trg_update_listings_updated_at ON listings;
-DROP TABLE IF EXISTS listings;
-DROP TYPE IF EXISTS cotswolds_county;
-DROP TYPE IF EXISTS membership_tier;
+-- Drop existing table (CASCADE removes any attached triggers/indexes automatically)
+DROP TABLE IF EXISTS listings CASCADE;
+DROP TYPE IF EXISTS cotswolds_county CASCADE;
+DROP TYPE IF EXISTS membership_tier CASCADE;
 
 -- Create custom enum for Cotswolds counties. 
 -- Cotswolds spans across Gloucestershire, Oxfordshire, and Warwickshire primarily, 
