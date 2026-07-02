@@ -19,14 +19,15 @@ export function proxy(request: NextRequest) {
   }
 
   // 2. Main domain access protection:
-  // If attempting to access /admin routes directly on the main public domain, 
-  // return a 404 page (or bypass in local development for testing convenience)
+  // Commented out to allow direct access to /admin on the main domain
+  /*
   if (!isAdminSubdomain && url.pathname.startsWith('/admin')) {
     if (!isLocalhost) {
       url.pathname = '/404';
       return NextResponse.rewrite(url);
     }
   }
+  */
 
   return NextResponse.next();
 }
