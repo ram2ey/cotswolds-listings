@@ -1,5 +1,5 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, Search, HelpCircle, ShieldCheck, Zap } from "lucide-react";
+import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, HelpCircle, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -109,9 +109,9 @@ export default async function Home() {
         </div>
       </header>
 
-      {/* 2. Hero Section */}
+      {/* 2. Hero Section (No search bar, no CTA buttons) */}
       <section 
-        className="relative overflow-hidden bg-stone-950 text-white min-h-[440px] flex flex-col justify-center py-16 border-b border-amber-500/20 bg-cover bg-center"
+        className="relative overflow-hidden bg-stone-950 text-white min-h-[380px] flex flex-col justify-center py-16 border-b border-amber-500/20 bg-cover bg-center"
         style={{ backgroundImage: `url('/hero-bridge.jpg')` }}
       >
         <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-[1px]" />
@@ -124,25 +124,25 @@ export default async function Home() {
             <p className="mt-4 text-stone-200 leading-relaxed font-normal max-w-xl text-sm sm:text-base opacity-95">
               Handpicked boutique hotels, historic coaching inns, cozy gastropubs, and artisan shops across Gloucestershire, Oxfordshire, and Warwickshire.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-              <a
-                href="#search"
-                className="px-6 py-3 bg-amber-500 text-stone-950 text-xs font-bold rounded-xl shadow-md hover:bg-amber-600 transition"
-              >
-                Search Directory
-              </a>
-              <a
-                href="#featured"
-                className="px-6 py-3 border border-white/20 text-white text-xs font-bold rounded-xl backdrop-blur-xs hover:bg-white/10 transition"
-              >
-                Featured Venues
-              </a>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* 3. Featured Listings Section */}
+      {/* 3. Main Search Section (Brought directly below the Hero) */}
+      <main id="search" className="relative z-20 flex-1 -mt-8 bg-stone-50 pb-16 border-b border-stone-200 scroll-mt-6">
+        <div className="max-w-7xl mx-auto">
+          <Suspense fallback={
+            <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs text-stone-505 mt-2">Loading search console...</p>
+            </div>
+          }>
+            <CotswoldsSearch />
+          </Suspense>
+        </div>
+      </main>
+
+      {/* 4. Featured Listings Section */}
       {featured && featured.length > 0 && (
         <section id="featured" className="py-16 bg-white border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,7 +186,7 @@ export default async function Home() {
                       <h3 className="text-md font-bold font-serif text-stone-950 hover:text-amber-700 transition">
                         <Link href={`/listings/${item.slug}`}>{item.title}</Link>
                       </h3>
-                      <p className="text-xs text-stone-500 mt-2 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-stone-505 mt-2 line-clamp-2 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
@@ -211,7 +211,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* 4. Explore Popular Categories */}
+      {/* 5. Explore Popular Categories */}
       <section className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -243,7 +243,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 5. Explore Popular Locations */}
+      {/* 6. Explore Popular Locations */}
       <section className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -275,12 +275,12 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 6. How it Works Section */}
+      {/* 7. How it Works Section */}
       <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">How does CotswoldXL Directory work?</h2>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">How does Cotswolds.UK Directory work?</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -289,7 +289,7 @@ export default async function Home() {
                 <HelpCircle className="h-6 w-6" />
               </div>
               <h3 className="text-sm font-bold text-stone-950 mb-2">Find Stays, Dining & Services</h3>
-              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 Search our comprehensive business indexes filtered by specific Cotswolds villages or trade classes to discover exactly what you need.
               </p>
             </div>
@@ -299,7 +299,7 @@ export default async function Home() {
                 <Zap className="h-6 w-6" />
               </div>
               <h3 className="text-sm font-bold text-stone-950 mb-2">Interactive Location Sorting</h3>
-              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 Use your device's shared GPS coordinates to immediately filter and sort results by radial mileage distance proximity.
               </p>
             </div>
@@ -309,7 +309,7 @@ export default async function Home() {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <h3 className="text-sm font-bold text-stone-950 mb-2">Empowering Local Venues</h3>
-              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 Claim your listing to unlock premium Gold Partner visibility, custom Highlights, reviews, menus, and on-demand live image synchronization.
               </p>
             </div>
@@ -317,33 +317,12 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* MAIN SEARCH SECTION (The Directory catalog) */}
-      <main id="search" className="flex-1 bg-stone-50 py-16 scroll-mt-6 border-b border-stone-200">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-xl mx-auto mb-10 px-4">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Search Engine</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Search the Directory</h2>
-            <p className="text-stone-500 text-xs mt-2">
-              Browse through our live verified database entries. Sort alphabetically or by GPS proximity.
-            </p>
-          </div>
-          <Suspense fallback={
-            <div className="text-center py-20">
-              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-stone-500 mt-2">Loading search console...</p>
-            </div>
-          }>
-            <CotswoldsSearch />
-          </Suspense>
-        </div>
-      </main>
-
       {/* 8. Call to Action (CTA) Section */}
       <section className="py-16 bg-stone-950 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[1px]" />
         <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
           <h2 className="text-2xl sm:text-3xl font-serif font-black text-white leading-tight">
-            CotswoldXL Business Directory is the best way to find & discover great local businesses
+            Cotswolds.UK Directory is the best way to find & discover great local businesses
           </h2>
           <p className="text-stone-300 text-xs mt-4 max-w-xl mx-auto leading-relaxed">
             Verify ownership of your business listing to gain priority rankings, unlock photo galleries, add custom FAQs, and start getting direct client leads on WhatsApp.
