@@ -302,6 +302,10 @@ async function runIngestion() {
 
   for (const item of rawItems) {
     const title = item.title || item.name;
+    if (!title) {
+      console.log("Skipping listing due to missing title name.");
+      continue;
+    }
     
     // Skip permanently closed locations
     if (item.isClosed || item.permanentlyClosed || item.closed === true) {
