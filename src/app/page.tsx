@@ -128,21 +128,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 3. Main Search Section (Brought directly below the Hero) */}
-      <main id="search" className="relative z-20 flex-1 -mt-8 bg-stone-50 pb-16 border-b border-stone-200 scroll-mt-6">
-        <div className="max-w-7xl mx-auto">
-          <Suspense fallback={
-            <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
-              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-stone-505 mt-2">Loading search console...</p>
-            </div>
-          }>
-            <CotswoldsSearch />
-          </Suspense>
-        </div>
-      </main>
-
-      {/* 4. Featured Listings Section */}
+      {/* 3. Featured Listings Section (Gold Partners) */}
       {featured && featured.length > 0 && (
         <section id="featured" className="py-16 bg-white border-b border-stone-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -211,7 +197,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* 5. Explore Popular Categories */}
+      {/* 4. Explore Popular Categories */}
       <section className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -243,7 +229,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 6. Explore Popular Locations */}
+      {/* 5. Explore Popular Locations */}
       <section className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -275,8 +261,29 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* 6. Recent Listings Section (Search Catalog repositioned above How it works) */}
+      <main id="search" className="bg-stone-50 py-16 border-b border-stone-200 scroll-mt-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-xl mx-auto mb-10 px-4">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Directory Index</span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Recent Listings</h2>
+            <p className="text-stone-505 text-xs mt-2">
+              Browse through our newly added, verified Cotswolds local businesses.
+            </p>
+          </div>
+          <Suspense fallback={
+            <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs text-stone-505 mt-2">Loading listings console...</p>
+            </div>
+          }>
+            <CotswoldsSearch />
+          </Suspense>
+        </div>
+      </main>
+
       {/* 7. How it Works Section */}
-      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
+      <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
@@ -284,7 +291,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <HelpCircle className="h-6 w-6" />
               </div>
@@ -294,7 +301,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <Zap className="h-6 w-6" />
               </div>
@@ -304,7 +311,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <ShieldCheck className="h-6 w-6" />
               </div>
