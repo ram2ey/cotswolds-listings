@@ -72,7 +72,8 @@ export default async function Home() {
     { name: "Pub & Restaurant", icon: Utensils, desc: "Gastropubs, tea rooms & fine dining", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80" },
     { name: "Gastropub & Inn", icon: Hotel, desc: "Traditional coaching inns & taverns", img: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=500&q=80" },
     { name: "Boutique Shop", icon: Store, desc: "Artisans, antiques & local farm shops", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=500&q=80" },
-    { name: "Attraction & Tour", icon: Compass, desc: "Landmarks, manor estates & walking trails", img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=500&q=80" }
+    { name: "Attraction & Tour", icon: Compass, desc: "Landmarks, manor estates & walking trails", img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=500&q=80" },
+    { name: "Local Business", icon: HelpCircle, desc: "Services, builders, salons & trades", img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=500&q=80" }
   ];
 
   const locations = [
@@ -91,7 +92,7 @@ export default async function Home() {
           <Link href="/" className="flex items-center gap-2">
             <span className="h-3.5 w-3.5 rounded-full bg-amber-500 shadow-md shadow-amber-500/50 animate-pulse" />
             <span className="font-serif text-xl font-extrabold tracking-tight text-stone-950">
-              Cotswold<span className="text-amber-500 font-sans">XL</span> Directory
+              Cotswolds<span className="text-amber-500 font-sans">.UK</span>
             </span>
           </Link>
           <div className="flex items-center gap-4 text-xs font-bold">
@@ -400,10 +401,10 @@ export default async function Home() {
             <div className="flex items-center gap-2 mb-4">
               <span className="h-3.5 w-3.5 rounded-full bg-amber-500" />
               <span className="font-serif text-lg font-extrabold tracking-tight text-stone-950">
-                Cotswold<span className="text-amber-500 font-sans">XL</span> Directory
+                Cotswolds<span className="text-amber-500 font-sans">.UK</span>
               </span>
             </div>
-            <p className="text-xs text-stone-500 leading-relaxed pr-6">
+            <p className="text-xs text-stone-505 leading-relaxed pr-6">
               A high-performance digital business directory service. Connecting visitors and locals to premium boutique hotels, coaching inns, and artisan shops.
             </p>
           </div>
@@ -423,21 +424,21 @@ export default async function Home() {
           <div>
             <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Contact Us</h4>
             <ul className="space-y-2 text-xs text-stone-505 leading-relaxed">
-              <li>Email: <a href="mailto:info@cotswoldxldirectory.co.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswoldxldirectory.co.uk</a></li>
-              <li>Website: <a href="https://cotswoldxldirectory.co.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswoldxldirectory.co.uk</a></li>
+              <li>Email: <a href="mailto:info@cotswolds.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswolds.uk</a></li>
+              <li>Website: <a href="https://cotswolds.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswolds.uk</a></li>
               <li className="pt-2 flex gap-3 text-stone-400">
-                <a href="#" className="hover:text-stone-700">Facebook</a>
+                <a href="#" className="hover:text-stone-750">Facebook</a>
                 <span>•</span>
-                <a href="#" className="hover:text-stone-700">Instagram</a>
+                <a href="#" className="hover:text-stone-750">Instagram</a>
                 <span>•</span>
-                <a href="#" className="hover:text-stone-700">YouTube</a>
+                <a href="#" className="hover:text-stone-750">YouTube</a>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-100 mt-12 pt-8 text-center text-[10px] text-stone-400">
-          <p>© {new Date().getFullYear()} CotswoldXL Digital Business Directory. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Cotswolds.UK Directory. All rights reserved.</p>
         </div>
       </footer>
     </div>

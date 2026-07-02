@@ -275,70 +275,32 @@ export default function CotswoldsSearch() {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       
-      {/* 1. Sleek Floating Search Pill */}
-      <div className="w-full bg-white rounded-2xl md:rounded-full border border-stone-200 shadow-xl p-3 md:p-2 mb-10 flex flex-col md:flex-row items-center gap-2">
-        {/* Keyword Search Input */}
-        <div className="w-full md:flex-1 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 md:border-r border-stone-105">
-          <Search className="h-5 w-5 text-stone-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Search hotels, pubs, shops..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            className="w-full text-sm bg-transparent text-stone-900 placeholder-stone-400 focus:outline-hidden"
-          />
+      {/* Search results summary & filters bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h3 className="text-lg font-serif font-black text-stone-950">
+            {debouncedKeyword || selectedCategory !== "All Categories" || selectedRegion !== "All Sub-Regions" ? "Search Results" : "All Directory Listings"}
+          </h3>
+          <p className="text-xs text-stone-500 mt-1">
+            {listings.length} {listings.length === 1 ? 'business' : 'businesses'} found
+            {debouncedKeyword && ` for "${debouncedKeyword}"`}
+            {selectedCategory !== "All Categories" && ` in ${selectedCategory}`}
+            {selectedRegion !== "All Sub-Regions" && ` near ${selectedRegion}`}
+          </p>
         </div>
 
-        {/* Category Dropdown Selector */}
-        <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 md:border-r border-stone-105">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-450 shrink-0">In</label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
-          >
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat} className="text-stone-900">{cat}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Region Dropdown Selector */}
-        <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 border-stone-105 md:mr-2">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-450 shrink-0">Near</label>
-          <select
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
-          >
-            {SUB_REGIONS.map(reg => (
-              <option key={reg} value={reg} className="text-stone-900">{reg}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* CTA Button Actions */}
-        <div className="w-full md:w-auto flex items-center gap-2 justify-end mt-2 md:mt-0">
-          {/* Advanced Filter Drawer Toggle */}
+        <div className="flex gap-2">
+          {/* Advanced Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer border ${
+            className={`flex items-center gap-1.5 px-4.5 py-2.5 rounded-xl text-xs font-bold transition border cursor-pointer ${
               showFilters || onlyPremium || hasWhatsApp || hasWebsite || userCoords
-                ? 'bg-amber-50 border-amber-250 text-amber-800 shadow-xs'
-                : 'border-stone-200 hover:bg-stone-50 text-stone-600'
+                ? 'bg-amber-50 border-amber-250 text-amber-800 shadow-2xs'
+                : 'bg-white border-stone-200 hover:bg-stone-50 text-stone-605'
             }`}
           >
             Filters
             <span className="inline-block text-[10px] opacity-75">▼</span>
-          </button>
-
-          {/* Search Trigger Button */}
-          <button
-            onClick={fetchListings}
-            className="px-5 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-full text-xs font-bold shadow-md transition shrink-0 cursor-pointer flex items-center gap-1.5"
-          >
-            <Search className="h-3.5 w-3.5" />
-            Search
           </button>
         </div>
       </div>
