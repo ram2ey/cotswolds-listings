@@ -44,6 +44,28 @@ function detectCounty(address = '', city = '') {
   return 'Gloucestershire';
 }
 
+// Help function to standardize raw Google Maps categories to match frontend dropdown filters
+function mapCategory(rawCategory = '') {
+  const cat = rawCategory.toLowerCase();
+  
+  if (cat.includes('hotel') || cat.includes('accommodation') || cat.includes('bed & breakfast') || cat.includes('bed and breakfast') || cat.includes('b&b') || cat.includes('guesthouse') || cat.includes('lodging') || cat.includes('hostel')) {
+    return 'Hotel & Accommodation';
+  }
+  if (cat.includes('gastropub') || cat.includes('inn')) {
+    return 'Gastropub & Inn';
+  }
+  if (cat.includes('pub') || cat.includes('bar') || cat.includes('restaurant') || cat.includes('cafe') || cat.includes('coffee') || cat.includes('bakery') || cat.includes('tea room') || cat.includes('diner') || cat.includes('grill') || cat.includes('steakhouse') || cat.includes('bistro')) {
+    return 'Pub & Restaurant';
+  }
+  if (cat.includes('shop') || cat.includes('store') || cat.includes('boutique') || cat.includes('gallery') || cat.includes('antique') || cat.includes('market') || cat.includes('florist') || cat.includes('bookstore')) {
+    return 'Boutique Shop';
+  }
+  if (cat.includes('attraction') || cat.includes('tour') || cat.includes('museum') || cat.includes('garden') || cat.includes('landmark') || cat.includes('park') || cat.includes('castle') || cat.includes('riding') || cat.includes('nature') || cat.includes('activity')) {
+    return 'Attraction & Tour';
+  }
+  return 'Local Business';
+}
+
 // Download image binary as Buffer
 async function downloadImage(url) {
   try {
@@ -332,7 +354,7 @@ async function runIngestion() {
       title: title,
       slug: slug,
       description: item.subTitle || item.description || `Beautiful local listing in ${village}, Cotswolds.`,
-      category: item.categoryName || item.subTitle || 'Local Business',
+      category: mapCategory(item.categoryName || item.subTitle || 'Local Business'),
       phone: item.phone || item.phoneNormalized || null,
       website: item.website || null,
       whatsapp: item.whatsapp || null,
