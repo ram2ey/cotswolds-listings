@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { 
   Search, 
   MapPin, 
@@ -74,8 +74,13 @@ const COUNTY_CARDS = [
   { name: 'Worcestershire', gradient: 'from-purple-800 to-indigo-950 hover:from-purple-700 hover:to-indigo-900 shadow-purple-950/10' }
 ];
 
-export default function CotswoldsSearch() {
+interface CotswoldsSearchProps {
+  hideListings?: boolean;
+}
+
+export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearchProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
   const [allListings, setAllListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -222,12 +227,27 @@ export default function CotswoldsSearch() {
 
   // Trigger search with delay debouncing on filter updates
   useEffect(() => {
+    if (hideListings) return;
     const delayDebounce = setTimeout(() => {
       fetchListings();
     }, 250);
 
     return () => clearTimeout(delayDebounce);
-  }, [fetchListings]);
+  }, [fetchListings, hideListings]);
+
+  // Handle Search Submission (redirects to search route if hideListings is active)
+  const handleSearchSubmit = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (hideListings) {
+      const params = new URLSearchParams();
+      if (keyword) params.set('keyword', keyword);
+      if (selectedCategory && selectedCategory !== "All Categories") params.set('category', selectedCategory);
+      if (selectedRegion && selectedRegion !== "All Sub-Regions") params.set('region', selectedRegion);
+      router.push(`/search?${params.toString()}`);
+    } else {
+      fetchListings();
+    }
+  };
 
   // Client side keyword search, checks, and sorting calculations
   const filteredListings = listings.filter((item) => {
@@ -334,7 +354,7 @@ export default function CotswoldsSearch() {
 
           {/* Search Trigger Button */}
           <button
-            onClick={fetchListings}
+            onClick={handleSearchSubmit}
             className="px-5 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-full text-xs font-bold shadow-md transition shrink-0 cursor-pointer flex items-center gap-1.5"
           >
             <Search className="h-3.5 w-3.5" />
@@ -467,416 +487,354 @@ export default function CotswoldsSearch() {
         </div>
       )}
 
-      {/* 2. Featured Claimed Listings Carousel */}
-      {(() => {
-        const featuredListings = (allListings.length ? allListings : listings).filter(
-          (item) => item.tier === 'gold' || item.tier === 'silver'
-        );
+      {!hideListings && (
+        <>
+          {/* 2. Featured Claimed Listings Carousel */}
+          {(() => {
+            const featuredListings = (allListings.length ? allListings : listings).filter(
+              (item) => item.tier === 'gold' || item.tier === 'silver'
+            );
 
-        if (featuredListings.length === 0) return null;
+            if (featuredListings.length === 0) return null;
 
-        return (
-          <div className="mb-10 animate-fade-in">
-            <div className="mb-5">
-              <h3 className="text-xl font-bold tracking-tight text-stone-900 font-serif flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-500 fill-current animate-pulse" />
-                Featured Claimed Listings
-              </h3>
-              <p className="text-xs text-stone-500 mt-0.5">
-                Explore hand-verified premium venues and trusted local partners.
-              </p>
-            </div>
+            return (
+              <div className="mb-10 animate-fade-in">
+                <div className="mb-5">
+                  <h3 className="text-xl font-bold tracking-tight text-stone-900 font-serif flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500 fill-current animate-pulse" />
+                    Featured Claimed Listings
+                  </h3>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Explore hand-verified premium venues and trusted local partners.
+                  </p>
+                </div>
 
-            {/* Horizontal snaps row */}
-            <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-stone-50">
-              {featuredListings.map((item) => {
-                const isGold = item.tier === 'gold';
-                const whatsappContact = item.whatsapp || item.phone;
-                
-                return (
-                  <div
-                    key={`featured-${item.id}`}
-                    className={`snap-start shrink-0 w-72 sm:w-80 bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md ${
-                      isGold 
-                        ? 'border-2 border-amber-500 shadow-md ring-4 ring-amber-500/5' 
-                        : 'border border-stone-200 shadow-xs'
-                    }`}
-                  >
-                    {/* Cover image */}
-                    <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-100 overflow-hidden cursor-pointer hover:opacity-95">
-                      {item.images && item.images.length > 0 ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.images[0]}
-                          alt={item.title}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
-                          <MapPin className="h-8 w-8 stroke-1" />
-                        </div>
-                      )}
+                {/* Horizontal snaps row */}
+                <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-stone-50">
+                  {featuredListings.map((item) => {
+                    const isGold = item.tier === 'gold';
+                    const whatsappContact = item.whatsapp || item.phone;
+                    
+                    return (
+                      <div
+                        key={`featured-${item.id}`}
+                        className={`snap-start shrink-0 w-72 sm:w-80 bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md ${
+                          isGold 
+                            ? 'border-2 border-amber-500 shadow-md ring-4 ring-amber-500/5' 
+                            : 'border border-stone-200 shadow-xs'
+                        }`}
+                      >
+                        {/* Cover image */}
+                        <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-100 overflow-hidden cursor-pointer hover:opacity-95">
+                          {item.images && item.images.length > 0 ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.images[0]}
+                              alt={item.title}
+                              className="object-cover w-full h-full"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
+                              <MapPin className="h-8 w-8 stroke-1" />
+                            </div>
+                          )}
 
-                      {isGold && (
-                        <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-955 shadow-xs">
-                          <span className="relative flex h-1.5 w-1.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-955 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-stone-955"></span>
-                          </span>
-                          Gold Partner
-                        </span>
-                      )}
-                    </Link>
-
-                    {/* Description details */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-center gap-2 mb-2">
-                          <span className="text-[9px] font-extrabold uppercase tracking-wider text-stone-500">
-                            {item.category}
-                          </span>
-                          <span className="text-[10px] text-stone-400 font-bold flex items-center gap-0.5">
-                            <MapPin className="h-3 w-3 text-stone-300 shrink-0" />
-                            {item.sub_region}
-                          </span>
-                        </div>
-
-                        <Link href={`/listings/${item.slug}`} className="block hover:text-amber-600 transition-colors cursor-pointer">
-                          <h4 className="font-serif font-bold text-base text-stone-955 line-clamp-1 leading-snug">
-                            {item.title}
-                          </h4>
+                          {isGold && (
+                            <div className="absolute top-3 left-3 flex gap-1">
+                              <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                                Gold
+                              </span>
+                            </div>
+                          )}
                         </Link>
 
-                        {item.rating && (
-                          <div className="flex items-center gap-1 mt-1 mb-2 text-xs font-bold text-amber-500">
-                            <div className="flex text-amber-500">
-                              {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`h-3 w-3 ${
-                                    i < Math.floor(Number(item.rating) || 0) 
-                                      ? 'fill-current text-amber-500' 
-                                      : 'text-stone-200'
-                                  }`} 
-                                />
-                              ))}
-                            </div>
-                            <span className="text-[10px] text-stone-500 font-medium">({item.reviews_count || 0})</span>
+                        {/* Text card info */}
+                        <div className="p-5 flex-1 flex flex-col justify-between">
+                          <div>
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-700 block mb-1">{item.category}</span>
+                            <h4 className="font-serif font-bold text-sm text-stone-900 hover:text-amber-700 transition">
+                              <Link href={`/listings/${item.slug}`}>{item.title}</Link>
+                            </h4>
+                            <p className="text-[11px] text-stone-500 mt-1 line-clamp-2 leading-relaxed">
+                              {item.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-4 pt-3.5 border-t border-stone-100 flex items-center justify-between gap-2.5">
+                            <span className="text-[10px] text-stone-400 font-medium flex items-center gap-0.5 truncate">
+                              <MapPin className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{item.sub_region || 'Cotswolds'}</span>
+                            </span>
+                            {whatsappContact ? (
+                              <a
+                                href={getWhatsAppURL(whatsappContact, item.title)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-505 active:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
+                              >
+                                <MessageSquare className="h-3.5 w-3.5 fill-current" />
+                                WhatsApp
+                              </a>
+                            ) : item.website ? (
+                              <a
+                                href={item.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-[10px] font-bold transition shrink-0"
+                              >
+                                Website
+                              </a>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 3. Explore by County grid select */}
+          {(() => {
+            const getCountyCount = (countyName: string) => {
+              const matches = allListings.length ? allListings : listings;
+              return matches.filter((item) => item.county?.toLowerCase() === countyName.toLowerCase()).length;
+            };
+
+            const handleCountyClick = (countyName: string) => {
+              if (selectedRegion.toLowerCase() === countyName.toLowerCase()) {
+                setSelectedRegion('All Sub-Regions');
+              } else {
+                setSelectedRegion(countyName);
+              }
+
+              // Smooth scroll to directory results list
+              setTimeout(() => {
+                const el = document.getElementById('directory-results');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 150);
+            };
+
+            return (
+              <div className="mb-12 border-t border-stone-200 pt-10">
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold tracking-tight text-stone-900 font-serif">
+                    Explore by County
+                  </h3>
+                  <p className="text-xs text-stone-505 mt-0.5">
+                    Select a local county to search approved listings and historic villages.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {COUNTY_CARDS.map((county) => {
+                    const count = getCountyCount(county.name);
+                    const isActive = selectedRegion.toLowerCase() === county.name.toLowerCase();
+
+                    return (
+                      <button
+                        key={county.name}
+                        onClick={() => handleCountyClick(county.name)}
+                        className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group bg-gradient-to-br ${county.gradient} text-white ${
+                          isActive ? 'ring-4 ring-amber-500 ring-offset-2 scale-[1.01]' : ''
+                        }`}
+                      >
+                        {/* Decorative background character */}
+                        <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500">
+                          {county.name[0]}
+                        </span>
+
+                        <span className="bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider w-fit">
+                          {county.name === 'Gloucestershire' ? 'Glos' : county.name === 'Oxfordshire' ? 'Oxon' : county.name === 'Warwickshire' ? 'Warks' : county.name === 'Worcestershire' ? 'Worcs' : 'Wilts'}
+                        </span>
+
+                        <div>
+                          <h4 className="font-serif font-bold text-base leading-tight group-hover:text-amber-300 transition-colors">
+                            {county.name}
+                          </h4>
+                          <p className="text-[11px] text-white/70 mt-1">
+                            {count} {count === 1 ? 'Listing' : 'Listings'}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 4. Main Results Section Wrapper */}
+          <div id="directory-results" className="scroll-mt-10 border-t border-stone-200 pt-10">
+            {/* 2. Loading State */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
+                <p className="text-sm text-stone-500 font-medium">Searching directory listings...</p>
+              </div>
+            )}
+
+            {/* 3. Error State */}
+            {error && !loading && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 max-w-xl mx-auto flex gap-3 items-center">
+                <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
+                <span className="text-sm font-medium">{error}</span>
+              </div>
+            )}
+
+            {/* 4. Empty State */}
+            {!loading && !error && sortedListings.length === 0 && (
+              <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-2xl max-w-xl mx-auto">
+                <Compass className="h-12 w-12 text-stone-400 mx-auto mb-3" />
+                <h3 className="text-lg font-serif font-semibold text-stone-900">No Listings Found</h3>
+                <p className="text-sm text-stone-500 mt-2 max-w-xs mx-auto">
+                  Try adjusting your search filters or broadening your radial mileage limits.
+                </p>
+              </div>
+            )}
+
+            {/* 5. Responsive Multi-Column Layout */}
+            {!loading && !error && sortedListings.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {sortedListings.slice(0, visibleCount).map((item) => {
+                  const isGold = item.tier === 'gold';
+                  const whatsappContact = item.whatsapp || item.phone;
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-355 transform hover:-translate-y-1.5 ${
+                        isGold 
+                          ? 'border-2 border-amber-500 shadow-lg shadow-amber-500/5 hover:shadow-amber-500/15 ring-4 ring-amber-500/5' 
+                          : 'border border-stone-200 hover:border-stone-300 hover:shadow-xs'
+                      }`}
+                    >
+                      {/* Image & Card Head */}
+                      <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-100 overflow-hidden cursor-pointer hover:opacity-95">
+                        {item.images && item.images.length > 0 ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={item.images[0]}
+                            alt={item.title}
+                            className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
+                            <MapPin className="h-10 w-10 stroke-1" />
                           </div>
                         )}
 
-                        <p className="text-[11px] text-stone-600 line-clamp-2 mt-2 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      {/* CTA Actions */}
-                      <div className="border-t border-stone-100 pt-4 mt-4 flex gap-2">
-                        {item.website && (
-                          <a
-                            href={item.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-center py-1.5 px-2 border border-stone-200 hover:border-stone-300 text-stone-750 hover:bg-stone-50 rounded-lg text-[10px] font-bold transition cursor-pointer"
-                          >
-                            Website
-                          </a>
-                        )}
-
-                        {isGold && whatsappContact ? (
-                          <a
-                            href={getWhatsAppURL(whatsappContact, item.title)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1.5 inline-flex items-center justify-center gap-1.5 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-extrabold transition shadow-xs cursor-pointer hover:shadow-sm"
-                          >
-                            <MessageSquare className="h-3.5 w-3.5 fill-current" />
-                            WhatsApp
-                          </a>
-                        ) : (
-                          item.phone && (
-                            <a
-                              href={`tel:${item.phone.replace(/\s+/g, '')}`}
-                              className="flex-1 text-center py-1.5 px-2 border border-stone-200 hover:border-stone-300 text-stone-750 hover:bg-stone-50 rounded-lg text-[10px] font-bold transition cursor-pointer"
-                            >
-                              Call
-                            </a>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 3. Explore by County Filter Cards */}
-      {(() => {
-        const getCountyCount = (countyName: string) => {
-          const listToCount = allListings.length ? allListings : listings;
-          return listToCount.filter(
-            (l) => l.county.toLowerCase() === countyName.toLowerCase()
-          ).length;
-        };
-
-        const handleCountyClick = (countyName: string) => {
-          if (selectedRegion.toLowerCase() === countyName.toLowerCase()) {
-            setSelectedRegion("All Sub-Regions");
-          } else {
-            setSelectedRegion(countyName);
-          }
-
-          // Smooth scroll to directory results list
-          setTimeout(() => {
-            const el = document.getElementById('directory-results');
-            if (el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 150);
-        };
-
-        return (
-          <div className="mb-12 border-t border-stone-200 pt-10">
-            <div className="mb-6">
-              <h3 className="text-xl font-bold tracking-tight text-stone-900 font-serif">
-                Explore by County
-              </h3>
-              <p className="text-xs text-stone-500 mt-0.5">
-                Select a local county to search approved listings and historic villages.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {COUNTY_CARDS.map((county) => {
-                const count = getCountyCount(county.name);
-                const isActive = selectedRegion.toLowerCase() === county.name.toLowerCase();
-
-                return (
-                  <button
-                    key={county.name}
-                    onClick={() => handleCountyClick(county.name)}
-                    className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group bg-gradient-to-br ${county.gradient} text-white ${
-                      isActive ? 'ring-4 ring-amber-500 ring-offset-2 scale-[1.01]' : ''
-                    }`}
-                  >
-                    {/* Decorative background character */}
-                    <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500">
-                      {county.name[0]}
-                    </span>
-
-                    <span className="bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider w-fit">
-                      {county.name === 'Gloucestershire' ? 'Glos' : county.name === 'Oxfordshire' ? 'Oxon' : county.name === 'Warwickshire' ? 'Warks' : county.name === 'Worcestershire' ? 'Worcs' : 'Wilts'}
-                    </span>
-
-                    <div>
-                      <h4 className="font-serif font-bold text-base leading-tight group-hover:text-amber-300 transition-colors">
-                        {county.name}
-                      </h4>
-                      <p className="text-[11px] text-white/70 mt-1">
-                        {count} {count === 1 ? 'Listing' : 'Listings'}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* 4. Main Results Section Wrapper */}
-      <div id="directory-results" className="scroll-mt-10 border-t border-stone-200 pt-10">
-        {/* 2. Loading State */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
-          <p className="text-sm text-stone-500 font-medium">Searching directory listings...</p>
-        </div>
-      )}
-
-      {/* 3. Error State */}
-      {error && !loading && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 max-w-xl mx-auto flex gap-3 items-center">
-          <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
-          <span className="text-sm font-medium">{error}</span>
-        </div>
-      )}
-
-      {/* 4. Empty State */}
-      {!loading && !error && sortedListings.length === 0 && (
-        <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-2xl max-w-xl mx-auto">
-          <Compass className="h-12 w-12 text-stone-400 mx-auto mb-3" />
-          <h3 className="text-lg font-serif font-semibold text-stone-900">No Listings Found</h3>
-          <p className="text-sm text-stone-500 mt-2 max-w-xs mx-auto">
-            Try adjusting your search filters or broadening your radial mileage limits.
-          </p>
-        </div>
-      )}
-
-      {/* 5. Responsive Multi-Column Layout */}
-      {!loading && !error && sortedListings.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sortedListings.slice(0, visibleCount).map((item) => {
-            const isGold = item.tier === 'gold';
-            
-            // Format phone into raw string for WhatsApp if listed
-            // Priority is item.whatsapp -> item.phone
-            const whatsappContact = item.whatsapp || item.phone;
-            
-            return (
-              <div
-                key={item.id}
-                className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-350 transform hover:-translate-y-1.5 ${
-                  isGold 
-                    ? 'border-2 border-amber-500 shadow-lg shadow-amber-500/5 hover:shadow-amber-500/15 ring-4 ring-amber-500/5' 
-                    : 'border border-stone-200 hover:border-stone-300 hover:shadow-xs'
-                }`}
-              >
-                {/* Image & Card Head */}
-                <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-100 overflow-hidden cursor-pointer hover:opacity-95">
-                  {item.images && item.images.length > 0 ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.images[0]}
-                      alt={item.title}
-                      className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
-                      <MapPin className="h-10 w-10 stroke-1" />
-                    </div>
-                  )}
-
-                  {/* Proximity Distance Tag */}
-                  {item.distance_miles !== undefined && (
-                    <span className="absolute top-3 left-3 bg-stone-900/90 text-stone-100 backdrop-blur-xs text-[10px] font-bold px-2 py-1 rounded-md tracking-wide shadow-sm">
-                      {item.distance_miles.toFixed(1)} miles away
-                    </span>
-                  )}
-
-                  {/* Pulsing Gold Animated Badge */}
-                  {isGold && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500 text-stone-955 shadow-md">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-955 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-stone-955"></span>
-                      </span>
-                      Gold Partner
-                    </span>
-                  )}
-                </Link>
-
-                {/* Body Details */}
-                <div className="p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[10px] font-bold tracking-wider uppercase text-stone-500">
-                        {item.category}
-                      </span>
-                      <span className="text-[11px] font-medium text-stone-400 flex items-center gap-1">
-                        <MapPin className="h-3.5 w-3.5 text-stone-300 shrink-0" />
-                        {item.sub_region}
-                      </span>
-                    </div>
-
-                    <Link href={`/listings/${item.slug}`} className="block hover:text-amber-600 transition-colors cursor-pointer">
-                      <h3 className="font-serif font-bold text-lg text-stone-900 leading-snug mb-2 hover:text-amber-650 transition-colors">
-                        {item.title}
-                      </h3>
-                    </Link>
-                    
-                    {item.rating && (
-                      <div className="flex items-center gap-1 mt-1 mb-3 text-xs font-bold text-amber-500">
-                        <div className="flex text-amber-500">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-3.5 w-3.5 ${
-                                i < Math.floor(Number(item.rating) || 0) 
-                                  ? 'fill-current text-amber-500' 
-                                  : 'text-stone-200'
-                              }`} 
-                            />
-                          ))}
+                        <div className="absolute top-3.5 left-3.5 flex gap-1.5">
+                          <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                            {isGold ? 'Gold Partner' : 'Basic Member'}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-stone-500 font-medium">({item.reviews_count || 0})</span>
-                      </div>
-                    )}
-
-                    <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed mb-4">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  {/* Foot Actions */}
-                  <div className="pt-4 border-t border-stone-100 space-y-3">
-                    <div className="flex items-center justify-between text-xs text-stone-500">
-                      <span className="truncate max-w-[200px]" title={item.address}>{item.address}</span>
-                      <span className="font-bold text-stone-700 shrink-0">{item.postcode}</span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                      <Link
-                        href={`/listings/${item.slug}`}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-lg text-xs font-bold transition text-center cursor-pointer animate-fade-in"
-                      >
-                        View Profile
                       </Link>
 
-                      {isGold && whatsappContact ? (
-                        <a
-                          href={getWhatsAppURL(whatsappContact, item.title)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-bold transition text-center"
-                        >
-                          <MessageSquare className="h-4 w-4 fill-current" />
-                          WhatsApp
-                        </a>
-                      ) : item.website ? (
-                        <a
-                          href={item.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
-                        >
-                          <Globe className="h-3.5 w-3.5" />
-                          Website
-                        </a>
-                      ) : item.phone ? (
-                        <a
-                          href={`tel:${item.phone.replace(/\s+/g, '')}`}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
-                        >
-                          <Phone className="h-3.5 w-3.5" />
-                          Call
-                        </a>
-                      ) : null}
+                      {/* Info & CTA details */}
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-705 block">{item.category}</span>
+                            <span className="text-[10px] text-stone-400 font-semibold flex items-center gap-0.5">
+                              <MapPin className="h-3 w-3 shrink-0" />
+                              <span className="truncate max-w-28">{item.sub_region || 'Cotswolds'}</span>
+                            </span>
+                          </div>
+
+                          <h3 className="text-md font-serif font-black text-stone-900 mt-2 hover:text-amber-700 transition">
+                            <Link href={`/listings/${item.slug}`}>{item.title}</Link>
+                          </h3>
+
+                          {item.rating && (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <div className="flex text-amber-400">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-3 w-3 ${
+                                      i < Math.floor(item.rating || 0) ? 'fill-current' : 'opacity-20'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[10px] font-bold text-stone-500">({item.rating})</span>
+                            </div>
+                          )}
+
+                          <p className="text-xs text-stone-550 mt-2 line-clamp-3 leading-relaxed">
+                            {item.description || "Local business listings in the Cotswolds sub-regions."}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 pt-3.5 border-t border-stone-100/60 flex flex-col gap-2">
+                          <div className="flex flex-col gap-1 text-[10px] text-stone-400 font-medium">
+                            <span className="truncate">{item.address || `${item.sub_region}, Cotswolds`}</span>
+                            {item.phone && <span>Phone: {item.phone}</span>}
+                          </div>
+
+                          <div className="flex gap-2.5 mt-2">
+                            <Link
+                              href={`/listings/${item.slug}`}
+                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-lg text-xs font-bold transition text-center"
+                            >
+                              View Profile
+                            </Link>
+
+                            {whatsappContact ? (
+                              <a
+                                href={getWhatsAppURL(whatsappContact, item.title)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-505 active:bg-emerald-700 text-white rounded-lg text-xs font-bold transition text-center cursor-pointer"
+                              >
+                                <MessageSquare className="h-4 w-4 fill-current" />
+                                WhatsApp
+                              </a>
+                            ) : item.website ? (
+                              <a
+                                href={item.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
+                              >
+                                <Globe className="h-3.5 w-3.5" />
+                                Website
+                              </a>
+                            ) : item.phone ? (
+                              <a
+                                href={`tel:${item.phone.replace(/\s+/g, '')}`}
+                                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
+                              >
+                                <Phone className="h-3.5 w-3.5" />
+                                Call
+                              </a>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
-      )}
+            )}
 
-      {!loading && !error && sortedListings.length > visibleCount && (
-        <div className="text-center mt-12">
-          <button
-            onClick={() => setVisibleCount(prev => prev + 9)}
-            className="px-8 py-3.5 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer"
-          >
-            Load More Listings
-          </button>
-        </div>
+            {!loading && !error && sortedListings.length > visibleCount && (
+              <div className="text-center mt-12">
+                <button
+                  onClick={() => setVisibleCount(prev => prev + 9)}
+                  className="px-8 py-3.5 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer"
+                >
+                  Load More Listings
+                </button>
+              </div>
+            )}
+          </div>
+        </>
       )}
-      </div>
-
     </div>
   );
 }
