@@ -1,5 +1,7 @@
+import CotswoldsSearch from "./components/CotswoldsSearch";
 import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, HelpCircle, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 // Fetch live Gold Partner featured listings
 async function getFeaturedListings() {
@@ -123,6 +125,20 @@ export default async function Home() {
               Your fast-track to the best local businesses. We bring top-rated services, shops, and restaurants together to make your search quick and effortless.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* 3. Directory Search Console Bar (Placed right under Hero) */}
+      <section id="search" className="bg-stone-50 py-8 border-b border-stone-200 scroll-mt-6">
+        <div className="max-w-7xl mx-auto">
+          <Suspense fallback={
+            <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
+              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs text-stone-505 mt-2">Loading search console...</p>
+            </div>
+          }>
+            <CotswoldsSearch hideListings={true} />
+          </Suspense>
         </div>
       </section>
 
@@ -259,8 +275,9 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 6. How it Works Section */}
-      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
+
+      {/* 7. How it Works Section */}
+      <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
@@ -268,7 +285,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <HelpCircle className="h-6 w-6" />
               </div>
@@ -278,7 +295,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <Zap className="h-6 w-6" />
               </div>
@@ -288,7 +305,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <ShieldCheck className="h-6 w-6" />
               </div>
@@ -301,7 +318,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 7. Call to Action (CTA) Section */}
+      {/* 8. Call to Action (CTA) Section */}
       <section className="py-16 bg-stone-950 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[1px]" />
         <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
@@ -323,7 +340,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 8. Footer Section */}
+      {/* 9. Footer Section */}
       <footer className="bg-white border-t border-stone-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
           {/* Column 1: Branding */}
