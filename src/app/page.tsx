@@ -1,7 +1,5 @@
-import CotswoldsSearch from "./components/CotswoldsSearch";
 import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, HelpCircle, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 // Fetch live Gold Partner featured listings
 async function getFeaturedListings() {
@@ -96,7 +94,7 @@ export default async function Home() {
             </span>
           </Link>
           <div className="flex items-center gap-4 text-xs font-bold">
-            <a href="#search" className="text-stone-605 hover:text-stone-900 transition hidden sm:inline-block">Find Businesses</a>
+            <Link href="/search" className="text-stone-605 hover:text-stone-900 transition">Find Businesses</Link>
             <a href="#how-it-works" className="text-stone-605 hover:text-stone-900 transition hidden sm:inline-block">How it Works</a>
             <Link
               href="/listings/submit"
@@ -209,7 +207,7 @@ export default async function Home() {
             {categories.map((cat) => (
               <Link
                 key={cat.name}
-                href={`/?category=${encodeURIComponent(cat.name)}#search`}
+                href={`/search?category=${encodeURIComponent(cat.name)}`}
                 className="relative group overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-6 text-white shadow-xs hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -241,7 +239,7 @@ export default async function Home() {
             {locations.map((loc) => (
               <Link
                 key={loc.name}
-                href={`/?region=${encodeURIComponent(loc.name)}#search`}
+                href={`/search?region=${encodeURIComponent(loc.name)}`}
                 className="relative group overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-6 text-white shadow-xs hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -261,29 +259,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 6. Recent Listings Section (Search Catalog repositioned above How it works) */}
-      <main id="search" className="bg-stone-50 py-16 border-b border-stone-200 scroll-mt-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-xl mx-auto mb-10 px-4">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Directory Index</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Recent Listings</h2>
-            <p className="text-stone-505 text-xs mt-2">
-              Browse through our newly added, verified Cotswolds local businesses.
-            </p>
-          </div>
-          <Suspense fallback={
-            <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
-              <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-stone-505 mt-2">Loading listings console...</p>
-            </div>
-          }>
-            <CotswoldsSearch />
-          </Suspense>
-        </div>
-      </main>
-
-      {/* 7. How it Works Section */}
-      <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
+      {/* 6. How it Works Section */}
+      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
@@ -291,7 +268,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <HelpCircle className="h-6 w-6" />
               </div>
@@ -301,7 +278,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <Zap className="h-6 w-6" />
               </div>
@@ -311,7 +288,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+            <div className="bg-white p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <ShieldCheck className="h-6 w-6" />
               </div>
@@ -324,7 +301,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 8. Call to Action (CTA) Section */}
+      {/* 7. Call to Action (CTA) Section */}
       <section className="py-16 bg-stone-950 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[1px]" />
         <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
@@ -346,7 +323,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* 9. Footer Section */}
+      {/* 8. Footer Section */}
       <footer className="bg-white border-t border-stone-200 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
           {/* Column 1: Branding */}
@@ -368,7 +345,7 @@ export default async function Home() {
             <ul className="space-y-2 text-xs font-semibold text-stone-605">
               <li><a href="#featured" className="hover:text-stone-950 transition">Featured Venues</a></li>
               <li><a href="#how-it-works" className="hover:text-stone-950 transition">How it Works</a></li>
-              <li><a href="#search" className="hover:text-stone-950 transition">Search Directory</a></li>
+              <li><Link href="/search" className="hover:text-stone-950 transition">Search Directory</Link></li>
               <li><Link href="/listings/submit" className="hover:text-stone-950 transition">List Your Business</Link></li>
             </ul>
           </div>
