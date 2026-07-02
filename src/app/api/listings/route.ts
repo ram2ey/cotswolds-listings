@@ -125,7 +125,7 @@ async function fallbackTableQuery(supabase: any, category: string | null, region
   }
 
   if (region) {
-    query = query.or(`sub_region.ilike.%${region}%,county.ilike.%${region}%`);
+    query = query.or(`sub_region.ilike.*${region}*,county.ilike.*${region}*`);
   }
 
   const { data, error } = await query;
