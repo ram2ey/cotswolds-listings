@@ -96,7 +96,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   const [debouncedKeyword, setDebouncedKeyword] = useState<string>("");
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [onlyPremium, setOnlyPremium] = useState<boolean>(false);
-  const [hasWhatsApp, setHasWhatsApp] = useState<boolean>(false);
   const [hasWebsite, setHasWebsite] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'proximity' | 'alphabetical' | 'newest'>("alphabetical");
   const [visibleCount, setVisibleCount] = useState<number>(9);
@@ -104,7 +103,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   // Reset pagination when filters change
   useEffect(() => {
     setVisibleCount(9);
-  }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWhatsApp, hasWebsite, sortBy]);
+  }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWebsite, sortBy]);
 
   // Synchronize state with URL search parameters (triggered by clicking home category/county cards)
   useEffect(() => {
@@ -179,14 +178,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
-  };
-
-  // Helper to construct WhatsApp customer lead routing URL
-  const getWhatsAppURL = (whatsappNum: string, businessName: string) => {
-    // Standardize phone string into purely numbers
-    const cleanNum = whatsappNum.replace(/\D/g, '');
-    const defaultText = `Hi! I found "${businessName}" on the Cotswolds Local Directory and would like to ask about your availability and services.`;
-    return `https://wa.me/${cleanNum}?text=${encodeURIComponent(defaultText)}`;
   };
 
   // Main fetch function
@@ -265,9 +256,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
     if (onlyPremium && item.tier === 'basic') {
       return false;
     }
-    if (hasWhatsApp && !item.whatsapp && !item.phone) {
-      return false;
-    }
     if (hasWebsite && !item.website) {
       return false;
     }
@@ -343,7 +331,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer border ${
-              showFilters || onlyPremium || hasWhatsApp || hasWebsite || userCoords
+              showFilters || onlyPremium || hasWebsite || userCoords
                 ? 'bg-amber-50 border-amber-250 text-amber-800 shadow-xs'
                 : 'border-stone-200 hover:bg-stone-50 text-stone-605'
             }`}
@@ -431,16 +419,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                   className="rounded border-stone-700 bg-stone-850 text-amber-500 focus:ring-amber-500 cursor-pointer h-4 w-4"
                 />
                 Show Premium Claims Only (Gold & Silver)
-              </label>
-
-              <label className="flex items-center gap-2.5 text-xs text-stone-300 hover:text-white cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={hasWhatsApp}
-                  onChange={(e) => setHasWhatsApp(e.target.checked)}
-                  className="rounded border-stone-700 bg-stone-850 text-amber-500 focus:ring-amber-500 cursor-pointer h-4 w-4"
-                />
-                Direct WhatsApp Contact Enabled
               </label>
 
               <label className="flex items-center gap-2.5 text-xs text-stone-300 hover:text-white cursor-pointer select-none">
@@ -565,26 +543,12 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                               <MapPin className="h-3.5 w-3.5 shrink-0" />
                               <span className="truncate">{item.sub_region || 'Cotswolds'}</span>
                             </span>
-                            {whatsappContact ? (
-                              <a
-                                href={getWhatsAppURL(whatsappContact, item.title)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-505 active:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition flex items-center gap-1 cursor-pointer shrink-0"
-                              >
-                                <MessageSquare className="h-3.5 w-3.5 fill-current" />
-                                WhatsApp
-                              </a>
-                            ) : item.website ? (
-                              <a
-                                href={item.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-3 py-1.5 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-[10px] font-bold transition shrink-0"
-                              >
-                                Website
-                              </a>
-                            ) : null}
+                            <Link
+                              href={`/listings/${item.slug}`}
+                              className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-850 text-white rounded-lg text-[10px] font-bold transition shrink-0"
+                            >
+                              View Profile
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -728,9 +692,11 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                         )}
 
                         <div className="absolute top-3.5 left-3.5 flex gap-1.5">
-                          <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
-                            {isGold ? 'Gold Partner' : 'Basic Member'}
-                          </span>
+                          {isGold && (
+                            <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                              Gold Partner
+                            </span>
+                          )}
                         </div>
                       </Link>
 
@@ -779,40 +745,10 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                           <div className="flex gap-2.5 mt-2">
                             <Link
                               href={`/listings/${item.slug}`}
-                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-lg text-xs font-bold transition text-center"
+                              className="w-full py-2.5 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-lg text-xs font-bold transition text-center"
                             >
                               View Profile
                             </Link>
-
-                            {whatsappContact ? (
-                              <a
-                                href={getWhatsAppURL(whatsappContact, item.title)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-505 active:bg-emerald-700 text-white rounded-lg text-xs font-bold transition text-center cursor-pointer"
-                              >
-                                <MessageSquare className="h-4 w-4 fill-current" />
-                                WhatsApp
-                              </a>
-                            ) : item.website ? (
-                              <a
-                                href={item.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
-                              >
-                                <Globe className="h-3.5 w-3.5" />
-                                Website
-                              </a>
-                            ) : item.phone ? (
-                              <a
-                                href={`tel:${item.phone.replace(/\s+/g, '')}`}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 rounded-lg text-xs font-semibold transition text-center"
-                              >
-                                <Phone className="h-3.5 w-3.5" />
-                                Call
-                              </a>
-                            ) : null}
                           </div>
                         </div>
                       </div>

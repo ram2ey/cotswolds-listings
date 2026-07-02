@@ -730,22 +730,6 @@ export default function ListingProfile() {
                     </a>
                   )}
 
-                  {/* WhatsApp click-to-chat button */}
-                  {whatsappUrl && (
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`flex items-center justify-center gap-2 w-full px-4 py-3 text-xs font-bold rounded-xl transition cursor-pointer ${
-                        isGold
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
-                          : 'bg-stone-100 hover:bg-stone-200 text-stone-800'
-                      }`}
-                    >
-                      <MessageSquare className="h-4.5 w-4.5" />
-                      Message on WhatsApp
-                    </a>
-                  )}
 
                   {/* Phone direct link */}
                   {listing.phone && (
@@ -910,7 +894,7 @@ export default function ListingProfile() {
                       <li>✓ Star Ratings & Reviews</li>
                       <li>✓ Opening Hours Display</li>
                       <li>✓ Social Media Links</li>
-                      <li>✓ WhatsApp Chat Button</li>
+                      <li>✓ Direct Contact Links</li>
                     </ul>
                   </div>
 

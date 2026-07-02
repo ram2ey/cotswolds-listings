@@ -83,7 +83,6 @@ export default function SubmitListing() {
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
   const [email, setEmail] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
   const [address, setAddress] = useState('');
   const [postcode, setPostcode] = useState('');
   const [county, setCounty] = useState(COUNTIES[0]);
@@ -162,10 +161,7 @@ export default function SubmitListing() {
       return;
     }
 
-    if (whatsapp && !validatePhone(whatsapp)) {
-      setError('Invalid WhatsApp number. Please enter a valid number (e.g. 447123456789).');
-      return;
-    }
+
 
     try {
       setSubmitting(true);
@@ -178,7 +174,7 @@ export default function SubmitListing() {
         phone: phone || null,
         website: website || null,
         email: email || null,
-        whatsapp: whatsapp || null,
+        whatsapp: null,
         address,
         postcode,
         county,
@@ -259,7 +255,7 @@ export default function SubmitListing() {
                   setPhone('');
                   setWebsite('');
                   setEmail('');
-                  setWhatsapp('');
+
                   setAddress('');
                   setPostcode('');
                   setSubRegion('');
@@ -472,19 +468,7 @@ export default function SubmitListing() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
-                      <MessageSquare className="h-3.5 w-3.5 text-stone-450" /> WhatsApp Number
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="e.g. 447123456789 (international format)"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
                   </div>
-                </div>
               </div>
 
               {/* Block 4: Image Asset */}

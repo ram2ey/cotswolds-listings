@@ -326,7 +326,7 @@ export default async function Home() {
             Cotswolds.UK Directory is the best way to find & discover great local businesses
           </h2>
           <p className="text-stone-300 text-xs mt-4 max-w-xl mx-auto leading-relaxed">
-            Verify ownership of your business listing to gain priority rankings, unlock photo galleries, add custom FAQs, and start getting direct client leads on WhatsApp.
+            Verify ownership of your business listing to gain priority rankings, unlock photo galleries, add custom FAQs, and start getting direct customer leads.
           </p>
           <div className="mt-8 flex flex-col items-center gap-2">
             <Link
