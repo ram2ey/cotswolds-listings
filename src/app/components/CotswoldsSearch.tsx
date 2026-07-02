@@ -92,6 +92,12 @@ export default function CotswoldsSearch() {
   const [hasWhatsApp, setHasWhatsApp] = useState<boolean>(false);
   const [hasWebsite, setHasWebsite] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'proximity' | 'alphabetical' | 'newest'>("alphabetical");
+  const [visibleCount, setVisibleCount] = useState<number>(9);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWhatsApp, hasWebsite, sortBy]);
 
   // Debounce keyword typing to prevent sluggish re-renders on keystroke
   useEffect(() => {
@@ -694,7 +700,7 @@ export default function CotswoldsSearch() {
       {/* 5. Responsive Multi-Column Layout */}
       {!loading && !error && sortedListings.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {sortedListings.map((item) => {
+          {sortedListings.slice(0, visibleCount).map((item) => {
             const isGold = item.tier === 'gold';
             
             // Format phone into raw string for WhatsApp if listed
@@ -837,6 +843,17 @@ export default function CotswoldsSearch() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {!loading && !error && sortedListings.length > visibleCount && (
+        <div className="text-center mt-12">
+          <button
+            onClick={() => setVisibleCount(prev => prev + 9)}
+            className="px-8 py-3.5 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md hover:shadow-lg cursor-pointer"
+          >
+            Load More Listings
+          </button>
         </div>
       )}
       </div>
