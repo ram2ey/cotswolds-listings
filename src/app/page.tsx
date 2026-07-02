@@ -1,5 +1,5 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, ArrowRight } from "lucide-react";
+import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
