@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
         tier
       };
     } else {
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
       
       // Update listing tier, website, and ensure it is approved
       const { data, error } = await supabase
