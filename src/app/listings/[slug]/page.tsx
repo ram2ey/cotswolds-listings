@@ -1,0 +1,700 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { 
+  MapPin, 
+  Phone, 
+  Globe, 
+  MessageSquare, 
+  Mail, 
+  Compass, 
+  ChevronLeft, 
+  ArrowUpRight, 
+  Clock, 
+  Star, 
+  ShieldAlert, 
+  ExternalLink,
+  Loader2
+} from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+// Setup Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes("your-supabase-url"))
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+interface Listing {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  phone?: string;
+  website?: string;
+  whatsapp?: string;
+  email?: string;
+  address: string;
+  postcode: string;
+  county: string;
+  sub_region: string;
+  latitude?: number;
+  longitude?: number;
+  images: string[];
+  tier: 'gold' | 'silver' | 'basic';
+  is_approved: boolean;
+  created_at?: string;
+  rating?: number;
+  reviews_count?: number;
+  tags?: string[];
+  premium_metadata?: {
+    highlights?: string[];
+    faqs?: { question: string; answer: string }[];
+    specialSection?: {
+      price_range?: string;
+      signature_dishes?: string[];
+      room_types?: string[];
+      amenities_list?: string[];
+      services_offered?: string[];
+    };
+    socialLinks?: {
+      instagram?: string;
+      facebook?: string;
+    };
+  };
+}
+
+// Fallback high-fidelity mock dataset for offline testing
+const MOCK_LISTINGS: Listing[] = [
+  {
+    id: "mock-1",
+    title: "The Lygon Arms",
+    slug: "the-lygon-arms-broadway",
+    description: "A historic 16th-century coaching inn situated in the heart of Broadway village. Retaining historic charm with modern luxury, featuring wood-panelled dining rooms, cozy open fireplaces, a vaulted ceiling restaurant, and a full-service spa with indoor pool. Ideal for dining, weekend getaways, and exploring the wider Worcestershire area.",
+    category: "Hotel & Accommodation",
+    phone: "+44 1386 852255",
+    website: "https://www.lygonarmshotel.co.uk",
+    whatsapp: "441386852255",
+    email: "info@lygonarmshotel.co.uk",
+    address: "High Street, Broadway",
+    postcode: "WR12 7DU",
+    county: "Worcestershire",
+    sub_region: "Broadway",
+    latitude: 52.0366,
+    longitude: -1.8552,
+    images: ["/hero-bridge.jpg"],
+    tier: "gold",
+    is_approved: true,
+    rating: 4.8,
+    reviews_count: 245,
+    tags: ["Historic", "Luxury Spa", "Indoor Pool"],
+    premium_metadata: {
+      highlights: [
+        "16th-Century coaching inn history",
+        "Full luxury spa & heated indoor pool",
+        "Fine dining in a vaulted hall"
+      ],
+      faqs: [
+        {
+          question: "Is the spa open to non-residents?",
+          answer: "Yes, spa day passes and treatments are available for non-residents, though booking in advance is highly recommended."
+        },
+        {
+          question: "Are dogs allowed in rooms?",
+          answer: "Absolutely! We provide dog beds, treats, and designated walking maps. Dogs are also welcome in our Lygon Bar & Grill."
+        }
+      ],
+      specialSection: {
+        room_types: ["Classic Double", "Splendid Suite", "Master Suite"],
+        amenities_list: ["Heated Indoor Pool", "Luxury Spa", "Vaulted Dining Hall", "Valet Parking"]
+      }
+    }
+  },
+  {
+    id: "mock-2",
+    title: "The Wild Rabbit",
+    slug: "the-wild-rabbit-kingham",
+    description: "A chic, award-winning gastro-pub with rooms, featuring organic, locally-sourced Cotswolds dining. Located in the beautiful village of Kingham, offering a contemporary take on the traditional English pub with exposed stone walls, open fireplaces, and handcrafted furniture. The kitchen creates seasonal menus matching premium local ingredients.",
+    category: "Pub & Restaurant",
+    phone: "+44 1608 658389",
+    website: "https://thewildrabbit.co.uk",
+    whatsapp: "441608658389",
+    email: "info@thewildrabbit.co.uk",
+    address: "Church Street, Kingham",
+    postcode: "OX7 6YA",
+    county: "Oxfordshire",
+    sub_region: "Kingham",
+    latitude: 51.9103,
+    longitude: -1.6148,
+    images: ["/hero-bridge.jpg"],
+    tier: "gold",
+    is_approved: true,
+    rating: 4.7,
+    reviews_count: 198,
+    tags: ["Organic Food", "Gastro Pub", "Open Fireplace"],
+    premium_metadata: {
+      highlights: [
+        "Award-winning organic menus",
+        "Cozy fireplaces & handcrafted design",
+        "Premium rooms in scenic Kingham"
+      ],
+      faqs: [
+        {
+          question: "Do I need to book the dining room?",
+          answer: "Yes, our dining room fills up fast, especially on weekends. Bar seating is available on a first-come, first-served basis."
+        },
+        {
+          question: "Where do your ingredients come from?",
+          answer: "Most of our organic ingredients are sourced directly from Daylesford Organic Farm, located just a few miles away."
+        }
+      ],
+      specialSection: {
+        price_range: "£££ - ££££",
+        signature_dishes: ["Daylesford Organic Ribeye", "Seared Cornish Turbot", "Warm Plum & Almond Tart"]
+      }
+    }
+  },
+  {
+    id: "mock-3",
+    title: "Horse & Groom",
+    slug: "horse-groom-bourton-on-the-hill",
+    description: "An award-winning 16th-century Georgian inn situated on a hill with spectacular views of the Cotswolds countryside. Famous for its excellent food, cask ales, and friendly hospitality. Offers five individually designed ensuite double bedrooms, a garden terrace, and fine dining using local Gloucestershire game and produce.",
+    category: "Pub & Inn",
+    phone: "+44 1386 700413",
+    website: "https://www.horseandgroom.info",
+    whatsapp: "",
+    email: "reservations@horseandgroom.info",
+    address: "Bourton-on-the-Hill, Moreton-in-Marsh",
+    postcode: "GL56 9AQ",
+    county: "Gloucestershire",
+    sub_region: "Moreton-in-Marsh",
+    latitude: 51.9967,
+    longitude: -1.7483,
+    images: [],
+    tier: "silver",
+    is_approved: true
+  },
+  {
+    id: "mock-4",
+    title: "Arlington Row Cottages",
+    slug: "arlington-row-bibury",
+    description: "A highly photographed row of historic 14th-century stone cottages, originally built as a monastic wool store and converted into weavers' cottages in the 17th century. Located in the picturesque village of Bibury beside the River Coln. Managed as a historic landmark and rental property, representing classic Cotswolds heritage.",
+    category: "Historic Landmark",
+    phone: "+44 1451 820259",
+    website: "https://www.nationaltrust.org.uk/bibury",
+    whatsapp: "",
+    address: "Awkward Hill, Bibury, Cirencester",
+    postcode: "GL7 5ND",
+    county: "Gloucestershire",
+    sub_region: "Bibury",
+    latitude: 51.7583,
+    longitude: -1.8319,
+    images: [],
+    tier: "basic",
+    is_approved: true
+  },
+  {
+    id: "mock-5",
+    title: "Broadway Tower",
+    slug: "broadway-tower-broadway",
+    description: "An iconic late-18th-century Gothic Folly tower standing on Broadway Hill, the second-highest point in the Cotswolds. Designed by Capability Brown and built for Lady Coventry. Offers panoramic views of up to 16 counties, a historical exhibition, a local deer park, a contemporary visitor cafe, and scenic walking trails.",
+    category: "Landmark & Cafe",
+    phone: "+44 1386 852390",
+    website: "https://broadwaytower.co.uk",
+    whatsapp: "",
+    address: "Middlecombe Hill, Broadway",
+    postcode: "WR12 7LB",
+    county: "Worcestershire",
+    sub_region: "Broadway",
+    latitude: 52.0244,
+    longitude: -1.8322,
+    images: [],
+    tier: "silver",
+    is_approved: true
+  }
+];
+
+export default function ListingProfile() {
+  const params = useParams();
+  const router = useRouter();
+  const slug = params?.slug as string;
+
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+
+    async function getListingDetails() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Try querying Supabase first
+        if (supabase) {
+          const { data, error: dbError } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('slug', slug)
+            .eq('is_approved', true)
+            .single();
+
+          if (dbError) {
+            console.warn("Database slug fetch failed, trying mock fallback: ", dbError.message);
+            // Search inside mock items
+            const mock = MOCK_LISTINGS.find(item => item.slug === slug);
+            if (mock) {
+              setListing(mock);
+            } else {
+              setError("We could not find a listing matching the specified slug.");
+            }
+          } else if (data) {
+            setListing(data);
+          }
+        } else {
+          // Offline mock lookup
+          const mock = MOCK_LISTINGS.find(item => item.slug === slug);
+          if (mock) {
+            setListing(mock);
+          } else {
+            setError("We could not find a listing matching the specified slug.");
+          }
+        }
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred while retrieval.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    getListingDetails();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-stone-50 gap-4">
+        <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
+        <p className="text-sm font-medium text-stone-500 font-sans">Loading profile details...</p>
+      </div>
+    );
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-stone-50 px-4 text-center">
+        <ShieldAlert className="h-14 w-14 text-rose-500 mb-4" />
+        <h2 className="text-2xl font-serif font-bold text-stone-900">Listing Not Available</h2>
+        <p className="text-sm text-stone-500 mt-2 max-w-md">
+          {error || "The profile is either unapproved, deleted, or does not exist."}
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Directory
+        </Link>
+      </div>
+    );
+  }
+
+  const isGold = listing.tier === 'gold';
+  const isSilver = listing.tier === 'silver';
+  
+  // Format WhatsApp Link
+  const whatsappNumber = listing.whatsapp || listing.phone;
+  const cleanWhatsapp = whatsappNumber ? whatsappNumber.replace(/[^\d]/g, '') : '';
+  const whatsappUrl = cleanWhatsapp
+    ? `https://wa.me/${cleanWhatsapp}?text=Hi%20${encodeURIComponent(listing.title)},%20I%20saw%20your%20profile%20on%20Cotswolds.UK%20and%20wanted%20to%20get%20in%20touch!`
+    : '';
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col justify-between">
+      {/* 1. Header Navigation */}
+      <nav className="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 cursor-pointer">
+            <span className="h-3 w-3 rounded-full bg-amber-500 shadow-md shadow-amber-500/50" />
+            <span className="font-serif text-lg font-extrabold tracking-tight text-stone-950">
+              Cotswolds<span className="text-amber-500">.UK</span>
+            </span>
+          </Link>
+          
+          <Link
+            href="/"
+            className="flex items-center gap-1 text-xs font-bold text-stone-600 hover:text-stone-950 transition"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Return to Search
+          </Link>
+        </div>
+      </nav>
+
+      {/* 2. Page Content */}
+      <main className="flex-1 pb-16">
+        {/* Cover Photo Hero banner */}
+        <div className="relative h-64 md:h-[400px] w-full bg-stone-950 overflow-hidden">
+          {listing.images && listing.images.length > 0 ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={listing.images[0]}
+              alt={listing.title}
+              className="w-full h-full object-cover opacity-60"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-stone-700 bg-stone-900">
+              <Compass className="h-20 w-20 stroke-1 animate-pulse" />
+            </div>
+          )}
+          
+          {/* Dark bottom gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/30 to-transparent" />
+          
+          {/* Cover Content Overlay */}
+          <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 text-white z-10">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-amber-500/20 text-amber-400 border border-amber-500/30 backdrop-blur-md mb-3">
+                  {listing.category}
+                </span>
+                
+                <h1 className="text-3xl md:text-5xl font-serif font-black tracking-tight text-white mb-2">
+                  {listing.title}
+                </h1>
+
+                {listing.rating && (
+                  <div className="flex items-center gap-2 mb-3 text-xs font-bold text-stone-250">
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-3.5 w-3.5 ${
+                            i < Math.floor(Number(listing.rating) || 0) 
+                              ? 'fill-current' 
+                              : 'opacity-30'
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                    <span>{listing.rating} out of 5</span>
+                    <span className="opacity-60">•</span>
+                    <span className="opacity-80">{listing.reviews_count || 0} reviews</span>
+                  </div>
+                )}
+                
+                <p className="flex items-center gap-1.5 text-sm text-stone-300 font-medium">
+                  <MapPin className="h-4 w-4 text-amber-500" />
+                  {listing.address}, {listing.sub_region} ({listing.county})
+                </p>
+              </div>
+
+              {/* Tiers Badge Indicators */}
+              <div className="flex gap-2">
+                {isGold && (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-stone-950 shadow-lg">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-950 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-stone-950"></span>
+                    </span>
+                    Gold Partner
+                  </span>
+                )}
+                {isSilver && (
+                  <span className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white/20 border border-white/20 text-white backdrop-blur-md">
+                    <Star className="h-4.5 w-4.5 fill-current text-amber-400" />
+                    Featured Partner
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Split Layout grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            
+            {/* Column 1: Detailed Description & Photo Gallery */}
+            <div className="lg:col-span-2 space-y-10">
+              
+              {/* Detailed Description Block */}
+              <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
+                <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-4">
+                  About Business
+                </h3>
+                <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
+                  {listing.description || `Welcome to ${listing.title}. This verified business is located in the lovely Cotswolds county of ${listing.county}, offering high-quality hospitality and services to residents and tourists alike.`}
+                </p>
+              </div>
+
+              {/* Premium Features & Highlights (Claimed Listings Only) */}
+              {(isGold || isSilver) && listing.premium_metadata && (
+                <>
+                  {/* Unique Highlights */}
+                  {listing.premium_metadata.highlights && listing.premium_metadata.highlights.length > 0 && (
+                    <div className="bg-gradient-to-br from-amber-500/5 to-amber-500/10 rounded-2xl p-8 border border-amber-500/20 shadow-xs">
+                      <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-amber-500/10 pb-3 mb-4">
+                        Why Visit Us
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {listing.premium_metadata.highlights.map((item, idx) => (
+                          <div key={idx} className="flex gap-2.5 items-start">
+                            <span className="h-5 w-5 rounded-full bg-amber-500/20 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">✓</span>
+                            <span className="text-stone-850 text-sm leading-snug">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Special Custom Feature Card (Menus/Amenities) */}
+                  {listing.premium_metadata.specialSection && (
+                    <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
+                      <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-5">
+                        {/pub|restaurant|caf|gastropub|inn/i.test(listing.category) 
+                          ? 'House Specialties & Pricing' 
+                          : /hotel|accommodation|b&b/i.test(listing.category) 
+                          ? 'Premium Amenities & Rooms' 
+                          : 'Our Exclusive Services'}
+                      </h3>
+                      
+                      {listing.premium_metadata.specialSection.price_range && (
+                        <div className="mb-4 text-sm">
+                          <span className="font-semibold text-stone-500">Price Guide: </span>
+                          <span className="font-bold text-stone-900 bg-stone-100 px-2 py-0.5 rounded">{listing.premium_metadata.specialSection.price_range}</span>
+                        </div>
+                      )}
+
+                      {/* Signature Dishes */}
+                      {listing.premium_metadata.specialSection.signature_dishes && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wider text-stone-400">Signature Items</p>
+                          <div className="flex flex-wrap gap-2">
+                            {listing.premium_metadata.specialSection.signature_dishes.map((dish, i) => (
+                              <span key={i} className="px-3 py-1 bg-stone-50 border border-stone-200 text-stone-750 text-xs font-semibold rounded-lg">
+                                {dish}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Amenities List */}
+                      {listing.premium_metadata.specialSection.amenities_list && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wider text-stone-400">Guest Amenities</p>
+                          <div className="flex flex-wrap gap-2">
+                            {listing.premium_metadata.specialSection.amenities_list.map((amenity, i) => (
+                              <span key={i} className="px-3 py-1 bg-amber-50/50 border border-amber-100 text-stone-850 text-xs font-semibold rounded-lg flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                                {amenity}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Services Offered */}
+                      {listing.premium_metadata.specialSection.services_offered && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-bold uppercase tracking-wider text-stone-400">Services Offered</p>
+                          <div className="flex flex-wrap gap-2">
+                            {listing.premium_metadata.specialSection.services_offered.map((service, i) => (
+                              <span key={i} className="px-3 py-1 bg-stone-50 border border-stone-200 text-stone-750 text-xs font-semibold rounded-lg">
+                                {service}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* FAQs Accordion */}
+                  {listing.premium_metadata.faqs && listing.premium_metadata.faqs.length > 0 && (
+                    <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
+                      <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-4">
+                        Frequently Asked Questions
+                      </h3>
+                      <div className="space-y-3 mt-4">
+                        {listing.premium_metadata.faqs.map((faq, idx) => (
+                          <details key={idx} className="group border border-stone-200 rounded-xl p-4 bg-stone-50/50 hover:bg-stone-50 transition duration-150">
+                            <summary className="font-semibold text-sm cursor-pointer select-none outline-hidden flex justify-between items-center text-stone-850">
+                              <span>{faq.question}</span>
+                              <span className="text-xs text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <p className="mt-3 text-stone-650 text-xs leading-relaxed whitespace-pre-line pl-1 border-l-2 border-amber-400">
+                              {faq.answer}
+                            </p>
+                          </details>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Cover Photo Gallery section */}
+              {listing.images && listing.images.length > 0 && (
+                <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
+                  <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-6">
+                    Photos
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {listing.images.map((img, idx) => (
+                      <div key={idx} className="aspect-video w-full rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={img} 
+                          alt={`${listing.title} gallery ${idx + 1}`} 
+                          className="w-full h-full object-cover hover:scale-103 transition-transform duration-350"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Spatial Map Integration coordinates block */}
+              {listing.latitude && listing.longitude && (
+                <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
+                  <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-6">
+                    <h3 className="text-lg font-serif font-bold text-stone-950">
+                      Geographic Location
+                    </h3>
+                    <span className="text-[10px] text-stone-400 font-mono">
+                      GPS: {listing.latitude.toFixed(4)}, {listing.longitude.toFixed(4)}
+                    </span>
+                  </div>
+                  
+                  {/* Embedded OpenStreetMap map frame */}
+                  <div className="w-full h-72 rounded-xl overflow-hidden border border-stone-200 relative">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      scrolling="no"
+                      marginHeight={0}
+                      marginWidth={0}
+                      src={`https://maps.google.com/maps?q=${listing.latitude},${listing.longitude}&hl=en&z=14&output=embed`}
+                      className="absolute inset-0 border-0"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Column 2: Quick Action Contact Sidebar */}
+            <div className="space-y-6">
+              
+              {/* Primary Lead Floating Container */}
+              <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm sticky top-24">
+                <div className="border-b border-stone-100 pb-4 mb-5 text-center">
+                  <h4 className="text-xs uppercase font-extrabold tracking-widest text-stone-400">
+                    Contact & Reservations
+                  </h4>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Official Website Action */}
+                  {listing.website && (
+                    <a
+                      href={listing.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between w-full px-4 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer group"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Globe className="h-4.5 w-4.5 text-amber-500" />
+                        Visit Official Website
+                      </span>
+                      <ExternalLink className="h-4 w-4 text-stone-400 group-hover:text-white transition" />
+                    </a>
+                  )}
+
+                  {/* WhatsApp click-to-chat button */}
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center justify-center gap-2 w-full px-4 py-3 text-xs font-bold rounded-xl transition cursor-pointer ${
+                        isGold
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                          : 'bg-stone-100 hover:bg-stone-200 text-stone-800'
+                      }`}
+                    >
+                      <MessageSquare className="h-4.5 w-4.5" />
+                      Message on WhatsApp
+                    </a>
+                  )}
+
+                  {/* Phone direct link */}
+                  {listing.phone && (
+                    <a
+                      href={`tel:${listing.phone.replace(/\s+/g, '')}`}
+                      className="flex items-center gap-3 w-full px-4 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:text-stone-950 rounded-xl text-xs font-medium transition cursor-pointer"
+                    >
+                      <Phone className="h-4 w-4 text-stone-400 shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Call Direct</p>
+                        <p className="text-xs font-semibold">{listing.phone}</p>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Email direct link */}
+                  {listing.email && (
+                    <a
+                      href={`mailto:${listing.email}`}
+                      className="flex items-center gap-3 w-full px-4 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 hover:text-stone-950 rounded-xl text-xs font-medium transition cursor-pointer"
+                    >
+                      <Mail className="h-4 w-4 text-stone-400 shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Email Inquiries</p>
+                        <p className="text-xs font-semibold">{listing.email}</p>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Address box */}
+                  <div className="flex items-start gap-3 w-full px-4 py-3 bg-stone-50 border border-stone-100 rounded-xl text-xs text-stone-600">
+                    <MapPin className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] text-stone-455 uppercase font-bold tracking-wider">Location</p>
+                      <p className="text-xs font-medium mt-0.5 leading-snug">{listing.address}</p>
+                      <p className="text-xs font-bold text-stone-800 mt-0.5">{listing.postcode}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sub-region Badge footer */}
+                <div className="mt-5 pt-4 border-t border-stone-100 text-[10px] text-stone-450 text-center font-medium">
+                  Verified Local Partner of the Cotswolds Tourism Guild
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </main>
+
+      {/* 3. Footer */}
+      <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-3">
+          <p>© {new Date().getFullYear()} Cotswolds.UK Directory Services. All Rights Reserved.</p>
+          <div className="flex items-center justify-center gap-4 text-stone-500 font-bold">
+            <Link href="/" className="hover:text-stone-300 transition">Directory Search</Link>
+            <span>•</span>
+            <Link href="/listings/submit" className="hover:text-stone-300 transition">Submit Business</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
