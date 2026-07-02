@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
 
         const { items: mapsItems } = await client.dataset(mapsRun.defaultDatasetId).listItems();
         if (mapsItems && mapsItems.length > 0) {
-          const mapItem = mapsItems[0];
+          const mapItem = mapsItems[0] as any;
           const rawImageUrls: string[] = [];
           if (mapItem.imageUrl) rawImageUrls.push(mapItem.imageUrl);
           if (mapItem.imageUrls && Array.isArray(mapItem.imageUrls)) {
