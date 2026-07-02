@@ -50,6 +50,7 @@ interface Listing {
   rating?: number;
   reviews_count?: number;
   tags?: string[];
+  opening_hours?: any;
   premium_metadata?: {
     highlights?: string[];
     faqs?: { question: string; answer: string }[];
@@ -91,6 +92,15 @@ const MOCK_LISTINGS: Listing[] = [
     rating: 4.8,
     reviews_count: 245,
     tags: ["Historic", "Luxury Spa", "Indoor Pool"],
+    opening_hours: [
+      { "day": "Monday", "hours": "Open 24 hours" },
+      { "day": "Tuesday", "hours": "Open 24 hours" },
+      { "day": "Wednesday", "hours": "Open 24 hours" },
+      { "day": "Thursday", "hours": "Open 24 hours" },
+      { "day": "Friday", "hours": "Open 24 hours" },
+      { "day": "Saturday", "hours": "Open 24 hours" },
+      { "day": "Sunday", "hours": "Open 24 hours" }
+    ],
     premium_metadata: {
       highlights: [
         "16th-Century coaching inn history",
@@ -110,6 +120,10 @@ const MOCK_LISTINGS: Listing[] = [
       specialSection: {
         room_types: ["Classic Double", "Splendid Suite", "Master Suite"],
         amenities_list: ["Heated Indoor Pool", "Luxury Spa", "Vaulted Dining Hall", "Valet Parking"]
+      },
+      socialLinks: {
+        instagram: "https://instagram.com/cotswolds_thelygonarms",
+        facebook: "https://facebook.com/cotswolds_thelygonarms"
       }
     }
   },
@@ -135,6 +149,15 @@ const MOCK_LISTINGS: Listing[] = [
     rating: 4.7,
     reviews_count: 198,
     tags: ["Organic Food", "Gastro Pub", "Open Fireplace"],
+    opening_hours: [
+      { "day": "Monday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Tuesday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Wednesday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Thursday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Friday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Saturday", "hours": "12:00 PM - 11:00 PM" },
+      { "day": "Sunday", "hours": "12:00 PM - 10:30 PM" }
+    ],
     premium_metadata: {
       highlights: [
         "Award-winning organic menus",
@@ -154,6 +177,10 @@ const MOCK_LISTINGS: Listing[] = [
       specialSection: {
         price_range: "£££ - ££££",
         signature_dishes: ["Daylesford Organic Ribeye", "Seared Cornish Turbot", "Warm Plum & Almond Tart"]
+      },
+      socialLinks: {
+        instagram: "https://instagram.com/cotswolds_thewildrabbit",
+        facebook: "https://facebook.com/cotswolds_thewildrabbit"
       }
     }
   },
@@ -225,6 +252,75 @@ export default function ListingProfile() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Claim listing flow states
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState<boolean>(false);
+  const [claimStep, setClaimStep] = useState<number>(1);
+  const [selectedPlan, setSelectedPlan] = useState<'silver' | 'gold'>('silver');
+  const [websiteInput, setWebsiteInput] = useState<string>('');
+  const [cardNumber, setCardNumber] = useState<string>('');
+  const [cardExpiry, setCardExpiry] = useState<string>('');
+  const [cardCvv, setCardCvv] = useState<string>('');
+  const [cardName, setCardName] = useState<string>('');
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [scrapeStatusText, setScrapeStatusText] = useState<string>('Processing secure payment...');
+
+  // Handles submitting the listing claim to our claim API route
+  const handleClaimSubmit = async () => {
+    if (!listing) return;
+    setClaimError(null);
+    setClaimStep(4); // Show progress screen
+    
+    const messages = [
+      'Processing your secure payment...',
+      'Payment authorised successfully ✓',
+      'Setting up your business profile...',
+      'Analysing your website content...',
+      'Generating your highlights and FAQs...',
+      'Crafting your premium listing details...',
+      'Almost there — applying finishing touches...',
+      'Saving your new Gold Partner status...',
+      'Preparing your premium profile...'
+    ];
+    
+    let msgIdx = 0;
+    const interval = setInterval(() => {
+      if (msgIdx < messages.length - 1) {
+        msgIdx++;
+        setScrapeStatusText(messages[msgIdx]);
+      }
+    }, 2500);
+
+    try {
+      const res = await fetch('/api/listings/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: listing.id,
+          tier: selectedPlan,
+          website: websiteInput
+        })
+      });
+
+      clearInterval(interval);
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Server error occurred during payment processing.');
+      }
+
+      setScrapeStatusText('Success! Listing Claimed and Scraped Successfully.');
+      
+      setTimeout(() => {
+        setIsClaimModalOpen(false);
+        window.location.reload();
+      }, 1500);
+    } catch (err: any) {
+      clearInterval(interval);
+      setClaimError(err.message || 'An unexpected error occurred during claims processing.');
+      setClaimStep(3); // Go back to payment step to allow correcting details
+    }
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -303,7 +399,7 @@ export default function ListingProfile() {
   }
 
   const isGold = listing.tier === 'gold';
-  const isSilver = listing.tier === 'silver';
+  const isSilver = false; // Silver tier retired — all claimed listings are Gold
   
   // Format WhatsApp Link
   const whatsappNumber = listing.whatsapp || listing.phone;
@@ -403,12 +499,7 @@ export default function ListingProfile() {
                     Gold Partner
                   </span>
                 )}
-                {isSilver && (
-                  <span className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white/20 border border-white/20 text-white backdrop-blur-md">
-                    <Star className="h-4.5 w-4.5 fill-current text-amber-400" />
-                    Featured Partner
-                  </span>
-                )}
+
               </div>
             </div>
           </div>
@@ -432,7 +523,7 @@ export default function ListingProfile() {
               </div>
 
               {/* Premium Features & Highlights (Claimed Listings Only) */}
-              {(isGold || isSilver) && listing.premium_metadata && (
+              {isGold && listing.premium_metadata && (
                 <>
                   {/* Unique Highlights */}
                   {listing.premium_metadata.highlights && listing.premium_metadata.highlights.length > 0 && (
@@ -538,8 +629,8 @@ export default function ListingProfile() {
                 </>
               )}
 
-              {/* Cover Photo Gallery section */}
-              {listing.images && listing.images.length > 0 && (
+              {/* Cover Photo Gallery section (Claimed Listings Only) */}
+              {isGold && listing.images && listing.images.length > 1 && (
                 <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
                   <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-6">
                     Photos
@@ -591,6 +682,29 @@ export default function ListingProfile() {
             {/* Column 2: Quick Action Contact Sidebar */}
             <div className="space-y-6">
               
+              {/* Claim Listing Sidebar Card (only for basic unclaimed listings) */}
+              {listing.tier === 'basic' && (
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100/40 border border-amber-200 rounded-2xl p-6 shadow-xs space-y-3">
+                  <h4 className="font-serif font-bold text-base text-stone-900 flex items-center gap-1.5">
+                    <Star className="h-4.5 w-4.5 text-amber-600 fill-current animate-pulse" />
+                    Is this your business?
+                  </h4>
+                  <p className="text-xs text-stone-605 leading-relaxed">
+                    Claim this listing to upgrade to a premium partner status, display rating stars, add your website, and run a deep AI website scrape for highlights, FAQs, and custom menus.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsClaimModalOpen(true);
+                      setClaimStep(1);
+                      setWebsiteInput(listing.website || '');
+                    }}
+                    className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 text-xs font-bold rounded-xl shadow-md transition cursor-pointer text-center"
+                  >
+                    Claim Listing Now
+                  </button>
+                </div>
+              )}
+
               {/* Primary Lead Floating Container */}
               <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm sticky top-24">
                 <div className="border-b border-stone-100 pb-4 mb-5 text-center">
@@ -661,6 +775,32 @@ export default function ListingProfile() {
                     </a>
                   )}
 
+                  {/* Social Media links for premium listings */}
+                  {isGold && listing.premium_metadata?.socialLinks && (
+                    <div className="flex gap-2 pt-2 border-t border-stone-100 mt-2">
+                      {listing.premium_metadata.socialLinks.instagram && (
+                        <a
+                          href={listing.premium_metadata.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 hover:text-stone-950 rounded-xl text-[10px] font-bold transition cursor-pointer"
+                        >
+                          Instagram
+                        </a>
+                      )}
+                      {listing.premium_metadata.socialLinks.facebook && (
+                        <a
+                          href={listing.premium_metadata.socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 border border-stone-200 hover:border-stone-300 text-stone-700 hover:bg-stone-50 hover:text-stone-950 rounded-xl text-[10px] font-bold transition cursor-pointer"
+                        >
+                          Facebook
+                        </a>
+                      )}
+                    </div>
+                  )}
+
                   {/* Address box */}
                   <div className="flex items-start gap-3 w-full px-4 py-3 bg-stone-50 border border-stone-100 rounded-xl text-xs text-stone-600">
                     <MapPin className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
@@ -678,11 +818,278 @@ export default function ListingProfile() {
                 </div>
               </div>
 
+              {/* Opening Hours Container */}
+              {listing.opening_hours && Array.isArray(listing.opening_hours) && listing.opening_hours.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm">
+                  <div className="border-b border-stone-100 pb-3 mb-4 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-500 shrink-0" />
+                    <h4 className="text-[11px] uppercase font-extrabold tracking-widest text-stone-900">
+                      Opening Hours
+                    </h4>
+                  </div>
+
+                  <div className="space-y-2">
+                    {listing.opening_hours.map((item: any, idx: number) => {
+                      const day = item.day || item.dayName || '';
+                      const hours = item.hours || item.hoursText || '';
+                      return (
+                        <div key={idx} className="flex justify-between items-center text-xs">
+                          <span className="font-semibold text-stone-550">{day}</span>
+                          <span className="font-medium text-stone-800 text-right">{hours}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
             </div>
 
           </div>
         </div>
       </main>
+
+      {/* 4. Paid Claim Modal Dialog */}
+      {isClaimModalOpen && (
+        <div className="fixed inset-0 bg-stone-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-stone-200 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative animate-fade-in my-8 text-stone-900">
+            
+            {/* Modal Header */}
+            <div className="border-b border-stone-150 px-6 py-4 flex items-center justify-between bg-stone-50">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-stone-900">
+                  Claim Listing: {listing?.title}
+                </h3>
+                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-0.5">
+                  Step {claimStep} of 4 • {claimStep === 1 ? "Select Plan" : claimStep === 2 ? "Configure Website" : claimStep === 3 ? "Secure Checkout" : "Launching AI Crawl"}
+                </p>
+              </div>
+              
+              {claimStep < 4 && (
+                <button
+                  onClick={() => setIsClaimModalOpen(false)}
+                  className="text-stone-405 hover:text-stone-700 font-bold text-lg cursor-pointer h-7 w-7 rounded-full flex items-center justify-center hover:bg-stone-200/50"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              {claimError && (
+                <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl p-3 flex gap-2 items-center">
+                  <span className="font-bold">Error:</span> {claimError}
+                </div>
+              )}
+
+              {/* STEP 1: Select Plan */}
+              {claimStep === 1 && (
+                <div className="space-y-4">
+                  <p className="text-xs text-stone-605 leading-relaxed">
+                    Verify your ownership and unlock the full Gold Partner experience — premium search placement, a photo gallery, AI-generated highlights, and more.
+                  </p>
+
+                  {/* Gold-Only Plan Card */}
+                  <div className="p-5 rounded-2xl border-2 border-amber-500 bg-gradient-to-br from-amber-500/5 to-amber-500/10 shadow-xs">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className="text-sm font-extrabold text-amber-700">Gold Partner</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5">The complete premium listing experience.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xl font-black text-stone-900">£29</span>
+                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-stone-700 font-medium">
+                      <li>✓ Gold Partner Badge</li>
+                      <li>✓ Priority Search Ranking</li>
+                      <li>✓ Full Photo Gallery</li>
+                      <li>✓ AI-Generated Highlights</li>
+                      <li>✓ Star Ratings & Reviews</li>
+                      <li>✓ Opening Hours Display</li>
+                      <li>✓ Social Media Links</li>
+                      <li>✓ WhatsApp Chat Button</li>
+                    </ul>
+                  </div>
+
+                  <button
+                    onClick={() => { setSelectedPlan('gold'); setClaimStep(2); }}
+                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
+                  >
+                    Continue — £29/mo
+                  </button>
+                </div>
+              )}
+
+              {/* STEP 2: Configure Website */}
+              {claimStep === 2 && (
+                <div className="space-y-4">
+                  <p className="text-xs text-stone-605 leading-relaxed">
+                    Please provide your official business website. We will use it to personalise your listing with unique highlights, FAQs, and more.
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <label className="text-[10px] uppercase font-extrabold tracking-wider text-stone-400 block">
+                      Official Website URL
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="e.g. https://www.lygonarmshotel.co.uk"
+                      value={websiteInput}
+                      onChange={(e) => setWebsiteInput(e.target.value)}
+                      className="w-full border border-stone-200 rounded-xl px-4 py-3 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => setClaimStep(1)}
+                      className="flex-1 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!websiteInput || !/^https?:\/\//i.test(websiteInput)) {
+                          setClaimError("Please enter a valid website URL starting with http:// or https://");
+                        } else {
+                          setClaimError(null);
+                          setClaimStep(3);
+                        }
+                      }}
+                      className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer"
+                    >
+                      Proceed to Payment
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Payment Checkout */}
+              {claimStep === 3 && (
+                <div className="space-y-5">
+                  {/* Elegant Glassmorphic Card Preview */}
+                  <div className="w-full h-44 rounded-2xl bg-gradient-to-br from-stone-850 to-stone-950 text-white p-6 flex flex-col justify-between shadow-lg relative overflow-hidden border border-stone-800">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl" />
+                    
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500">Cotswolds Tourism Premium</span>
+                      <span className="text-xs font-extrabold italic font-serif">Visa</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Card Number */}
+                      <p className="font-mono text-base tracking-widest text-stone-200">
+                        {cardNumber ? cardNumber.replace(/(\d{4})/g, '$1 ').trim() : '•••• •••• •••• ••••'}
+                      </p>
+
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <p className="text-[8px] text-stone-500 uppercase font-bold tracking-wider">Cardholder</p>
+                          <p className="font-semibold truncate max-w-[180px]">{cardName || 'YOUR NAME'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[8px] text-stone-500 uppercase font-bold tracking-wider">Expires</p>
+                          <p className="font-semibold font-mono">{cardExpiry || 'MM/YY'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Card Name */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Cardholder Name</label>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                        className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition"
+                      />
+                    </div>
+
+                    {/* Card Number Input */}
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Card Number</label>
+                      <input
+                        type="text"
+                        placeholder="4000 1234 5678 9010"
+                        maxLength={16}
+                        value={cardNumber.replace(/\D/g, '')}
+                        onChange={(e) => setCardNumber(e.target.value)}
+                        className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Expiry */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Expiry Date</label>
+                        <input
+                          type="text"
+                          placeholder="MM/YY"
+                          maxLength={5}
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(e.target.value)}
+                          className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
+                        />
+                      </div>
+                      
+                      {/* CVV */}
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">CVV</label>
+                        <input
+                          type="password"
+                          placeholder="•••"
+                          maxLength={3}
+                          value={cardCvv.replace(/\D/g, '')}
+                          onChange={(e) => setCardCvv(e.target.value)}
+                          className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => setClaimStep(2)}
+                      className="flex-1 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleClaimSubmit}
+                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center"
+                    >
+                      Pay & Activate Claim (£{selectedPlan === 'silver' ? '9' : '29'}/mo)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: Processing Scrape & Payment */}
+              {claimStep === 4 && (
+                <div className="py-12 flex flex-col items-center justify-center gap-4 text-center">
+                  <Loader2 className="h-12 w-12 text-amber-600 animate-spin" />
+                  <div>
+                    <h4 className="font-serif font-bold text-base text-stone-900">Activating Premium Status</h4>
+                    <p className="text-xs text-stone-500 mt-1 max-w-xs leading-relaxed">
+                      {scrapeStatusText}
+                    </p>
+                  </div>
+                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-4">
+                    Please do not close this window
+                  </p>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* 3. Footer */}
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">

@@ -32,6 +32,7 @@ CREATE TABLE listings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
+  google_place_id TEXT UNIQUE,
   description TEXT,
   category TEXT, -- e.g., 'Pub & Restaurant', 'B&B', 'Boutique Hotel', 'Antiques'
   

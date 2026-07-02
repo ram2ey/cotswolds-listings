@@ -58,16 +58,18 @@ async function downloadImage(url) {
 }
 
 // Stream image buffer to Supabase storage bucket
-async function uploadToSupabaseStorage(slug, imageSrc) {
+async function uploadToSupabaseStorage(slug, imageSrc, idx = 0) {
   try {
     const downloadResult = await downloadImage(imageSrc);
     if (!downloadResult) return null;
 
     const { buffer, contentType } = downloadResult;
     const extension = contentType.split('/')[1] || 'jpg';
-    const filePath = `listings/${slug}.${extension}`;
+    const filePath = idx === 0
+      ? `listings/${slug}.${extension}`
+      : `listings/${slug}-${idx}.${extension}`;
 
-    console.log(`Streaming image for '${slug}' into listing-images bucket: ${filePath}...`);
+    console.log(`Streaming image (index ${idx}) for '${slug}' into listing-images bucket: ${filePath}...`);
     
     const { data, error } = await supabase.storage
       .from('listing-images')
@@ -77,7 +79,7 @@ async function uploadToSupabaseStorage(slug, imageSrc) {
       });
 
     if (error) {
-      console.error(`Error uploading storage object for ${slug}:`, error.message);
+      console.error(`Error uploading storage object (index ${idx}) for ${slug}:`, error.message);
       return null;
     }
 
@@ -88,7 +90,7 @@ async function uploadToSupabaseStorage(slug, imageSrc) {
 
     return publicUrl;
   } catch (error) {
-    console.error(`Error in uploadToSupabaseStorage for ${slug}:`, error.message);
+    console.error(`Error in uploadToSupabaseStorage for ${slug} at index ${idx}:`, error.message);
     return null;
   }
 }
@@ -110,12 +112,14 @@ async function runIngestion() {
         "traditional pubs in Bourton-on-the-Water, Cotswolds"
       ],
       maxCrawledPlacesPerSearch: 3, // Safe limit for test running
-      language: "en"
+      language: "en",
+      extractImages: true,
+      maxImages: 4
     };
 
     try {
-      console.log('Running Apify Google Maps Scraper actor (apify/google-maps-scraper)...');
-      const run = await client.actor("apify/google-maps-scraper").call(input);
+      console.log('Running Apify Google Maps Scraper actor (compass/crawler-google-places)...');
+      const run = await client.actor("compass/crawler-google-places").call(input);
       console.log(`Scraper finished. Fetching dataset items (Run ID: ${run.id})...`);
       const { items } = await client.dataset(run.defaultDatasetId).listItems();
       rawItems = items;
@@ -138,7 +142,25 @@ async function runIngestion() {
         city: "Broadway",
         postalCode: "WR12 7DU",
         location: { lat: 52.0366, lng: -1.8558 },
-        imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"
+        imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+        imageUrls: [
+          "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1582719478250-c89cae4db85b?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80"
+        ],
+        totalScore: 4.8,
+        reviewsCount: 245,
+        placeId: "google-place-lygon-arms",
+        openingHours: [
+          { "day": "Monday", "hours": "Open 24 hours" },
+          { "day": "Tuesday", "hours": "Open 24 hours" },
+          { "day": "Wednesday", "hours": "Open 24 hours" },
+          { "day": "Thursday", "hours": "Open 24 hours" },
+          { "day": "Friday", "hours": "Open 24 hours" },
+          { "day": "Saturday", "hours": "Open 24 hours" },
+          { "day": "Sunday", "hours": "Open 24 hours" }
+        ]
       },
       {
         title: "The Wild Rabbit",
@@ -149,7 +171,25 @@ async function runIngestion() {
         city: "Kingham",
         postalCode: "OX7 6YA",
         location: { lat: 51.9083, lng: -1.6146 },
-        imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"
+        imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+        imageUrls: [
+          "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
+        ],
+        totalScore: 4.7,
+        reviewsCount: 198,
+        placeId: "google-place-wild-rabbit",
+        openingHours: [
+          { "day": "Monday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Tuesday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Wednesday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Thursday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Friday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Saturday", "hours": "12:00 PM - 11:00 PM" },
+          { "day": "Sunday", "hours": "12:00 PM - 10:30 PM" }
+        ]
       },
       {
         title: "The Porch House",
@@ -160,7 +200,25 @@ async function runIngestion() {
         city: "Stow-on-the-Wold",
         postalCode: "GL54 1BN",
         location: { lat: 51.9298, lng: -1.7247 },
-        imageUrl: "https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80"
+        imageUrl: "https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80",
+        imageUrls: [
+          "https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?auto=format&fit=crop&w=800&q=80",
+          "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80"
+        ],
+        totalScore: 4.5,
+        reviewsCount: 167,
+        placeId: "google-place-porch-house",
+        openingHours: [
+          { "day": "Monday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Tuesday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Wednesday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Thursday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Friday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Saturday", "hours": "11:00 AM - 11:00 PM" },
+          { "day": "Sunday", "hours": "11:00 AM - 10:30 PM" }
+        ]
       }
     ];
   }
@@ -169,17 +227,45 @@ async function runIngestion() {
 
   for (const item of rawItems) {
     const title = item.title || item.name;
+    
+    // Skip permanently closed locations
+    if (item.isClosed || item.permanentlyClosed || item.closed === true) {
+      console.log(`Skipping permanently closed business: "${title}"`);
+      continue;
+    }
+
+    const lat = item.location ? parseFloat(item.location.lat) : null;
+    const lng = item.location ? parseFloat(item.location.lng) : null;
+
+    // Geographic bounding box validation (Cotswolds coordinates filter)
+    if (lat !== null && lng !== null) {
+      const isInsideCotswolds = (lat >= 51.35 && lat <= 52.25) && (lng >= -2.45 && lng <= -1.3);
+      if (!isInsideCotswolds) {
+        console.log(`Skipping out-of-bounds business: "${title}" (${lat}, ${lng})`);
+        continue;
+      }
+    }
+
     const village = item.city || item.sub_region || 'cotswolds';
     const slug = generateSlug(title, village);
     
     console.log(`Processing listing: "${title}" (Slug: ${slug})...`);
 
-    // Handle Image Streaming Integrity (No external hotlinking)
+    // Handle Image Streaming (Fetch up to 4 images for premium display)
     let imageUrls = [];
-    const externalImage = item.imageUrl || (item.imageUrls && item.imageUrls[0]);
+    const rawImageUrls = [];
+    if (item.imageUrl) rawImageUrls.push(item.imageUrl);
+    if (item.imageUrls && Array.isArray(item.imageUrls)) {
+      item.imageUrls.forEach(url => {
+        if (url && !rawImageUrls.includes(url)) {
+          rawImageUrls.push(url);
+        }
+      });
+    }
 
-    if (externalImage) {
-      const storedUrl = await uploadToSupabaseStorage(slug, externalImage);
+    const targetImages = rawImageUrls.slice(0, 4);
+    for (let i = 0; i < targetImages.length; i++) {
+      const storedUrl = await uploadToSupabaseStorage(slug, targetImages[i], i);
       if (storedUrl) {
         imageUrls.push(storedUrl);
       }
@@ -201,13 +287,19 @@ async function runIngestion() {
       postcode: item.postalCode || item.zip || '',
       county: county,
       sub_region: village,
-      latitude: item.location ? item.location.lat : null,
-      longitude: item.location ? item.location.lng : null,
+      latitude: lat,
+      longitude: lng,
       images: imageUrls,
       
-      // Enforce Data Staging Queue rules (always start basic & unapproved)
+      // Seed ratings & hours directly from scraped Google Maps dataset fields
+      rating: item.totalScore || null,
+      reviews_count: item.reviewsCount || null,
+      opening_hours: item.openingHours || null,
+      google_place_id: item.placeId || null,
+
+      // Ingest live immediately (bypass admin staging queue)
       tier: 'basic',
-      is_approved: false
+      is_approved: true
     };
 
     upsertListings.push(dbListing);

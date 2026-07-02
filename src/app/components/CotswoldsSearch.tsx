@@ -34,6 +34,9 @@ interface Listing {
   images?: string[];
   tier: 'basic' | 'silver' | 'gold';
   distance_miles?: number;
+  rating?: number;
+  reviews_count?: number;
+  opening_hours?: any;
 }
 
 // Default coordinates for Bourton-on-the-Water (central point of the Cotswolds)
@@ -519,6 +522,24 @@ export default function CotswoldsSearch() {
                           </h4>
                         </Link>
 
+                        {item.rating && (
+                          <div className="flex items-center gap-1 mt-1 mb-2 text-xs font-bold text-amber-500">
+                            <div className="flex text-amber-500">
+                              {[...Array(5)].map((_, i) => (
+                                <Star 
+                                  key={i} 
+                                  className={`h-3 w-3 ${
+                                    i < Math.floor(Number(item.rating) || 0) 
+                                      ? 'fill-current text-amber-500' 
+                                      : 'text-stone-200'
+                                  }`} 
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[10px] text-stone-500 font-medium">({item.reviews_count || 0})</span>
+                          </div>
+                        )}
+
                         <p className="text-[11px] text-stone-600 line-clamp-2 mt-2 leading-relaxed">
                           {item.description}
                         </p>
@@ -675,7 +696,6 @@ export default function CotswoldsSearch() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {sortedListings.map((item) => {
             const isGold = item.tier === 'gold';
-            const isSilver = item.tier === 'silver';
             
             // Format phone into raw string for WhatsApp if listed
             // Priority is item.whatsapp -> item.phone
@@ -687,8 +707,6 @@ export default function CotswoldsSearch() {
                 className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-350 transform hover:-translate-y-1.5 ${
                   isGold 
                     ? 'border-2 border-amber-500 shadow-lg shadow-amber-500/5 hover:shadow-amber-500/15 ring-4 ring-amber-500/5' 
-                    : isSilver
-                    ? 'border border-stone-300 shadow-sm hover:shadow-md'
                     : 'border border-stone-200 hover:border-stone-300 hover:shadow-xs'
                 }`}
               >
@@ -724,13 +742,6 @@ export default function CotswoldsSearch() {
                       Gold Partner
                     </span>
                   )}
-                  
-                  {isSilver && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-stone-100 border border-stone-300 text-stone-700">
-                      <Star className="h-3 w-3 fill-current text-stone-400" />
-                      Featured
-                    </span>
-                  )}
                 </Link>
 
                 {/* Body Details */}
@@ -752,6 +763,24 @@ export default function CotswoldsSearch() {
                       </h3>
                     </Link>
                     
+                    {item.rating && (
+                      <div className="flex items-center gap-1 mt-1 mb-3 text-xs font-bold text-amber-500">
+                        <div className="flex text-amber-500">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={`h-3.5 w-3.5 ${
+                                i < Math.floor(Number(item.rating) || 0) 
+                                  ? 'fill-current text-amber-500' 
+                                  : 'text-stone-200'
+                              }`} 
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-stone-500 font-medium">({item.reviews_count || 0})</span>
+                      </div>
+                    )}
+
                     <p className="text-xs text-stone-600 line-clamp-3 leading-relaxed mb-4">
                       {item.description}
                     </p>
