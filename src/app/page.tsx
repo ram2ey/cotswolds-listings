@@ -118,11 +118,11 @@ export default async function Home() {
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center md:text-left">
           <div className="max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight font-serif text-white leading-tight">
-              Discover the Heart <br />
-              of the <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Cotswolds</span>
+              All Cotswolds - <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">All In One Place</span>
             </h1>
             <p className="mt-4 text-stone-200 leading-relaxed font-normal max-w-xl text-sm sm:text-base opacity-95">
-              Handpicked boutique hotels, historic coaching inns, cozy gastropubs, and artisan shops across Gloucestershire, Oxfordshire, and Warwickshire.
+              Your fast-track to the best local businesses. We bring top-rated services, shops, and restaurants together to make your search quick and effortless.
             </p>
           </div>
         </div>
@@ -288,9 +288,9 @@ export default async function Home() {
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <HelpCircle className="h-6 w-6" />
               </div>
-              <h3 className="text-sm font-bold text-stone-950 mb-2">Find Stays, Dining & Services</h3>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">Exploring the Cotswolds Made Easy</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
-                Search our comprehensive business indexes filtered by specific Cotswolds villages or trade classes to discover exactly what you need.
+                We have made it easier for you to explore businesses in your community.
               </p>
             </div>
 
@@ -298,9 +298,9 @@ export default async function Home() {
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
                 <Zap className="h-6 w-6" />
               </div>
-              <h3 className="text-sm font-bold text-stone-950 mb-2">Interactive Location Sorting</h3>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">Supporting Local Businesses</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
-                Use your device's shared GPS coordinates to immediately filter and sort results by radial mileage distance proximity.
+                Whether you’re a new startup or an established company, our platform helps you stand out. Boosting your visibility, showcasing your offerings and reaching new customers Online and Off-line.
               </p>
             </div>
 
