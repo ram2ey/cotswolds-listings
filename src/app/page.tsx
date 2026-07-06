@@ -1,6 +1,6 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
 import Navbar from "./components/Navbar";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car } from "lucide-react";
+import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car, Layers, Heart } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -260,15 +260,37 @@ export default async function Home() {
       {/* 7. How it Works Section */}
       <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Process Guide</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">How does Cotswolds.UK Directory work?</h2>
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="h-4 w-4 rounded-full bg-amber-500 shadow-md shadow-amber-500/50" />
+              <span className="font-serif text-2xl font-extrabold tracking-tight text-stone-950">
+                Cotswolds<span className="text-amber-500 font-sans"> Pages</span>
+              </span>
+            </div>
+            <p className="text-stone-850 text-base font-bold leading-relaxed mb-3 max-w-xl mx-auto">
+              Cotswolds Pages is a comprehensive Directory to help you find Local Business.
+            </p>
+            <p className="text-stone-505 text-xs leading-relaxed max-w-xl mx-auto">
+              An intuitive Directory that aims to connect local residents and visitors to local services in the area.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            {/* Card 1 */}
             <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <HelpCircle className="h-6 w-6" />
+                <Layers className="h-6 w-6" />
+              </div>
+              <h3 className="text-sm font-bold text-stone-950 mb-2">All Cotswolds - All In One Place</h3>
+              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
+                Your fast-track to the best local businesses. We bring top-rated services, shops, and restaurants together to make your search quick and effortless.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
+              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
+                <Compass className="h-6 w-6" />
               </div>
               <h3 className="text-sm font-bold text-stone-950 mb-2">Exploring the Cotswolds Made Easy</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
@@ -276,23 +298,14 @@ export default async function Home() {
               </p>
             </div>
 
+            {/* Card 3 */}
             <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
               <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <Zap className="h-6 w-6" />
+                <Heart className="h-6 w-6" />
               </div>
               <h3 className="text-sm font-bold text-stone-950 mb-2">Supporting Local Businesses</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
-                Whether you’re a new startup or an established company, our platform helps you stand out. Boosting your visibility, showcasing your offerings and reaching new customers Online and Off-line.
-              </p>
-            </div>
-
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
-              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <h3 className="text-sm font-bold text-stone-950 mb-2">Empowering Local Venues</h3>
-              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
-                Claim your listing to unlock premium Gold Partner visibility, custom Highlights, reviews, menus, and on-demand live image synchronization.
+                Whether you’re a new startup or an established company, our platform helps you stand out. Boosting your visibility, showcasing your offerings and reaching new customers Online and Off-line
               </p>
             </div>
           </div>
