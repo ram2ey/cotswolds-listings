@@ -38,12 +38,12 @@ export default function SearchPage() {
       <footer className="bg-white border-t border-stone-200 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="flex items-center gap-2">
-            <svg className="w-5.5 h-4.5 text-amber-500 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 14.5c-3-2.5-7-2.5-10-1.5V1.5c3-1 7-1 10 1.5M12 14.5c3-2.5 7-2.5 10-1.5V1.5c-3-1-7-1-10 1.5M12 3v11.5" />
-            </svg>
-            <span className="font-serif text-md font-black tracking-tight text-amber-500">
-              Cotswolds<span className="text-stone-950 font-sans font-light ml-1">Pages</span>
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-light.jpg"
+              alt="Cotswolds Pages"
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <div className="text-xs text-stone-400">
             <p>© {new Date().getFullYear()} Cotswolds Pages. All rights reserved.</p>

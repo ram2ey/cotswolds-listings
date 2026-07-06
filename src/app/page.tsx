@@ -382,12 +382,12 @@ export default async function Home() {
           {/* Column 1: Branding */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <svg className="w-5.5 h-4.5 text-amber-500 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 14.5c-3-2.5-7-2.5-10-1.5V1.5c3-1 7-1 10 1.5M12 14.5c3-2.5 7-2.5 10-1.5V1.5c-3-1-7-1-10 1.5M12 3v11.5" />
-              </svg>
-              <span className="font-serif text-lg font-black tracking-tight text-amber-500">
-                Cotswolds<span className="text-stone-950 font-sans font-light ml-1">Pages</span>
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo-light.jpg"
+                alt="Cotswolds Pages"
+                className="h-11 w-auto object-contain"
+              />
             </div>
             <p className="text-xs text-stone-505 leading-relaxed pr-6">
               A high-performance digital business directory service. Connecting visitors and locals to premium boutique hotels, coaching inns, and artisan shops.

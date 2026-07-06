@@ -1047,7 +1047,15 @@ export default function ListingProfile() {
 
       {/* 3. Footer */}
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-4">
+          <div className="flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-dark.jpg"
+              alt="Cotswolds Pages"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
           <p>© {new Date().getFullYear()} Cotswolds Pages. All Rights Reserved.</p>
           <div className="flex items-center justify-center gap-4 text-stone-500 font-bold">
             <Link href="/" className="hover:text-stone-300 transition">Directory Search</Link>
