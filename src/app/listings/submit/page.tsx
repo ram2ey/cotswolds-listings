@@ -124,6 +124,32 @@ export default function SubmitListing() {
     }
   };
 
+  const handleWebsiteBlur = () => {
+    if (website.trim() && !/^https?:\/\//i.test(website)) {
+      setWebsite(`https://${website.trim()}`);
+    }
+  };
+
+  const handlePostcodeBlur = async () => {
+    const pc = postcode.trim();
+    if (!pc) return;
+    if (!validatePostcode(pc)) return;
+
+    try {
+      const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 200 && data.result) {
+          setLatitude(data.result.latitude.toString());
+          setLongitude(data.result.longitude.toString());
+          setError(null);
+        }
+      }
+    } catch (err) {
+      console.warn("Postcode geocoding lookup failed:", err);
+    }
+  };
+
   // Postcode and phone regex validations
   const validatePostcode = (pc: string) => {
     const regex = /^[A-Z]{1,2}[0-9R][0-9A-Z]?\s?[0-9][ABD-HJLNP-UW-Z]{2}$/i;
@@ -337,6 +363,7 @@ export default function SubmitListing() {
                       placeholder="e.g. GL54 2EN"
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value)}
+                      onBlur={handlePostcodeBlur}
                       className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                     />
                   </div>
@@ -412,6 +439,7 @@ export default function SubmitListing() {
                       placeholder="e.g. https://yoursite.com"
                       value={website}
                       onChange={(e) => setWebsite(e.target.value)}
+                      onBlur={handleWebsiteBlur}
                       className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                     />
                   </div>

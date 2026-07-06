@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { 
@@ -98,6 +98,21 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   const [hasWebsite, setHasWebsite] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'proximity' | 'alphabetical' | 'newest'>("alphabetical");
   const [visibleCount, setVisibleCount] = useState<number>(9);
+
+  // Dynamic list of towns based on active database listings
+  const dynamicTowns = useMemo(() => {
+    if (!allListings || allListings.length === 0) {
+      return TOWNS;
+    }
+    const unique = new Set<string>();
+    allListings.forEach((item) => {
+      if (item.town && item.town.trim()) {
+        const normalized = item.town.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        unique.add(normalized);
+      }
+    });
+    return ["Select Town", ...Array.from(unique).sort()];
+  }, [allListings]);
 
   // Reset pagination when filters change
   useEffect(() => {
@@ -316,7 +331,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
             onChange={(e) => setSelectedRegion(e.target.value)}
             className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
           >
-            {TOWNS.map(reg => (
+            {dynamicTowns.map(reg => (
               <option key={reg} value={reg} className="text-stone-900">{reg}</option>
             ))}
           </select>
@@ -509,9 +524,12 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                               className="object-cover w-full h-full"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
-                              <MapPin className="h-8 w-8 stroke-1" />
-                            </div>
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src="https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=600&q=80"
+                              alt="Cotswolds Pages"
+                              className="object-cover w-full h-full opacity-80"
+                            />
                           )}
 
                           {isGold && (
@@ -683,9 +701,12 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                             className="object-cover w-full h-full hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
-                            <MapPin className="h-10 w-10 stroke-1" />
-                          </div>
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src="https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=600&q=80"
+                            alt="Cotswolds Pages"
+                            className="object-cover w-full h-full opacity-80 hover:scale-105 transition-transform duration-500"
+                          />
                         )}
 
                         <div className="absolute top-3.5 left-3.5 flex gap-1.5">

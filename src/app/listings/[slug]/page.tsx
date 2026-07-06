@@ -412,9 +412,12 @@ export default function ListingProfile() {
               className="w-full h-full object-cover opacity-60"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-stone-700 bg-stone-900">
-              <Compass className="h-20 w-20 stroke-1 animate-pulse" />
-            </div>
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=1200&q=80"
+              alt="Cotswolds Pages"
+              className="w-full h-full object-cover opacity-60"
+            />
           )}
           
           {/* Dark bottom gradient */}

@@ -195,9 +195,12 @@ export default async function Home() {
                         className="object-cover w-full h-full hover:scale-102 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400">
-                        <MapPin className="h-8 w-8 stroke-1" />
-                      </div>
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img 
+                        src="https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=600&q=80" 
+                        alt="Cotswolds Pages" 
+                        className="object-cover w-full h-full opacity-80 hover:scale-102 transition-transform duration-300"
+                      />
                     )}
                     <div className="absolute top-3 left-3 flex gap-1.5">
                       <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
