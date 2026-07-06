@@ -120,17 +120,17 @@ export default async function Home() {
     { name: "Construction & Home Maintenance", icon: Wrench, desc: "Plumbers, carpenters, builders & tradesmen", img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=500&q=80" },
     { name: "Health & Beauty", icon: Sparkles, desc: "Salons, wellness spas & local medical care", img: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=500&q=80" },
     { name: "Professional Services", icon: Briefcase, desc: "Accountants, lawyers & digital consultants", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=500&q=80" },
-    { name: "Car & Automotive", icon: Car, desc: "Mechanics, body shops, dealers & servicing", img: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=500&q=80" },
+    { name: "Car & Automotive", icon: Car, desc: "Mechanics, body shops, dealers & servicing", img: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=500&q=80" },
     { name: "Hotels & Motels", icon: Hotel, desc: "Verified guest houses, stays & motels", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80" },
-    { name: "Restaurants & Cafés", icon: Utensils, desc: "Local restaurants, cafes & bakeries", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80" }
+    { name: "Restaurants & Cafés", icon: Utensils, desc: "Local restaurants, cafes & bakeries", img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80" }
   ];
 
   const locations = [
-    { name: 'Broadway', desc: 'Gateway views & Broadway Tower', img: 'https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Bourton-on-the-Water', desc: 'Little Venice of the Cotswolds', img: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Stow-on-the-Wold', desc: 'Historic market squares & portals', img: 'https://images.unsplash.com/photo-1505873242700-f289a29e1e0f?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Burford', desc: 'Iconic sloping streets & old bridges', img: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Cirencester', desc: 'Roman capital & historic markets', img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=500&q=80' }
+    { name: 'Broadway', desc: 'Gateway views & Broadway Tower', img: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Bourton-on-the-Water', desc: 'Little Venice of the Cotswolds', img: 'https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Stow-on-the-Wold', desc: 'Historic market squares & portals', img: 'https://images.unsplash.com/photo-1627662235999-5f2122bc13d5?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Burford', desc: 'Iconic sloping streets & old bridges', img: 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=500&q=80' },
+    { name: 'Cirencester', desc: 'Roman capital & historic markets', img: 'https://images.unsplash.com/photo-1576085898323-218337e3e43c?auto=format&fit=crop&w=500&q=80' }
   ];
 
   return (
