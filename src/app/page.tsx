@@ -65,6 +65,54 @@ async function getFeaturedListings() {
   }
 }
 
+function ShopIcon() {
+  return (
+    <svg className="w-20 h-20 text-stone-950 mb-6 shrink-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {/* Shop body */}
+      <rect x="24" y="46" width="52" height="34" rx="3" />
+      <rect x="44" y="58" width="14" height="22" rx="1" />
+      <rect x="31" y="55" width="8" height="8" rx="1" />
+      {/* Awning */}
+      <path d="M19 46h62l-6-15H25l-6 15z" />
+      <path d="M19 46c2.5 3.5 7.5 3.5 10 0s7.5 3.5 10 0s7.5 3.5 10 0s7.5 3.5 10 0s7.5 3.5 10 0s7.5 3.5 10 0" />
+      {/* Location Pin */}
+      <path d="M72 12c-5.5 0-10 4.5-10 10 0 7 10 16 10 16s10-9 10-16c0-5.5-4.5-10-10-10z" fill="white" />
+      <circle cx="72" cy="22" r="3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function SearchSlidersIcon() {
+  return (
+    <svg className="w-20 h-20 text-stone-950 mb-6 shrink-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {/* Magnifying Glass */}
+      <circle cx="48" cy="45" r="24" />
+      <line x1="65" y1="62" x2="82" y2="79" strokeWidth="5.5" />
+      {/* Sliders */}
+      <line x1="34" y1="36" x2="62" y2="36" />
+      <circle cx="40" cy="36" r="3.5" fill="currentColor" />
+      <line x1="34" y1="45" x2="62" y2="45" />
+      <circle cx="56" cy="45" r="3.5" fill="currentColor" />
+      <line x1="34" y1="54" x2="62" y2="54" />
+      <circle cx="46" cy="54" r="3.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function SupportIcon() {
+  return (
+    <svg className="w-20 h-20 text-stone-950 mb-6 shrink-0" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {/* Handshake line art */}
+      <path d="M35 55l-10-10c-4-4-4-10 0-14s10-4 14 0l10 10" />
+      <path d="M65 45L50 30c-4-4-10-4-14 0s-4 10 0 14l10 10" />
+      <path d="M42 42c2-2 5-2 7 0l8 8" />
+      <path d="M33 51c2-2 5-2 7 0l12 12" />
+      {/* Love heart */}
+      <path d="M72 16c-3-3-7-3-10 0s-3 7 0 10l10 10 10-10c3-3 3-7 0-10s-7-3-10 0z" fill="currentColor" />
+    </svg>
+  );
+}
+
 export default async function Home() {
   const featured = await getFeaturedListings();
 
@@ -277,10 +325,8 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
             {/* Card 1 */}
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
-              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <Layers className="h-6 w-6" />
-              </div>
+            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+              <ShopIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">All Cotswolds - All In One Place</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 Your fast-track to the best local businesses. We bring top-rated services, shops, and restaurants together to make your search quick and effortless.
@@ -288,10 +334,8 @@ export default async function Home() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
-              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <Compass className="h-6 w-6" />
-              </div>
+            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+              <SearchSlidersIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Exploring the Cotswolds Made Easy</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 We have made it easier for you to explore businesses in your community.
@@ -299,10 +343,8 @@ export default async function Home() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-stone-50 p-8 rounded-2xl border border-stone-200/80 shadow-2xs text-center flex flex-col items-center">
-              <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-                <Heart className="h-6 w-6" />
-              </div>
+            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+              <SupportIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Supporting Local Businesses</h3>
               <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
                 Whether you’re a new startup or an established company, our platform helps you stand out. Boosting your visibility, showcasing your offerings and reaching new customers Online and Off-line
