@@ -359,7 +359,7 @@ export default async function Home() {
         <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-[1px]" />
         <div className="max-w-4xl mx-auto text-center px-4 relative z-10">
           <h2 className="text-2xl sm:text-3xl font-serif font-black text-white leading-tight">
-            Cotswolds.UK Directory is the best way to find & discover great local businesses
+            Cotswolds Pages is the best way to find & discover great local businesses
           </h2>
           <p className="text-stone-300 text-xs mt-4 max-w-xl mx-auto leading-relaxed">
             Verify ownership of your business listing to gain priority rankings, unlock photo galleries, add custom FAQs, and start getting direct customer leads.
@@ -382,9 +382,11 @@ export default async function Home() {
           {/* Column 1: Branding */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="h-3.5 w-3.5 rounded-full bg-amber-500" />
-              <span className="font-serif text-lg font-extrabold tracking-tight text-stone-950">
-                Cotswolds<span className="text-amber-500 font-sans">.UK</span>
+              <svg className="w-5.5 h-4.5 text-amber-500 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 14.5c-3-2.5-7-2.5-10-1.5V1.5c3-1 7-1 10 1.5M12 14.5c3-2.5 7-2.5 10-1.5V1.5c-3-1-7-1-10 1.5M12 3v11.5" />
+              </svg>
+              <span className="font-serif text-lg font-black tracking-tight text-amber-500">
+                Cotswolds<span className="text-stone-950 font-sans font-light ml-1">Pages</span>
               </span>
             </div>
             <p className="text-xs text-stone-505 leading-relaxed pr-6">
@@ -407,8 +409,8 @@ export default async function Home() {
           <div>
             <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Contact Us</h4>
             <ul className="space-y-2 text-xs text-stone-505 leading-relaxed">
-              <li>Email: <a href="mailto:info@cotswolds.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswolds.uk</a></li>
-              <li>Website: <a href="https://cotswolds.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswolds.uk</a></li>
+              <li>Email: <a href="mailto:info@cotswoldspages.co.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswoldspages.co.uk</a></li>
+              <li>Website: <a href="https://cotswoldspages.co.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswoldspages.co.uk</a></li>
               <li className="pt-2 flex gap-3 text-stone-400">
                 <a href="#" className="hover:text-stone-750">Facebook</a>
                 <span>•</span>
@@ -421,7 +423,7 @@ export default async function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-100 mt-12 pt-8 text-center text-[10px] text-stone-400">
-          <p>© {new Date().getFullYear()} Cotswolds.UK Directory. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Cotswolds Pages. All rights reserved.</p>
         </div>
       </footer>
     </div>

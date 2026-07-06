@@ -20,9 +20,11 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <span className="h-3.5 w-3.5 rounded-full bg-amber-500 shadow-md shadow-amber-500/50" />
-            <span className="font-serif text-xl font-extrabold tracking-tight text-stone-950">
-              Cotswolds<span className="text-amber-500 font-sans">.UK</span>
+            <svg className="w-5.5 h-4.5 text-amber-500 shrink-0" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 14.5c-3-2.5-7-2.5-10-1.5V1.5c3-1 7-1 10 1.5M12 14.5c3-2.5 7-2.5 10-1.5V1.5c-3-1-7-1-10 1.5M12 3v11.5" />
+            </svg>
+            <span className="font-serif text-lg font-black tracking-tight text-amber-500">
+              Cotswolds<span className="text-stone-950 font-sans font-light ml-1">Pages</span>
             </span>
           </Link>
 

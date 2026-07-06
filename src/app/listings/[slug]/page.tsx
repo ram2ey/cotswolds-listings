@@ -392,7 +392,7 @@ export default function ListingProfile() {
   const whatsappNumber = listing.whatsapp || listing.phone;
   const cleanWhatsapp = whatsappNumber ? whatsappNumber.replace(/[^\d]/g, '') : '';
   const whatsappUrl = cleanWhatsapp
-    ? `https://wa.me/${cleanWhatsapp}?text=Hi%20${encodeURIComponent(listing.title)},%20I%20saw%20your%20profile%20on%20Cotswolds.UK%20and%20wanted%20to%20get%20in%20touch!`
+    ? `https://wa.me/${cleanWhatsapp}?text=Hi%20${encodeURIComponent(listing.title)},%20I%20saw%20your%20profile%20on%20Cotswolds%20Pages%20and%20wanted%20to%20get%20in%20touch!`
     : '';
 
   return (
@@ -1048,7 +1048,7 @@ export default function ListingProfile() {
       {/* 3. Footer */}
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs space-y-3">
-          <p>© {new Date().getFullYear()} Cotswolds.UK Directory Services. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} Cotswolds Pages. All Rights Reserved.</p>
           <div className="flex items-center justify-center gap-4 text-stone-500 font-bold">
             <Link href="/" className="hover:text-stone-300 transition">Directory Search</Link>
             <span>•</span>

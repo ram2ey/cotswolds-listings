@@ -13,8 +13,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Cotswolds Local Business Directory | Hotels, Pubs & Attractions",
-  description: "Explore the premium local business directory for the Cotswolds region (UK). Discover historic coaching inns, boutique stores, organic farms, and attractions across Gloucestershire, Oxfordshire, and Warwickshire.",
+  title: "Cotswolds Pages | Local Business Directory",
+  description: "Explore the premium local business directory for the Cotswolds region (Cotswolds Pages). Discover local services, trades, builders, salons, and hotels.",
 };
 
 export default function RootLayout({
