@@ -289,7 +289,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
           <Search className="h-5 w-5 text-stone-400 shrink-0" />
           <input
             type="text"
-            placeholder="Search hotels, pubs, shops..."
+            placeholder="What are you looking for?"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             className="w-full text-sm bg-transparent text-stone-900 placeholder-stone-400 focus:outline-hidden"
