@@ -309,11 +309,13 @@ export default async function Home() {
       <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="h-4 w-4 rounded-full bg-amber-500 shadow-md shadow-amber-500/50" />
-              <span className="font-serif text-2xl font-extrabold tracking-tight text-stone-950">
-                Cotswolds<span className="text-amber-500 font-sans"> Pages</span>
-              </span>
+            <div className="flex justify-center mb-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo-light.jpg"
+                alt="Cotswolds Pages"
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <p className="text-stone-850 text-base font-bold leading-relaxed mb-3 max-w-xl mx-auto">
               Cotswolds Pages is a comprehensive Directory to help you find Local Business.
