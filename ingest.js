@@ -120,58 +120,55 @@ async function runIngestion() {
         "boutique hotels Chipping Campden Cotswolds",
         "historic hotels Broadway Cotswolds",
         "luxury hotels Burford Cotswolds",
-        "country house hotels Stow-on-the-Wold",
+        "hotels Stow-on-the-Wold",
         "hotels Bourton-on-the-Water Cotswolds",
-        "B&B bed and breakfast Cheltenham Cotswolds",
+        "hotels Tetbury Gloucestershire",
+        "hotels Winchcombe Cotswolds",
         "boutique hotels Cirencester Cotswolds",
         "hotels Moreton-in-Marsh Cotswolds",
         "hotels Chipping Norton Oxfordshire Cotswolds",
-        "inns and hotels Tetbury Gloucestershire",
+        "guest houses and B&B Woodstock Oxfordshire",
+        "bed and breakfast Lacock Wiltshire",
         
-        // --- PUBS & GASTRO PUBS ---
-        "traditional pubs Bourton-on-the-Water Cotswolds",
-        "gastropubs Broadway Worcestershire Cotswolds",
-        "village pubs Chipping Campden Cotswolds",
-        "country pubs Stow-on-the-Wold Gloucestershire",
-        "pubs Burford Oxfordshire Cotswolds",
-        "gastro pubs Cirencester Gloucestershire",
-        "best pubs Moreton-in-Marsh Cotswolds",
-        "historic coaching inns Cotswolds",
-        
-        // --- RESTAURANTS & DINING ---
+        // --- RESTAURANTS, CAFES & BAKERIES ---
         "restaurants Chipping Campden Cotswolds",
-        "fine dining restaurants Cheltenham Cotswolds",
         "restaurants Burford Oxfordshire",
         "tea rooms Bourton-on-the-Water Cotswolds",
         "restaurants Broadway Cotswolds",
         "restaurants Stow-on-the-Wold Gloucestershire",
         "restaurants Cirencester Gloucestershire",
-        
-        // --- CAFES & BAKERIES ---
+        "restaurants Tetbury Gloucestershire",
+        "restaurants Winchcombe Cotswolds",
+        "cafes and tea rooms Chipping Norton",
+        "bakeries and cafes Painswick Gloucestershire",
+        "bakeries and cafes Woodstock Oxfordshire",
+        "cafes and bakeries Lacock Wiltshire",
         "cafes and coffee shops Cotswolds",
-        "bakeries and tea rooms Chipping Campden",
-        "cafes Bourton-on-the-Water",
         
         // --- SHOPS & RETAIL ---
         "antique shops Stow-on-the-Wold Cotswolds",
-        "art galleries Chipping Campden Cotswolds",
+        "antique shops Tetbury Cotswolds",
         "independent shops Burford Oxfordshire",
         "gift shops Bourton-on-the-Water Cotswolds",
         "farm shops Cotswolds Gloucestershire",
+        "gift shops Broadway Cotswolds",
+        "independent shops Woodstock Oxfordshire",
         
-        // --- SPAS & WELLNESS ---
-        "spas and wellness retreats Cotswolds",
-        "day spas Cheltenham Cotswolds",
-        
-        // --- WEDDING VENUES ---
-        "wedding venues Cotswolds Gloucestershire",
-        "barn wedding venues Cotswolds",
+        // --- SERVICES (Construction, Auto, Beauty) ---
+        "builders and plumbers Cirencester",
+        "carpenters and building services Tetbury",
+        "builders and maintenance Chipping Campden",
+        "car repair and garages Moreton-in-Marsh",
+        "mechanics and auto repair Cirencester",
+        "hair and beauty salons Winchcombe",
+        "wellness spas and beauty salons Tetbury",
+        "wellness retreats and day spas Cotswolds",
         
         // --- ATTRACTIONS & ACTIVITIES ---
         "visitor attractions Cotswolds UK",
-        "gardens and National Trust Cotswolds",
-        "horse riding Cotswolds Gloucestershire",
-        "walking tours Cotswolds"
+        "historic gardens and National Trust Cotswolds",
+        "walking tours Cotswolds",
+        "horse riding stables Cotswolds"
       ],
       maxCrawledPlacesPerSearch: 10,
       language: "en",
