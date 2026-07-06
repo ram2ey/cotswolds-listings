@@ -44,7 +44,7 @@ const DEFAULT_CENTER_LAT = 51.8862;
 const DEFAULT_CENTER_LNG = -1.7588;
 
 const CATEGORIES = [
-  "All Categories",
+  "Choose Category",
   "Construction & Home Maintenance",
   "Health & Beauty",
   "Professional Services",
@@ -54,7 +54,7 @@ const CATEGORIES = [
 ];
 
 const TOWNS = [
-  "All Towns",
+  "Select Town",
   "Broadway",
   "Chipping Campden",
   "Stow-on-the-Wold",
@@ -86,8 +86,8 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   const [error, setError] = useState<string | null>(null);
 
   // Filters state
-  const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
-  const [selectedRegion, setSelectedRegion] = useState<string>("All Towns");
+  const [selectedCategory, setSelectedCategory] = useState<string>("Choose Category");
+  const [selectedRegion, setSelectedRegion] = useState<string>("Select Town");
   const [radius, setRadius] = useState<number>(15); // Default 15 miles radius
   
   // Custom client side filters & search toggles
@@ -187,11 +187,11 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
       const params = new URLSearchParams();
       
-      if (selectedCategory && selectedCategory !== "All Categories") {
+      if (selectedCategory && selectedCategory !== "Choose Category") {
         params.append("category", selectedCategory);
       }
       
-      if (selectedRegion && selectedRegion !== "All Towns") {
+      if (selectedRegion && selectedRegion !== "Select Town") {
         params.append("town", selectedRegion);
       }
 
@@ -231,8 +231,8 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
     if (hideListings) {
       const params = new URLSearchParams();
       if (keyword) params.set('keyword', keyword);
-      if (selectedCategory && selectedCategory !== "All Categories") params.set('category', selectedCategory);
-      if (selectedRegion && selectedRegion !== "All Towns") params.set('town', selectedRegion);
+      if (selectedCategory && selectedCategory !== "Choose Category") params.set('category', selectedCategory);
+      if (selectedRegion && selectedRegion !== "Select Town") params.set('town', selectedRegion);
       router.push(`/search?${params.toString()}`);
     } else {
       fetchListings();
@@ -298,7 +298,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
         {/* Category Dropdown Selector */}
         <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 md:border-r border-stone-105">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-450 shrink-0">In</label>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -312,7 +311,6 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
         {/* Town Dropdown Selector */}
         <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 border-stone-105 md:mr-2">
-          <label className="text-[10px] uppercase font-bold tracking-wider text-stone-450 shrink-0">Near</label>
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
@@ -567,7 +565,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
             const handleTownClick = (townName: string) => {
               if (selectedRegion.toLowerCase() === townName.toLowerCase()) {
-                setSelectedRegion('All Towns');
+                setSelectedRegion('Select Town');
               } else {
                 setSelectedRegion(townName);
               }
