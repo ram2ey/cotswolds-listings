@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Navbar from "../../components/Navbar";
 import { 
   MapPin, 
   Phone, 
@@ -397,24 +398,7 @@ export default function ListingProfile() {
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col justify-between">
       {/* 1. Header Navigation */}
-      <nav className="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <span className="h-3 w-3 rounded-full bg-amber-500 shadow-md shadow-amber-500/50" />
-            <span className="font-serif text-lg font-extrabold tracking-tight text-stone-950">
-              Cotswolds<span className="text-amber-500">.UK</span>
-            </span>
-          </Link>
-          
-          <Link
-            href="/"
-            className="flex items-center gap-1 text-xs font-bold text-stone-600 hover:text-stone-950 transition"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Return to Search
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* 2. Page Content */}
       <main className="flex-1 pb-16">

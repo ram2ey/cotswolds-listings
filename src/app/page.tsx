@@ -1,4 +1,5 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
+import Navbar from "./components/Navbar";
 import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -87,27 +88,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-stone-50 text-stone-900 font-sans scroll-smooth">
       {/* 1. Header/Navigation */}
-      <header className="bg-white border-b border-stone-200 py-4">
-        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="h-3.5 w-3.5 rounded-full bg-amber-500 shadow-md shadow-amber-500/50 animate-pulse" />
-            <span className="font-serif text-xl font-extrabold tracking-tight text-stone-950">
-              Cotswolds<span className="text-amber-500 font-sans">.UK</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-4 text-xs font-bold">
-            <Link href="/search" className="text-stone-605 hover:text-stone-900 transition">Find Businesses</Link>
-            <a href="#how-it-works" className="text-stone-605 hover:text-stone-900 transition hidden sm:inline-block">How it Works</a>
-            <Link
-              href="/listings/submit"
-              className="flex items-center gap-1.5 px-4.5 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer"
-            >
-              <PlusCircle className="h-3.5 w-3.5" />
-              Add Your Listing
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* 2. Hero Section (No search bar, no CTA buttons) */}
       <section 

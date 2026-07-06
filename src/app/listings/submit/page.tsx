@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Navbar from "../../components/Navbar";
 import { 
   ArrowLeft, 
   Store, 
@@ -199,23 +200,7 @@ export default function SubmitListing() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-16">
-      
-      {/* Top Header */}
-      <header className="border-b border-stone-200 bg-white shadow-xs">
-        <div className="max-w-4xl mx-auto px-4 py-6 flex items-center justify-between">
-          <Link 
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 transition"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Directory
-          </Link>
-          <div className="text-right">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-500">Submit Listing</span>
-            <h1 className="font-serif text-base font-bold text-stone-950">Add Your Business</h1>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Container */}
       <main className="max-w-2xl mx-auto px-4 mt-8">
