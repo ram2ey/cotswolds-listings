@@ -18,9 +18,8 @@ interface Listing {
   id: string;
   title: string;
   category: string;
-  sub_region: string;
+  town: string;
   address: string;
-  county: string;
   phone?: string;
   website?: string;
   tier?: 'basic' | 'silver' | 'gold';

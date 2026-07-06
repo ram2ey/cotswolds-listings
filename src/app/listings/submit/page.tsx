@@ -16,13 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-const COUNTIES = [
-  "Gloucestershire",
-  "Oxfordshire",
-  "Warwickshire",
-  "Wiltshire",
-  "Worcestershire"
-];
+
 
 const CATEGORIES = [
   "Hotel & Accommodation",
@@ -85,8 +79,7 @@ export default function SubmitListing() {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [postcode, setPostcode] = useState('');
-  const [county, setCounty] = useState(COUNTIES[0]);
-  const [subRegion, setSubRegion] = useState('');
+  const [town, setTown] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   
@@ -146,8 +139,8 @@ export default function SubmitListing() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !subRegion.trim()) {
-      setError('Please provide a Business Name and Sub-Region/Village.');
+    if (!title.trim() || !town.trim()) {
+      setError('Please provide a Business Name and Town/Village.');
       return;
     }
 
@@ -177,8 +170,7 @@ export default function SubmitListing() {
         whatsapp: null,
         address,
         postcode,
-        county,
-        sub_region: subRegion,
+        town,
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
         imageBase64,
@@ -258,7 +250,7 @@ export default function SubmitListing() {
 
                   setAddress('');
                   setPostcode('');
-                  setSubRegion('');
+                  setTown('');
                   setLatitude('');
                   setLongitude('');
                   setImageBase64(null);
@@ -309,32 +301,17 @@ export default function SubmitListing() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-stone-700">Category <span className="text-rose-500">*</span></label>
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer bg-white"
-                      >
-                        {CATEGORIES.map(cat => (
-                          <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-stone-700">Cotswolds County <span className="text-rose-500">*</span></label>
-                      <select
-                        value={county}
-                        onChange={(e) => setCounty(e.target.value)}
-                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer bg-white"
-                      >
-                        {COUNTIES.map(cnt => (
-                          <option key={cnt} value={cnt}>{cnt}</option>
-                        ))}
-                      </select>
-                    </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-stone-700">Category <span className="text-rose-500">*</span></label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer bg-white"
+                    >
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -358,13 +335,13 @@ export default function SubmitListing() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Village / Sub-Region <span className="text-rose-500">*</span></label>
+                    <label className="text-xs font-bold text-stone-700">Town / Village <span className="text-rose-500">*</span></label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Bourton-on-the-Water"
-                      value={subRegion}
-                      onChange={(e) => setSubRegion(e.target.value)}
+                      value={town}
+                      onChange={(e) => setTown(e.target.value)}
                       className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                     />
                   </div>

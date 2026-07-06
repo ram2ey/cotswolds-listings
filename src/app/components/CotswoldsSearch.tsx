@@ -28,8 +28,7 @@ interface Listing {
   email?: string;
   address: string;
   postcode: string;
-  county: string;
-  sub_region: string;
+  town: string;
   latitude?: number;
   longitude?: number;
   images?: string[];
@@ -54,8 +53,8 @@ const CATEGORIES = [
   "Local Business"
 ];
 
-const SUB_REGIONS = [
-  "All Sub-Regions",
+const TOWNS = [
+  "All Towns",
   "Broadway",
   "Chipping Campden",
   "Stow-on-the-Wold",
@@ -66,12 +65,12 @@ const SUB_REGIONS = [
   "Snowshill"
 ];
 
-const COUNTY_CARDS = [
-  { name: 'Gloucestershire', gradient: 'from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 shadow-amber-900/10' },
-  { name: 'Oxfordshire', gradient: 'from-emerald-800 to-emerald-950 hover:from-emerald-700 hover:to-emerald-900 shadow-emerald-950/10' },
-  { name: 'Warwickshire', gradient: 'from-rose-800 to-rose-950 hover:from-rose-700 hover:to-rose-905 shadow-rose-950/10' },
-  { name: 'Wiltshire', gradient: 'from-slate-700 to-slate-900 hover:from-slate-650 hover:to-slate-800 shadow-slate-950/10' },
-  { name: 'Worcestershire', gradient: 'from-purple-800 to-indigo-950 hover:from-purple-700 hover:to-indigo-900 shadow-purple-950/10' }
+const TOWN_CARDS = [
+  { name: 'Broadway', gradient: 'from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 shadow-amber-900/10' },
+  { name: 'Chipping Campden', gradient: 'from-emerald-800 to-emerald-950 hover:from-emerald-700 hover:to-emerald-900 shadow-emerald-950/10' },
+  { name: 'Stow-on-the-Wold', gradient: 'from-rose-800 to-rose-950 hover:from-rose-700 hover:to-rose-905 shadow-rose-950/10' },
+  { name: 'Bourton-on-the-Water', gradient: 'from-slate-700 to-slate-900 hover:from-slate-650 hover:to-slate-800 shadow-slate-950/10' },
+  { name: 'Cirencester', gradient: 'from-purple-800 to-indigo-950 hover:from-purple-700 hover:to-indigo-900 shadow-purple-950/10' }
 ];
 
 interface CotswoldsSearchProps {
@@ -88,7 +87,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
   // Filters state
   const [selectedCategory, setSelectedCategory] = useState<string>("All Categories");
-  const [selectedRegion, setSelectedRegion] = useState<string>("All Sub-Regions");
+  const [selectedRegion, setSelectedRegion] = useState<string>("All Towns");
   const [radius, setRadius] = useState<number>(15); // Default 15 miles radius
   
   // Custom client side filters & search toggles
@@ -105,10 +104,10 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
     setVisibleCount(9);
   }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWebsite, sortBy]);
 
-  // Synchronize state with URL search parameters (triggered by clicking home category/county cards)
+  // Synchronize state with URL search parameters (triggered by clicking home category/town cards)
   useEffect(() => {
     const categoryQuery = searchParams.get('category');
-    const regionQuery = searchParams.get('region');
+    const regionQuery = searchParams.get('town') || searchParams.get('region');
     const keywordQuery = searchParams.get('keyword');
 
     if (categoryQuery) {
@@ -192,8 +191,8 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
         params.append("category", selectedCategory);
       }
       
-      if (selectedRegion && selectedRegion !== "All Sub-Regions") {
-        params.append("region", selectedRegion);
+      if (selectedRegion && selectedRegion !== "All Towns") {
+        params.append("town", selectedRegion);
       }
 
       // If user has shared location OR we are falling back to default center
@@ -233,7 +232,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
       const params = new URLSearchParams();
       if (keyword) params.set('keyword', keyword);
       if (selectedCategory && selectedCategory !== "All Categories") params.set('category', selectedCategory);
-      if (selectedRegion && selectedRegion !== "All Sub-Regions") params.set('region', selectedRegion);
+      if (selectedRegion && selectedRegion !== "All Towns") params.set('town', selectedRegion);
       router.push(`/search?${params.toString()}`);
     } else {
       fetchListings();
@@ -247,7 +246,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
       const matchTitle = item.title.toLowerCase().includes(q);
       const matchDesc = item.description?.toLowerCase().includes(q) || false;
       const matchCat = item.category?.toLowerCase().includes(q) || false;
-      const matchRegion = item.sub_region?.toLowerCase().includes(q) || false;
+      const matchRegion = item.town?.toLowerCase().includes(q) || false;
       if (!matchTitle && !matchDesc && !matchCat && !matchRegion) {
         return false;
       }
@@ -311,7 +310,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
           </select>
         </div>
 
-        {/* Region Dropdown Selector */}
+        {/* Town Dropdown Selector */}
         <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 border-stone-105 md:mr-2">
           <label className="text-[10px] uppercase font-bold tracking-wider text-stone-450 shrink-0">Near</label>
           <select
@@ -319,7 +318,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
             onChange={(e) => setSelectedRegion(e.target.value)}
             className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
           >
-            {SUB_REGIONS.map(reg => (
+            {TOWNS.map(reg => (
               <option key={reg} value={reg} className="text-stone-900">{reg}</option>
             ))}
           </select>
@@ -541,7 +540,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                           <div className="mt-4 pt-3.5 border-t border-stone-100 flex items-center justify-between gap-2.5">
                             <span className="text-[10px] text-stone-400 font-medium flex items-center gap-0.5 truncate">
                               <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{item.sub_region || 'Cotswolds'}</span>
+                              <span className="truncate">{item.town || 'Cotswolds'}</span>
                             </span>
                             <Link
                               href={`/listings/${item.slug}`}
@@ -559,18 +558,18 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
             );
           })()}
 
-          {/* 3. Explore by County grid select */}
+          {/* 3. Explore by Town grid select */}
           {(() => {
-            const getCountyCount = (countyName: string) => {
+            const getTownCount = (townName: string) => {
               const matches = allListings.length ? allListings : listings;
-              return matches.filter((item) => item.county?.toLowerCase() === countyName.toLowerCase()).length;
+              return matches.filter((item) => item.town?.toLowerCase() === townName.toLowerCase()).length;
             };
 
-            const handleCountyClick = (countyName: string) => {
-              if (selectedRegion.toLowerCase() === countyName.toLowerCase()) {
-                setSelectedRegion('All Sub-Regions');
+            const handleTownClick = (townName: string) => {
+              if (selectedRegion.toLowerCase() === townName.toLowerCase()) {
+                setSelectedRegion('All Towns');
               } else {
-                setSelectedRegion(countyName);
+                setSelectedRegion(townName);
               }
 
               // Smooth scroll to directory results list
@@ -586,38 +585,38 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
               <div className="mb-12 border-t border-stone-200 pt-10">
                 <div className="mb-6">
                   <h3 className="text-xl font-bold tracking-tight text-stone-900 font-serif">
-                    Explore by County
+                    Explore by Town
                   </h3>
-                  <p className="text-xs text-stone-505 mt-0.5">
-                    Select a local county to search approved listings and historic villages.
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    Select a local town to search approved listings and historic villages.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                  {COUNTY_CARDS.map((county) => {
-                    const count = getCountyCount(county.name);
-                    const isActive = selectedRegion.toLowerCase() === county.name.toLowerCase();
+                  {TOWN_CARDS.map((town) => {
+                    const count = getTownCount(town.name);
+                    const isActive = selectedRegion.toLowerCase() === town.name.toLowerCase();
 
                     return (
                       <button
-                        key={county.name}
-                        onClick={() => handleCountyClick(county.name)}
-                        className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group bg-gradient-to-br ${county.gradient} text-white ${
+                        key={town.name}
+                        onClick={() => handleTownClick(town.name)}
+                        className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group bg-gradient-to-br ${town.gradient} text-white ${
                           isActive ? 'ring-4 ring-amber-500 ring-offset-2 scale-[1.01]' : ''
                         }`}
                       >
                         {/* Decorative background character */}
                         <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500">
-                          {county.name[0]}
+                          {town.name[0]}
                         </span>
 
                         <span className="bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider w-fit">
-                          {county.name === 'Gloucestershire' ? 'Glos' : county.name === 'Oxfordshire' ? 'Oxon' : county.name === 'Warwickshire' ? 'Warks' : county.name === 'Worcestershire' ? 'Worcs' : 'Wilts'}
+                          {town.name === 'Broadway' ? 'Bway' : town.name === 'Chipping Campden' ? 'Campden' : town.name === 'Stow-on-the-Wold' ? 'Stow' : town.name === 'Bourton-on-the-Water' ? 'Bourton' : town.name === 'Cirencester' ? 'Ciren' : 'Town'}
                         </span>
 
                         <div>
                           <h4 className="font-serif font-bold text-base leading-tight group-hover:text-amber-300 transition-colors">
-                            {county.name}
+                            {town.name}
                           </h4>
                           <p className="text-[11px] text-white/70 mt-1">
                             {count} {count === 1 ? 'Listing' : 'Listings'}
@@ -707,7 +706,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                             <span className="text-[9px] font-extrabold uppercase tracking-wider text-amber-705 block">{item.category}</span>
                             <span className="text-[10px] text-stone-400 font-semibold flex items-center gap-0.5">
                               <MapPin className="h-3 w-3 shrink-0" />
-                              <span className="truncate max-w-28">{item.sub_region || 'Cotswolds'}</span>
+                              <span className="truncate max-w-28">{item.town || 'Cotswolds'}</span>
                             </span>
                           </div>
 
@@ -732,13 +731,13 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                           )}
 
                           <p className="text-xs text-stone-550 mt-2 line-clamp-3 leading-relaxed">
-                            {item.description || "Local business listings in the Cotswolds sub-regions."}
+                            {item.description || "Local business listings in the Cotswolds towns."}
                           </p>
                         </div>
 
                         <div className="mt-5 pt-3.5 border-t border-stone-100/60 flex flex-col gap-2">
                           <div className="flex flex-col gap-1 text-[10px] text-stone-400 font-medium">
-                            <span className="truncate">{item.address || `${item.sub_region}, Cotswolds`}</span>
+                            <span className="truncate">{item.address || `${item.town}, Cotswolds`}</span>
                             {item.phone && <span>Phone: {item.phone}</span>}
                           </div>
 

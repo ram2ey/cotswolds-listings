@@ -194,7 +194,7 @@ export default async function Home() {
                     <div className="mt-4 pt-3 border-t border-stone-200/60 flex flex-col gap-1.5 text-[10px] text-stone-400 font-medium">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0" />
-                        <span className="truncate">{item.address || `${item.sub_region}, Cotswolds`}</span>
+                        <span className="truncate">{item.address || `${item.town}, Cotswolds`}</span>
                       </span>
                       {item.phone && (
                         <span className="flex items-center gap-1 text-stone-605">

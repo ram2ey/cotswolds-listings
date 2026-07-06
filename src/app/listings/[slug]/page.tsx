@@ -39,8 +39,7 @@ interface Listing {
   email?: string;
   address: string;
   postcode: string;
-  county: string;
-  sub_region: string;
+  town: string;
   latitude?: number;
   longitude?: number;
   images: string[];
@@ -82,8 +81,7 @@ const MOCK_LISTINGS: Listing[] = [
     email: "info@lygonarmshotel.co.uk",
     address: "High Street, Broadway",
     postcode: "WR12 7DU",
-    county: "Worcestershire",
-    sub_region: "Broadway",
+    town: "Broadway",
     latitude: 52.0366,
     longitude: -1.8552,
     images: ["/hero-bridge.jpg"],
@@ -139,8 +137,7 @@ const MOCK_LISTINGS: Listing[] = [
     email: "info@thewildrabbit.co.uk",
     address: "Church Street, Kingham",
     postcode: "OX7 6YA",
-    county: "Oxfordshire",
-    sub_region: "Kingham",
+    town: "Kingham",
     latitude: 51.9103,
     longitude: -1.6148,
     images: ["/hero-bridge.jpg"],
@@ -196,8 +193,7 @@ const MOCK_LISTINGS: Listing[] = [
     email: "reservations@horseandgroom.info",
     address: "Bourton-on-the-Hill, Moreton-in-Marsh",
     postcode: "GL56 9AQ",
-    county: "Gloucestershire",
-    sub_region: "Moreton-in-Marsh",
+    town: "Moreton-in-Marsh",
     latitude: 51.9967,
     longitude: -1.7483,
     images: [],
@@ -215,8 +211,7 @@ const MOCK_LISTINGS: Listing[] = [
     whatsapp: "",
     address: "Awkward Hill, Bibury, Cirencester",
     postcode: "GL7 5ND",
-    county: "Gloucestershire",
-    sub_region: "Bibury",
+    town: "Bibury",
     latitude: 51.7583,
     longitude: -1.8319,
     images: [],
@@ -234,8 +229,7 @@ const MOCK_LISTINGS: Listing[] = [
     whatsapp: "",
     address: "Middlecombe Hill, Broadway",
     postcode: "WR12 7LB",
-    county: "Worcestershire",
-    sub_region: "Broadway",
+    town: "Broadway",
     latitude: 52.0244,
     longitude: -1.8322,
     images: [],
@@ -484,7 +478,7 @@ export default function ListingProfile() {
                 
                 <p className="flex items-center gap-1.5 text-sm text-stone-300 font-medium">
                   <MapPin className="h-4 w-4 text-amber-500" />
-                  {listing.address}, {listing.sub_region} ({listing.county})
+                  {listing.address}, {listing.town}
                 </p>
               </div>
 
@@ -518,7 +512,7 @@ export default function ListingProfile() {
                   About Business
                 </h3>
                 <p className="text-stone-600 text-sm leading-relaxed whitespace-pre-line">
-                  {listing.description || `Welcome to ${listing.title}. This verified business is located in the lovely Cotswolds county of ${listing.county}, offering high-quality hospitality and services to residents and tourists alike.`}
+                  {listing.description || `Welcome to ${listing.title}. This verified business is located in the lovely Cotswolds town of ${listing.town}, offering high-quality hospitality and services to residents and tourists alike.`}
                 </p>
               </div>
 

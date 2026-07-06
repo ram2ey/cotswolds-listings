@@ -37,8 +37,7 @@ function getMockListings(
       email: "info@lygonarmshotel.co.uk",
       address: "High St, Broadway",
       postcode: "WR12 7DU",
-      county: "Worcestershire",
-      sub_region: "Broadway",
+      town: "Broadway",
       latitude: 52.0366,
       longitude: -1.8558,
       images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"],
@@ -58,8 +57,7 @@ function getMockListings(
       email: "welcome@thewildrabbit.co.uk",
       address: "Church St, Kingham",
       postcode: "OX7 6YA",
-      county: "Oxfordshire",
-      sub_region: "Kingham",
+      town: "Kingham",
       latitude: 51.9083,
       longitude: -1.6146,
       images: ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"],
@@ -79,8 +77,7 @@ function getMockListings(
       email: "info@porch-house.co.uk",
       address: "Digbeth St, Stow-on-the-Wold",
       postcode: "GL54 1BN",
-      county: "Gloucestershire",
-      sub_region: "Stow-on-the-Wold",
+      town: "Stow-on-the-Wold",
       latitude: 51.9298,
       longitude: -1.7247,
       images: ["https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80"],
@@ -97,10 +94,7 @@ function getMockListings(
     }
     if (
       region &&
-      !(
-        listing.sub_region.toLowerCase().includes(region.toLowerCase()) ||
-        listing.county.toLowerCase().includes(region.toLowerCase())
-      )
+      !listing.town.toLowerCase().includes(region.toLowerCase())
     ) {
       return false;
     }
@@ -114,7 +108,7 @@ function getMockListings(
 }
 
 // Fallback querying using Supabase table select if database function is missing
-async function fallbackTableQuery(supabase: any, category: string | null, region: string | null) {
+async function fallbackTableQuery(supabase: any, category: string | null, town: string | null) {
   let query = supabase
     .from('listings')
     .select('*')
@@ -124,8 +118,8 @@ async function fallbackTableQuery(supabase: any, category: string | null, region
     query = query.ilike('category', `%${category}%`);
   }
 
-  if (region) {
-    query = query.or(`sub_region.ilike.*${region}*,county.ilike.*${region}*`);
+  if (town) {
+    query = query.ilike('town', `%${town}%`);
   }
 
   const { data, error } = await query;
@@ -139,7 +133,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const category = searchParams.get('category');
-    const region = searchParams.get('region');
+    const town = searchParams.get('town') || searchParams.get('region');
     const latStr = searchParams.get('lat');
     const lngStr = searchParams.get('lng');
     const radiusStr = searchParams.get('radius');
@@ -153,7 +147,7 @@ export async function GET(request: NextRequest) {
 
     // Use mock data if keys are unconfigured or pointing to placeholders
     if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-supabase-url-here')) {
-      const mockResult = getMockListings(category, region, lat, lng, radius);
+      const mockResult = getMockListings(category, town, lat, lng, radius);
       
       // Sort results (gold -> silver -> basic)
       const tierOrder: Record<string, number> = { gold: 1, silver: 2, basic: 3 };
@@ -181,12 +175,12 @@ export async function GET(request: NextRequest) {
         user_lng: lng,
         radius_miles: radius || 10.0,
         filter_category: category || null,
-        filter_region: region || null
+        filter_town: town || null
       });
 
       if (error) {
         console.warn('Supabase RPC search_listings_near failed (falling back to standard query):', error.message);
-        listings = await fallbackTableQuery(supabase, category, region);
+        listings = await fallbackTableQuery(supabase, category, town);
         // Manual distance attachment for standard results
         listings = listings.map((l: any) => ({
           ...l,
@@ -197,7 +191,7 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // Normal text-based query without spatial search
-      listings = await fallbackTableQuery(supabase, category, region);
+      listings = await fallbackTableQuery(supabase, category, town);
     }
 
     // Explicit sorting: bubble 'gold' listings to the top, then 'silver', then 'basic'.
@@ -238,20 +232,19 @@ export async function POST(request: NextRequest) {
       whatsapp,
       address,
       postcode,
-      county,
-      sub_region,
+      town,
       latitude,
       longitude,
       imageBase64,
       imageType
     } = payload;
 
-    if (!title || !county || !sub_region) {
-      return NextResponse.json({ error: 'Missing required fields (Title, County, Sub-Region)' }, { status: 400 });
+    if (!title || !town) {
+      return NextResponse.json({ error: 'Missing required fields (Title, Town/Village)' }, { status: 400 });
     }
 
-    // Generate slug using title and sub-region
-    const slug = (title + '-' + sub_region)
+    // Generate slug using title and town
+    const slug = (title + '-' + town)
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '')
@@ -303,8 +296,7 @@ export async function POST(request: NextRequest) {
           whatsapp: whatsapp || null,
           address: address || '',
           postcode: postcode || '',
-          county,
-          sub_region,
+          town,
           latitude: latitude ? parseFloat(latitude) : null,
           longitude: longitude ? parseFloat(longitude) : null,
           images: imageUrls,

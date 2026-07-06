@@ -122,13 +122,13 @@ export async function POST(request: NextRequest) {
       
       // In Mock Mode, generate listing info for fallback
       if (id === 'mock-1') {
-        listing = { title: "The Lygon Arms", category: "Hotel & Accommodation", sub_region: "Broadway", website: "https://www.lygonarmshotel.co.uk", tier: "gold" };
+        listing = { title: "The Lygon Arms", category: "Hotel & Accommodation", town: "Broadway", website: "https://www.lygonarmshotel.co.uk", tier: "gold" };
       } else if (id === 'mock-2') {
-        listing = { title: "The Wild Rabbit", category: "Pub & Restaurant", sub_region: "Kingham", website: "https://thewildrabbit.co.uk", tier: "gold" };
+        listing = { title: "The Wild Rabbit", category: "Pub & Restaurant", town: "Kingham", website: "https://thewildrabbit.co.uk", tier: "gold" };
       } else if (id === 'mock-3') {
-        listing = { title: "The Porch House", category: "Pub & Restaurant", sub_region: "Stow-on-the-Wold", website: "https://www.porch-house.co.uk", tier: "silver" };
+        listing = { title: "The Porch House", category: "Pub & Restaurant", town: "Stow-on-the-Wold", website: "https://www.porch-house.co.uk", tier: "silver" };
       } else {
-        listing = { title: "Cclaimed Premium Business", category: "Local Business", sub_region: "Cotswolds", website: "", tier: "silver" };
+        listing = { title: "Cclaimed Premium Business", category: "Local Business", town: "Cotswolds", website: "", tier: "silver" };
       }
     } else {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     // If website is blank or mock is active, run mock scrape
     if (isMockApify || !listing.website || listing.website.includes('your-supabase-url')) {
       console.log(`Running mock scrape for: ${listing.title}`);
-      premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
+      premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
       // Add simulated delay to mimic network request
       await new Promise(resolve => setTimeout(resolve, 1500));
     } else {
@@ -180,10 +180,10 @@ export async function POST(request: NextRequest) {
           .join('\n\n')
           .slice(0, 10000); // Grab first 10k chars to fit context safely
 
-        premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.sub_region);
+        premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.town);
       } catch (err: any) {
         console.error("Deep website crawl failed. Falling back to structured AI mock:", err.message);
-        premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
+        premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
       }
     }
 

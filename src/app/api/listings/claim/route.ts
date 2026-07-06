@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
         title: "Arlington Row Cottages",
         slug: "arlington-row-cottages-bibury",
         category: "Historic Landmark",
-        sub_region: "Bibury",
+        town: "Bibury",
         website,
         tier
       };
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
     // Run Scrape, AI enrichment & Premium Photo Extraction
     if (isMockApify || !website || website.includes('example.com')) {
       console.log(`Running mock scrape for Claim Flow: ${listing.title}`);
-      premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
+      premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
       
       // Seed high-quality mock unsplash gallery photos for offline testing
       premiumImages = [
@@ -226,17 +226,17 @@ export async function POST(request: NextRequest) {
           .join('\n\n')
           .slice(0, 10000); // Grab first 10k chars for safety
 
-        premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.sub_region);
+        premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.town);
       } catch (err: any) {
         console.error("Deep website crawl failed in claim, falling back to mock:", err.message);
-        premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.sub_region);
+        premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
       }
 
       // 2. Perform live Google Maps photo extraction on-demand (only at the time of claim)
       try {
         const mapsQuery = listing.google_place_id 
           ? `https://www.google.com/maps/place/?q=place_id:${listing.google_place_id}`
-          : `${listing.title}, ${listing.sub_region || 'Cotswolds'}, UK`;
+          : `${listing.title}, ${listing.town || 'Cotswolds'}, UK`;
 
         console.log(`Running Apify Google Maps Scraper actor for Gold partner photos: ${mapsQuery}`);
         const mapsRun = await client.actor("compass/crawler-google-places").call({

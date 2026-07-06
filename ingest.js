@@ -25,24 +25,7 @@ function generateSlug(title, village) {
     .replace(/^-+|-+$/g, '');     // Trim leading/trailing hyphens
 }
 
-// Help function to detect county based on address text
-function detectCounty(address = '', city = '') {
-  const fullText = (address + ' ' + city).toLowerCase();
-  if (fullText.includes('oxford') || fullText.includes('burford') || fullText.includes('chipping norton') || fullText.includes('woodstock')) {
-    return 'Oxfordshire';
-  }
-  if (fullText.includes('warwick') || fullText.includes('stratford') || fullText.includes('shipston')) {
-    return 'Warwickshire';
-  }
-  if (fullText.includes('wilt') || fullText.includes('castle combe') || fullText.includes('chippenham')) {
-    return 'Wiltshire';
-  }
-  if (fullText.includes('worcester') || fullText.includes('broadway')) {
-    return 'Worcestershire';
-  }
-  // Default to Gloucestershire (which covers the majority of the Cotswolds area)
-  return 'Gloucestershire';
-}
+
 
 // Help function to standardize raw Google Maps categories to match frontend dropdown filters
 function mapCategory(rawCategory = '') {
@@ -350,9 +333,6 @@ async function runIngestion() {
       }
     }
 
-    // Determine Cotswolds County
-    const county = detectCounty(item.address, item.city);
-
     // Build database mapping
     const dbListing = {
       title: title,
@@ -364,8 +344,7 @@ async function runIngestion() {
       whatsapp: item.whatsapp || null,
       address: item.address || '',
       postcode: item.postalCode || item.zip || '',
-      county: county,
-      sub_region: village,
+      town: village,
       latitude: lat,
       longitude: lng,
       images: imageUrls,

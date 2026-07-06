@@ -7,9 +7,8 @@ let mockPendingListings = [
     id: "mock-pending-1",
     title: "The Cotswold Lavender Farm",
     category: "Attraction / Farm Shop",
-    sub_region: "Snowshill",
     address: "Hill Barn Farm, Snowshill, Broadway WR12 7JY",
-    county: "Gloucestershire",
+    town: "Snowshill",
     tier: "basic",
     is_approved: false
   },
@@ -17,9 +16,8 @@ let mockPendingListings = [
     id: "mock-pending-2",
     title: "Cotswold Gin Pantry",
     category: "Distillery / Boutique Store",
-    sub_region: "Broadway",
     address: "High St, Broadway WR12 7DP",
-    county: "Worcestershire",
+    town: "Broadway",
     tier: "basic",
     is_approved: false
   },
@@ -27,9 +25,8 @@ let mockPendingListings = [
     id: "mock-pending-3",
     title: "The Cotswold Toy Museum",
     category: "Attraction / Museum",
-    sub_region: "Stow-on-the-Wold",
     address: "The Square, Stow-on-the-Wold GL54 1AB",
-    county: "Gloucestershire",
+    town: "Stow-on-the-Wold",
     tier: "basic",
     is_approved: false
   }
@@ -40,9 +37,8 @@ let mockApprovedListings = [
     id: "mock-1",
     title: "The Lygon Arms",
     category: "Hotel & Accommodation",
-    sub_region: "Broadway",
     address: "High St, Broadway WR12 7DU",
-    county: "Worcestershire",
+    town: "Broadway",
     tier: "gold",
     is_approved: true,
     website: "https://www.lygonarmshotel.co.uk"
@@ -51,9 +47,8 @@ let mockApprovedListings = [
     id: "mock-2",
     title: "The Wild Rabbit",
     category: "Pub & Restaurant",
-    sub_region: "Kingham",
     address: "Church St, Kingham, Chipping Norton OX7 6YA",
-    county: "Oxfordshire",
+    town: "Kingham",
     tier: "gold",
     is_approved: true,
     website: "https://thewildrabbit.co.uk"
@@ -62,9 +57,8 @@ let mockApprovedListings = [
     id: "mock-3",
     title: "The Porch House",
     category: "Pub & Restaurant",
-    sub_region: "Stow-on-the-Wold",
     address: "Digbeth St, Stow-on-the-Wold GL54 1BN",
-    county: "Gloucestershire",
+    town: "Stow-on-the-Wold",
     tier: "silver",
     is_approved: true,
     website: "https://www.porch-house.co.uk"

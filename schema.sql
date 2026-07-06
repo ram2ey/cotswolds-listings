@@ -6,19 +6,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Drop existing table (CASCADE removes any attached triggers/indexes automatically)
 DROP TABLE IF EXISTS listings CASCADE;
-DROP TYPE IF EXISTS cotswolds_county CASCADE;
 DROP TYPE IF EXISTS membership_tier CASCADE;
-
--- Create custom enum for Cotswolds counties. 
--- Cotswolds spans across Gloucestershire, Oxfordshire, and Warwickshire primarily, 
--- but also touches Wiltshire and Worcestershire.
-CREATE TYPE cotswolds_county AS ENUM (
-  'Gloucestershire', 
-  'Oxfordshire', 
-  'Warwickshire',
-  'Wiltshire',
-  'Worcestershire'
-);
 
 -- Create custom enum for membership tiers.
 CREATE TYPE membership_tier AS ENUM (
@@ -45,8 +33,7 @@ CREATE TABLE listings (
   -- Location handling
   address TEXT,
   postcode TEXT,
-  county cotswolds_county NOT NULL,
-  sub_region TEXT, -- Custom sub-region for Cotswolds (e.g. 'North Cotswolds', 'Chipping Campden')
+  town TEXT NOT NULL, -- Town/village for Cotswolds (e.g. 'Broadway', 'Chipping Campden')
   
   -- Geolocation fields
   latitude DOUBLE PRECISION,
@@ -71,7 +58,7 @@ CREATE TABLE listings (
 );
 
 -- Indexing for fast search and geographical queries
-CREATE INDEX IF NOT EXISTS listings_county_idx ON listings(county);
+CREATE INDEX IF NOT EXISTS listings_town_idx ON listings(town);
 CREATE INDEX IF NOT EXISTS listings_category_idx ON listings(category);
 CREATE INDEX IF NOT EXISTS listings_is_approved_idx ON listings(is_approved);
 CREATE INDEX IF NOT EXISTS listings_geom_idx ON listings USING GIST (geom);
@@ -118,7 +105,7 @@ CREATE OR REPLACE FUNCTION search_listings_near(
   user_lng DOUBLE PRECISION,
   radius_miles DOUBLE PRECISION,
   filter_category TEXT DEFAULT NULL,
-  filter_region TEXT DEFAULT NULL
+  filter_town TEXT DEFAULT NULL
 )
 RETURNS TABLE (
   id UUID,
@@ -132,8 +119,7 @@ RETURNS TABLE (
   email TEXT,
   address TEXT,
   postcode TEXT,
-  county cotswolds_county,
-  sub_region TEXT,
+  town TEXT,
   latitude DOUBLE PRECISION,
   longitude DOUBLE PRECISION,
   images TEXT[],
@@ -161,8 +147,7 @@ BEGIN
     l.email,
     l.address,
     l.postcode,
-    l.county,
-    l.sub_region,
+    l.town,
     l.latitude,
     l.longitude,
     l.images,
@@ -176,7 +161,7 @@ BEGIN
     l.is_approved = true
     AND (radius_miles IS NULL OR ST_DWithin(l.geom::geography, user_geom::geography, radius_meters))
     AND (filter_category IS NULL OR filter_category = '' OR l.category ILIKE '%' || filter_category || '%')
-    AND (filter_region IS NULL OR filter_region = '' OR l.sub_region ILIKE '%' || filter_region || '%' OR l.county::text ILIKE '%' || filter_region || '%')
+    AND (filter_town IS NULL OR filter_town = '' OR l.town ILIKE '%' || filter_town || '%')
   ORDER BY 
     CASE 
       WHEN l.tier = 'gold' THEN 1
