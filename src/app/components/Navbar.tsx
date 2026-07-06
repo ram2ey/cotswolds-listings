@@ -82,7 +82,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className={`block px-3 py-3 rounded-xl text-sm font-bold transition ${
                     isActive
-                      ? "bg-amber-55 text-amber-600"
+                      ? "bg-amber-50 text-amber-600"
                       : "text-stone-600 hover:bg-stone-50 hover:text-stone-950"
                   }`}
                 >

@@ -262,7 +262,7 @@ export default function AdminDashboard() {
 
             {authError && (
               <p className="text-xs text-rose-400 font-semibold text-center flex items-center gap-1 justify-center">
-                <AlertTriangle className="h-3.5 w-3.5 text-rose-550" />
+                <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
                 {authError}
               </p>
             )}

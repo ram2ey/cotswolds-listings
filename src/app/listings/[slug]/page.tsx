@@ -762,7 +762,7 @@ export default function ListingProfile() {
                   <div className="flex items-start gap-3 w-full px-4 py-3 bg-stone-50 border border-stone-100 rounded-xl text-xs text-stone-600">
                     <MapPin className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-[10px] text-stone-455 uppercase font-bold tracking-wider">Location</p>
+                      <p className="text-[10px] text-stone-500 uppercase font-bold tracking-wider">Location</p>
                       <p className="text-xs font-medium mt-0.5 leading-snug">{listing.address}</p>
                       <p className="text-xs font-bold text-stone-800 mt-0.5">{listing.postcode}</p>
                     </div>
@@ -791,7 +791,7 @@ export default function ListingProfile() {
                       const hours = item.hours || item.hoursText || '';
                       return (
                         <div key={idx} className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-stone-550">{day}</span>
+                          <span className="font-semibold text-stone-500">{day}</span>
                           <span className="font-medium text-stone-800 text-right">{hours}</span>
                         </div>
                       );

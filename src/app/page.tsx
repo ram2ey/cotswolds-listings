@@ -333,7 +333,7 @@ export default async function Home() {
             <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
               <ShopIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">All Cotswolds - All In One Place</h3>
-              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
                 Your fast-track to the best local businesses. We bring top-rated services, shops, and restaurants together to make your search quick and effortless.
               </p>
             </div>
@@ -342,7 +342,7 @@ export default async function Home() {
             <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
               <SearchSlidersIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Exploring the Cotswolds Made Easy</h3>
-              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
                 We have made it easier for you to explore businesses in your community.
               </p>
             </div>
@@ -351,7 +351,7 @@ export default async function Home() {
             <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
               <SupportIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Supporting Local Businesses</h3>
-              <p className="text-[11px] text-stone-550 leading-relaxed pr-2">
+              <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
                 Whether you’re a new startup or an established company, our platform helps you stand out. Boosting your visibility, showcasing your offerings and reaching new customers Online and Off-line
               </p>
             </div>

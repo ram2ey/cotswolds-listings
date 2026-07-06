@@ -749,7 +749,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                             </div>
                           )}
 
-                          <p className="text-xs text-stone-550 mt-2 line-clamp-3 leading-relaxed">
+                          <p className="text-xs text-stone-500 mt-2 line-clamp-3 leading-relaxed">
                             {item.description || "Local business listings in the Cotswolds towns."}
                           </p>
                         </div>
