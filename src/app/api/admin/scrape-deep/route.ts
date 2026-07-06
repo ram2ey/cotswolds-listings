@@ -122,13 +122,13 @@ export async function POST(request: NextRequest) {
       
       // In Mock Mode, generate listing info for fallback
       if (id === 'mock-1') {
-        listing = { title: "The Lygon Arms", category: "Hotel & Accommodation", town: "Broadway", website: "https://www.lygonarmshotel.co.uk", tier: "gold" };
+        listing = { title: "Cotswolds Builders Ltd", category: "Construction & Home Maintenance", town: "Broadway", website: "https://www.cotswoldbuilders.example.com", tier: "gold" };
       } else if (id === 'mock-2') {
-        listing = { title: "The Wild Rabbit", category: "Pub & Restaurant", town: "Kingham", website: "https://thewildrabbit.co.uk", tier: "gold" };
+        listing = { title: "Cotswold Tea Room", category: "Restaurants & Cafés", town: "Kingham", website: "https://cotswoldtearoom.example.com", tier: "gold" };
       } else if (id === 'mock-3') {
-        listing = { title: "The Porch House", category: "Pub & Restaurant", town: "Stow-on-the-Wold", website: "https://www.porch-house.co.uk", tier: "silver" };
+        listing = { title: "Broadway Hotel & Suites", category: "Hotels & Motels", town: "Stow-on-the-Wold", website: "https://broadwayhotelsuites.example.com", tier: "silver" };
       } else {
-        listing = { title: "Cclaimed Premium Business", category: "Local Business", town: "Cotswolds", website: "", tier: "silver" };
+        listing = { title: "Claimed Premium Business", category: "Professional Services", town: "Cotswolds", website: "", tier: "silver" };
       }
     } else {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);

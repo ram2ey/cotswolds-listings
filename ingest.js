@@ -31,22 +31,25 @@ function generateSlug(title, village) {
 function mapCategory(rawCategory = '') {
   const cat = rawCategory.toLowerCase();
   
-  if (cat.includes('hotel') || cat.includes('accommodation') || cat.includes('bed & breakfast') || cat.includes('bed and breakfast') || cat.includes('b&b') || cat.includes('guesthouse') || cat.includes('lodging') || cat.includes('hostel')) {
-    return 'Hotel & Accommodation';
+  if (cat.includes('builder') || cat.includes('construction') || cat.includes('plumber') || cat.includes('carpenter') || cat.includes('roofer') || cat.includes('electrician') || cat.includes('handyman') || cat.includes('gardener') || cat.includes('landscap') || cat.includes('painter') || cat.includes('decorator') || cat.includes('architect')) {
+    return 'Construction & Home Maintenance';
   }
-  if (cat.includes('gastropub') || cat.includes('inn')) {
-    return 'Gastropub & Inn';
+  if (cat.includes('salon') || cat.includes('beauty') || cat.includes('hair') || cat.includes('nail') || cat.includes('spa') || cat.includes('clinic') || cat.includes('dentist') || cat.includes('doctor') || cat.includes('medical') || cat.includes('chiropract') || cat.includes('massage') || cat.includes('health') || cat.includes('wellness')) {
+    return 'Health & Beauty';
   }
-  if (cat.includes('pub') || cat.includes('bar') || cat.includes('restaurant') || cat.includes('cafe') || cat.includes('coffee') || cat.includes('bakery') || cat.includes('tea room') || cat.includes('diner') || cat.includes('grill') || cat.includes('steakhouse') || cat.includes('bistro')) {
-    return 'Pub & Restaurant';
+  if (cat.includes('accountant') || cat.includes('lawyer') || cat.includes('solicitor') || cat.includes('consultant') || cat.includes('marketing') || cat.includes('agency') || cat.includes('finance') || cat.includes('adviser') || cat.includes('real estate') || cat.includes('estate agent')) {
+    return 'Professional Services';
   }
-  if (cat.includes('shop') || cat.includes('store') || cat.includes('boutique') || cat.includes('gallery') || cat.includes('antique') || cat.includes('market') || cat.includes('florist') || cat.includes('bookstore')) {
-    return 'Boutique Shop';
+  if (cat.includes('mechanic') || cat.includes('garage') || cat.includes('auto') || cat.includes('car repair') || cat.includes('dealer') || cat.includes('tyre') || cat.includes('car wash')) {
+    return 'Car & Automotive';
   }
-  if (cat.includes('attraction') || cat.includes('tour') || cat.includes('museum') || cat.includes('garden') || cat.includes('landmark') || cat.includes('park') || cat.includes('castle') || cat.includes('riding') || cat.includes('nature') || cat.includes('activity')) {
-    return 'Attraction & Tour';
+  if (cat.includes('hotel') || cat.includes('motel') || cat.includes('guesthouse') || cat.includes('bed & breakfast') || cat.includes('b&b') || cat.includes('lodging') || cat.includes('hostel')) {
+    return 'Hotels & Motels';
   }
-  return 'Local Business';
+  if (cat.includes('restaurant') || cat.includes('cafe') || cat.includes('coffee') || cat.includes('bakery') || cat.includes('tea room') || cat.includes('diner') || cat.includes('bistro') || cat.includes('grill') || cat.includes('steakhouse')) {
+    return 'Restaurants & Cafés';
+  }
+  return 'Professional Services'; // Fallback for general local services
 }
 
 // Download image binary as Buffer
@@ -287,6 +290,22 @@ async function runIngestion() {
     const title = item.title || item.name;
     if (!title) {
       console.log("Skipping listing due to missing title name.");
+      continue;
+    }
+
+    // Exclude pubs, bars, breweries, wine shops, distilleries, and inns promoting drinking
+    const rawCategory = (item.categoryName || item.subTitle || '').toLowerCase();
+    const cleanTitle = title.toLowerCase();
+    if (
+      rawCategory.includes('pub') || rawCategory.includes('bar') || rawCategory.includes('tavern') ||
+      rawCategory.includes('brewery') || rawCategory.includes('vineyard') || rawCategory.includes('distillery') ||
+      rawCategory.includes('wine') || rawCategory.includes('liquor') || rawCategory.includes('nightclub') ||
+      rawCategory.includes('club') ||
+      cleanTitle.includes(' pub') || cleanTitle.includes('bar ') || cleanTitle.includes('tavern') ||
+      cleanTitle.includes('brewery') || cleanTitle.includes('vineyard') || cleanTitle.includes('distillery') ||
+      cleanTitle.includes(' arms') || cleanTitle.includes(' inn')
+    ) {
+      console.log(`Skipping pub/alcohol-promoting business: "${title}"`);
       continue;
     }
     

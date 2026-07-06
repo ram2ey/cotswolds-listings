@@ -19,13 +19,12 @@ import {
 
 
 const CATEGORIES = [
-  "Hotel & Accommodation",
-  "Pub & Restaurant",
-  "Gastropub & Inn",
-  "Café & Bakery",
-  "Boutique Shop",
-  "Attraction & Tour",
-  "Local Business"
+  "Construction & Home Maintenance",
+  "Health & Beauty",
+  "Professional Services",
+  "Car & Automotive",
+  "Hotels & Motels",
+  "Restaurants & Cafés"
 ];
 
 // Helper function to resize uploaded image cover on the client side

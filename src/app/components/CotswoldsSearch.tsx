@@ -45,12 +45,12 @@ const DEFAULT_CENTER_LNG = -1.7588;
 
 const CATEGORIES = [
   "All Categories",
-  "Hotel & Accommodation",
-  "Pub & Restaurant",
-  "Gastropub & Inn",
-  "Boutique Shop",
-  "Attraction & Tour",
-  "Local Business"
+  "Construction & Home Maintenance",
+  "Health & Beauty",
+  "Professional Services",
+  "Car & Automotive",
+  "Hotels & Motels",
+  "Restaurants & Cafés"
 ];
 
 const TOWNS = [

@@ -1,5 +1,5 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Store, Compass, HelpCircle, ShieldCheck, Zap } from "lucide-react";
+import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -13,36 +13,36 @@ async function getFeaturedListings() {
     return [
       {
         id: "mock-1",
-        title: "The Lygon Arms",
-        slug: "the-lygon-arms-broadway",
-        description: "Historic 16th-century coaching inn offering luxury rooms and fine dining.",
-        category: "Hotel & Accommodation",
+        title: "Cotswolds Builders Ltd",
+        slug: "cotswolds-builders-ltd-broadway",
+        description: "Professional local building contractors offering roofing, carpentry, extensions, and complete home maintenance services.",
+        category: "Construction & Home Maintenance",
         address: "High St, Broadway",
         phone: "+44 1386 852255",
         rating: 4.8,
-        images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"]
+        images: ["https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80"]
       },
       {
         id: "mock-2",
-        title: "The Wild Rabbit",
-        slug: "the-wild-rabbit-kingham",
-        description: "Chic gastropub serving local organic ingredients in a cozy setting in Kingham.",
-        category: "Gastropub & Inn",
+        title: "Cotswold Wellness Spa",
+        slug: "cotswold-wellness-spa-kingham",
+        description: "Luxury health and beauty treatments, hair styling, skin clinics, massages, and holistic therapy spa in the heart of Kingham.",
+        category: "Health & Beauty",
         address: "Church St, Kingham",
         phone: "+44 1608 658389",
         rating: 4.7,
-        images: ["https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80"]
+        images: ["https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80"]
       },
       {
         id: "mock-3",
-        title: "The Porch House",
-        slug: "the-porch-house-stow-on-the-wold",
-        description: "England's oldest inn dating back to 947 AD, serving classic British food.",
-        category: "Gastropub & Inn",
-        address: "Digbeth St, Stow-on-the-Wold",
+        title: "Broadway Hotel & Suites",
+        slug: "broadway-hotel-suites-broadway",
+        description: "Beautiful boutique hotel offering clean suites, scenic gardens, and high-quality room service for visitors and tourists.",
+        category: "Hotels & Motels",
+        address: "Digbeth St, Broadway",
         phone: "+44 1451 870048",
         rating: 4.6,
-        images: ["https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80"]
+        images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80"]
       }
     ];
   }
@@ -68,12 +68,12 @@ export default async function Home() {
   const featured = await getFeaturedListings();
 
   const categories = [
-    { name: "Hotel & Accommodation", icon: Hotel, desc: "Boutique stays, estates & historic inns", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80" },
-    { name: "Pub & Restaurant", icon: Utensils, desc: "Gastropubs, tea rooms & fine dining", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80" },
-    { name: "Gastropub & Inn", icon: Hotel, desc: "Traditional coaching inns & taverns", img: "https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=500&q=80" },
-    { name: "Boutique Shop", icon: Store, desc: "Artisans, antiques & local farm shops", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=500&q=80" },
-    { name: "Attraction & Tour", icon: Compass, desc: "Landmarks, manor estates & walking trails", img: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=500&q=80" },
-    { name: "Local Business", icon: HelpCircle, desc: "Services, builders, salons & trades", img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=500&q=80" }
+    { name: "Construction & Home Maintenance", icon: Wrench, desc: "Plumbers, carpenters, builders & tradesmen", img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=500&q=80" },
+    { name: "Health & Beauty", icon: Sparkles, desc: "Salons, wellness spas & local medical care", img: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=500&q=80" },
+    { name: "Professional Services", icon: Briefcase, desc: "Accountants, lawyers & digital consultants", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=500&q=80" },
+    { name: "Car & Automotive", icon: Car, desc: "Mechanics, body shops, dealers & servicing", img: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=500&q=80" },
+    { name: "Hotels & Motels", icon: Hotel, desc: "Verified guest houses, stays & motels", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80" },
+    { name: "Restaurants & Cafés", icon: Utensils, desc: "Local restaurants, cafes & bakeries", img: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=500&q=80" }
   ];
 
   const locations = [

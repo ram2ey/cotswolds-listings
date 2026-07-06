@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 let mockPendingListings = [
   {
     id: "mock-pending-1",
-    title: "The Cotswold Lavender Farm",
-    category: "Attraction / Farm Shop",
+    title: "Cotswolds Carpenters",
+    category: "Construction & Home Maintenance",
     address: "Hill Barn Farm, Snowshill, Broadway WR12 7JY",
     town: "Snowshill",
     tier: "basic",
@@ -14,8 +14,8 @@ let mockPendingListings = [
   },
   {
     id: "mock-pending-2",
-    title: "Cotswold Gin Pantry",
-    category: "Distillery / Boutique Store",
+    title: "Broadway Garage",
+    category: "Car & Automotive",
     address: "High St, Broadway WR12 7DP",
     town: "Broadway",
     tier: "basic",
@@ -23,8 +23,8 @@ let mockPendingListings = [
   },
   {
     id: "mock-pending-3",
-    title: "The Cotswold Toy Museum",
-    category: "Attraction / Museum",
+    title: "Kingham Dental Care",
+    category: "Health & Beauty",
     address: "The Square, Stow-on-the-Wold GL54 1AB",
     town: "Stow-on-the-Wold",
     tier: "basic",
@@ -35,33 +35,33 @@ let mockPendingListings = [
 let mockApprovedListings = [
   {
     id: "mock-1",
-    title: "The Lygon Arms",
-    category: "Hotel & Accommodation",
+    title: "Cotswolds Builders Ltd",
+    category: "Construction & Home Maintenance",
     address: "High St, Broadway WR12 7DU",
     town: "Broadway",
     tier: "gold",
     is_approved: true,
-    website: "https://www.lygonarmshotel.co.uk"
+    website: "https://www.cotswoldbuilders.example.com"
   },
   {
     id: "mock-2",
-    title: "The Wild Rabbit",
-    category: "Pub & Restaurant",
+    title: "Cotswold Tea Room",
+    category: "Restaurants & Cafés",
     address: "Church St, Kingham, Chipping Norton OX7 6YA",
     town: "Kingham",
     tier: "gold",
     is_approved: true,
-    website: "https://thewildrabbit.co.uk"
+    website: "https://cotswoldtearoom.example.com"
   },
   {
     id: "mock-3",
-    title: "The Porch House",
-    category: "Pub & Restaurant",
+    title: "Broadway Hotel & Suites",
+    category: "Hotels & Motels",
     address: "Digbeth St, Stow-on-the-Wold GL54 1BN",
     town: "Stow-on-the-Wold",
     tier: "silver",
     is_approved: true,
-    website: "https://www.porch-house.co.uk"
+    website: "https://broadwayhotelsuites.example.com"
   }
 ];
 

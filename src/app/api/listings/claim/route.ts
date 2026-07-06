@@ -159,9 +159,9 @@ export async function POST(request: NextRequest) {
       // Simulate database lookup
       listing = {
         id,
-        title: "Arlington Row Cottages",
-        slug: "arlington-row-cottages-bibury",
-        category: "Historic Landmark",
+        title: "Arlington Hotel",
+        slug: "arlington-hotel-bibury",
+        category: "Hotels & Motels",
         town: "Bibury",
         website,
         tier

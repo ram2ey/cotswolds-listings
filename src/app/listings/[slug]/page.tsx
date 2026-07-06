@@ -71,14 +71,14 @@ interface Listing {
 const MOCK_LISTINGS: Listing[] = [
   {
     id: "mock-1",
-    title: "The Lygon Arms",
-    slug: "the-lygon-arms-broadway",
-    description: "A historic 16th-century coaching inn situated in the heart of Broadway village. Retaining historic charm with modern luxury, featuring wood-panelled dining rooms, cozy open fireplaces, a vaulted ceiling restaurant, and a full-service spa with indoor pool. Ideal for dining, weekend getaways, and exploring the wider Worcestershire area.",
-    category: "Hotel & Accommodation",
+    title: "Broadway Hotel & Suites",
+    slug: "broadway-hotel-suites-broadway",
+    description: "A premium boutique hotel situated in the heart of Broadway village, offering historic charm with modern luxury. Features cozy suites, peaceful gardens, high-quality room service, and is conveniently located near the local highlights of Broadway.",
+    category: "Hotels & Motels",
     phone: "+44 1386 852255",
-    website: "https://www.lygonarmshotel.co.uk",
+    website: "https://broadwayhotelsuites.example.com",
     whatsapp: "441386852255",
-    email: "info@lygonarmshotel.co.uk",
+    email: "info@broadwayhotelsuites.example.com",
     address: "High Street, Broadway",
     postcode: "WR12 7DU",
     town: "Broadway",
@@ -89,7 +89,7 @@ const MOCK_LISTINGS: Listing[] = [
     is_approved: true,
     rating: 4.8,
     reviews_count: 245,
-    tags: ["Historic", "Luxury Spa", "Indoor Pool"],
+    tags: ["Hotel", "Suites", "Gardens"],
     opening_hours: [
       { "day": "Monday", "hours": "Open 24 hours" },
       { "day": "Tuesday", "hours": "Open 24 hours" },
@@ -101,40 +101,36 @@ const MOCK_LISTINGS: Listing[] = [
     ],
     premium_metadata: {
       highlights: [
-        "16th-Century coaching inn history",
-        "Full luxury spa & heated indoor pool",
-        "Fine dining in a vaulted hall"
+        "Spacious luxury suites",
+        "Scenic private guest gardens",
+        "Valet guest parking"
       ],
       faqs: [
         {
-          question: "Is the spa open to non-residents?",
-          answer: "Yes, spa day passes and treatments are available for non-residents, though booking in advance is highly recommended."
-        },
-        {
-          question: "Are dogs allowed in rooms?",
-          answer: "Absolutely! We provide dog beds, treats, and designated walking maps. Dogs are also welcome in our Lygon Bar & Grill."
+          question: "Is room service available 24/7?",
+          answer: "Yes, room service is available 24 hours a day for all suite bookings."
         }
       ],
       specialSection: {
-        room_types: ["Classic Double", "Splendid Suite", "Master Suite"],
-        amenities_list: ["Heated Indoor Pool", "Luxury Spa", "Vaulted Dining Hall", "Valet Parking"]
+        room_types: ["Junior Suite", "Executive Suite", "Grand Penthouse"],
+        amenities_list: ["Room Service", "Private Gardens", "High-speed Wi-Fi"]
       },
       socialLinks: {
-        instagram: "https://instagram.com/cotswolds_thelygonarms",
-        facebook: "https://facebook.com/cotswolds_thelygonarms"
+        instagram: "https://instagram.com/broadway_hotel_suites",
+        facebook: "https://facebook.com/broadway_hotel_suites"
       }
     }
   },
   {
     id: "mock-2",
-    title: "The Wild Rabbit",
-    slug: "the-wild-rabbit-kingham",
-    description: "A chic, award-winning gastro-pub with rooms, featuring organic, locally-sourced Cotswolds dining. Located in the beautiful village of Kingham, offering a contemporary take on the traditional English pub with exposed stone walls, open fireplaces, and handcrafted furniture. The kitchen creates seasonal menus matching premium local ingredients.",
-    category: "Pub & Restaurant",
+    title: "Cotswold Tea Room",
+    slug: "cotswold-tea-room-kingham",
+    description: "A traditional Cotswold tea room serving hand-baked pastries, hot fresh teas, and lunch menus. Features stone walls, comfortable seating, and a selection of local jams and products. Standard ingredients are organic and sourced from local farms.",
+    category: "Restaurants & Cafés",
     phone: "+44 1608 658389",
-    website: "https://thewildrabbit.co.uk",
+    website: "https://cotswoldtearoom.example.com",
     whatsapp: "441608658389",
-    email: "info@thewildrabbit.co.uk",
+    email: "welcome@cotswoldtearoom.example.com",
     address: "Church Street, Kingham",
     postcode: "OX7 6YA",
     town: "Kingham",
@@ -145,52 +141,48 @@ const MOCK_LISTINGS: Listing[] = [
     is_approved: true,
     rating: 4.7,
     reviews_count: 198,
-    tags: ["Organic Food", "Gastro Pub", "Open Fireplace"],
+    tags: ["Tea", "Cakes", "Lunch"],
     opening_hours: [
-      { "day": "Monday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Tuesday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Wednesday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Thursday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Friday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Saturday", "hours": "12:00 PM - 11:00 PM" },
-      { "day": "Sunday", "hours": "12:00 PM - 10:30 PM" }
+      { "day": "Monday", "hours": "09:00 AM - 05:00 PM" },
+      { "day": "Tuesday", "hours": "09:00 AM - 05:00 PM" },
+      { "day": "Wednesday", "hours": "09:00 AM - 05:00 PM" },
+      { "day": "Thursday", "hours": "09:00 AM - 05:00 PM" },
+      { "day": "Friday", "hours": "09:00 AM - 05:00 PM" },
+      { "day": "Saturday", "hours": "09:00 AM - 06:00 PM" },
+      { "day": "Sunday", "hours": "10:00 AM - 04:00 PM" }
     ],
     premium_metadata: {
       highlights: [
-        "Award-winning organic menus",
-        "Cozy fireplaces & handcrafted design",
-        "Premium rooms in scenic Kingham"
+        "Loose-leaf organic teas",
+        "Fresh daily baked pastries",
+        "Scenic outdoor courtyard seating"
       ],
       faqs: [
         {
-          question: "Do I need to book the dining room?",
-          answer: "Yes, our dining room fills up fast, especially on weekends. Bar seating is available on a first-come, first-served basis."
-        },
-        {
-          question: "Where do your ingredients come from?",
-          answer: "Most of our organic ingredients are sourced directly from Daylesford Organic Farm, located just a few miles away."
+          question: "Do you offer gluten-free options?",
+          answer: "Yes, we have a daily selection of gluten-free cakes and bread alternatives."
         }
       ],
       specialSection: {
-        price_range: "£££ - ££££",
-        signature_dishes: ["Daylesford Organic Ribeye", "Seared Cornish Turbot", "Warm Plum & Almond Tart"]
+        price_range: "££ - £££",
+        signature_dishes: ["Loose-leaf Earl Grey", "Warm Scones with Clotted Cream", "Traditional Cream Tea"]
       },
       socialLinks: {
-        instagram: "https://instagram.com/cotswolds_thewildrabbit",
-        facebook: "https://facebook.com/cotswolds_thewildrabbit"
+        instagram: "https://instagram.com/cotswold_tea_room",
+        facebook: "https://facebook.com/cotswold_tea_room"
       }
     }
   },
   {
     id: "mock-3",
-    title: "Horse & Groom",
-    slug: "horse-groom-bourton-on-the-hill",
-    description: "An award-winning 16th-century Georgian inn situated on a hill with spectacular views of the Cotswolds countryside. Famous for its excellent food, cask ales, and friendly hospitality. Offers five individually designed ensuite double bedrooms, a garden terrace, and fine dining using local Gloucestershire game and produce.",
-    category: "Pub & Inn",
+    title: "Cotswolds Builders Ltd",
+    slug: "cotswolds-builders-ltd-broadway",
+    description: "An award-winning building contractor offering extensions, roofing, and general property maintenance in Moreton-in-Marsh. Known for premium stonework and carpentry.",
+    category: "Construction & Home Maintenance",
     phone: "+44 1386 700413",
-    website: "https://www.horseandgroom.info",
+    website: "https://www.cotswoldbuilders.example.com",
     whatsapp: "",
-    email: "reservations@horseandgroom.info",
+    email: "info@cotswoldbuilders.example.com",
     address: "Bourton-on-the-Hill, Moreton-in-Marsh",
     postcode: "GL56 9AQ",
     town: "Moreton-in-Marsh",
@@ -202,12 +194,12 @@ const MOCK_LISTINGS: Listing[] = [
   },
   {
     id: "mock-4",
-    title: "Arlington Row Cottages",
-    slug: "arlington-row-bibury",
-    description: "A highly photographed row of historic 14th-century stone cottages, originally built as a monastic wool store and converted into weavers' cottages in the 17th century. Located in the picturesque village of Bibury beside the River Coln. Managed as a historic landmark and rental property, representing classic Cotswolds heritage.",
-    category: "Historic Landmark",
+    title: "Cotswold Wellness Spa",
+    slug: "cotswold-wellness-spa-bibury",
+    description: "A luxury health and beauty destination in Bibury. Offering massage treatments, skin care, facials, manicure and wellness packages in a serene riverside setting.",
+    category: "Health & Beauty",
     phone: "+44 1451 820259",
-    website: "https://www.nationaltrust.org.uk/bibury",
+    website: "https://cotswoldwellnessspa.example.com",
     whatsapp: "",
     address: "Awkward Hill, Bibury, Cirencester",
     postcode: "GL7 5ND",
@@ -220,12 +212,12 @@ const MOCK_LISTINGS: Listing[] = [
   },
   {
     id: "mock-5",
-    title: "Broadway Tower",
-    slug: "broadway-tower-broadway",
-    description: "An iconic late-18th-century Gothic Folly tower standing on Broadway Hill, the second-highest point in the Cotswolds. Designed by Capability Brown and built for Lady Coventry. Offers panoramic views of up to 16 counties, a historical exhibition, a local deer park, a contemporary visitor cafe, and scenic walking trails.",
-    category: "Landmark & Cafe",
+    title: "Cotswold Auto Care",
+    slug: "cotswold-auto-care-broadway",
+    description: "Your local automotive specialists for MOT testing, engine diagnostics, vehicle repairs, and regular maintenance servicing. Offering prompt, reliable service.",
+    category: "Car & Automotive",
     phone: "+44 1386 852390",
-    website: "https://broadwaytower.co.uk",
+    website: "https://cotswoldautocare.example.com",
     whatsapp: "",
     address: "Middlecombe Hill, Broadway",
     postcode: "WR12 7LB",
