@@ -631,7 +631,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                         <div className={`absolute inset-0 bg-gradient-to-br ${town.gradient} group-hover:opacity-95 transition-opacity duration-300`} />
 
                         {/* Decorative background character */}
-                        <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500 relative z-10">
+                        <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500 z-10">
                           {town.name[0]}
                         </span>
 
