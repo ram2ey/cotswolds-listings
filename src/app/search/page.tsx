@@ -1,5 +1,6 @@
 import CotswoldsSearch from "../components/CotswoldsSearch";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { Suspense } from "react";
 
 export const metadata = {
@@ -35,21 +36,7 @@ export default function SearchPage() {
       </main>
 
       {/* Footer Section */}
-      <footer className="bg-white border-t border-stone-200 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo-light.jpg"
-              alt="Cotswolds Pages"
-              className="h-10 w-auto object-contain"
-            />
-          </div>
-          <div className="text-xs text-stone-400">
-            <p>© {new Date().getFullYear()} Cotswolds Pages. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer theme="light" />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car, Layers, Heart } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -382,55 +383,7 @@ export default async function Home() {
       </section>
 
       {/* 9. Footer Section */}
-      <footer className="bg-white border-t border-stone-200 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12 text-left">
-          {/* Column 1: Branding */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo-light.jpg"
-                alt="Cotswolds Pages"
-                className="h-11 w-auto object-contain"
-              />
-            </div>
-            <p className="text-xs text-stone-505 leading-relaxed pr-6">
-              A high-performance digital business directory service. Connecting visitors and locals to premium boutique hotels, coaching inns, and artisan shops.
-            </p>
-          </div>
-
-          {/* Column 2: Navigation */}
-          <div>
-            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Navigation</h4>
-            <ul className="space-y-2 text-xs font-semibold text-stone-605">
-              <li><a href="#featured" className="hover:text-stone-950 transition">Featured Venues</a></li>
-              <li><a href="#how-it-works" className="hover:text-stone-950 transition">How it Works</a></li>
-              <li><Link href="/search" className="hover:text-stone-950 transition">Search Directory</Link></li>
-              <li><Link href="/listings/submit" className="hover:text-stone-950 transition">List Your Business</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Contact */}
-          <div>
-            <h4 className="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 mb-4">Contact Us</h4>
-            <ul className="space-y-2 text-xs text-stone-505 leading-relaxed">
-              <li>Email: <a href="mailto:info@cotswoldspages.co.uk" className="font-semibold text-stone-700 hover:text-stone-950">info@cotswoldspages.co.uk</a></li>
-              <li>Website: <a href="https://cotswoldspages.co.uk" target="_blank" rel="noopener noreferrer" className="font-semibold text-stone-700 hover:text-stone-950">cotswoldspages.co.uk</a></li>
-              <li className="pt-2 flex gap-3 text-stone-400">
-                <a href="#" className="hover:text-stone-750">Facebook</a>
-                <span>•</span>
-                <a href="#" className="hover:text-stone-750">Instagram</a>
-                <span>•</span>
-                <a href="#" className="hover:text-stone-750">YouTube</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-100 mt-12 pt-8 text-center text-[10px] text-stone-400">
-          <p>© {new Date().getFullYear()} Cotswolds Pages. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer theme="light" />
     </div>
   );
 }
