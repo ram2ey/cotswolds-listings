@@ -146,7 +146,7 @@ export default async function Home() {
       >
         <div className="absolute inset-0 bg-stone-950/70 backdrop-blur-[1px]" />
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center md:text-left">
-          <div className="max-w-3xl">
+          <div className="max-w-3xl animate-fade-in-up">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight font-serif text-white leading-tight">
               All Cotswolds - <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">All In One Place</span>
@@ -185,7 +185,7 @@ export default async function Home() {
               {featured.map((item: any) => (
                 <div 
                   key={item.id} 
-                  className="bg-stone-50 rounded-2xl overflow-hidden border border-stone-200/80 transition-all flex flex-col justify-between shadow-xs hover:shadow-md"
+                  className="bg-stone-50 rounded-2xl overflow-hidden border border-stone-200/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col justify-between shadow-xs"
                 >
                   <Link href={`/listings/${item.slug}`} className="relative block aspect-video w-full bg-stone-200">
                     {item.images?.[0] ? (
@@ -263,7 +263,7 @@ export default async function Home() {
                 <img 
                   src={cat.img} 
                   alt={cat.name}
-                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-103 transition-transform duration-500" 
+                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/25 to-transparent group-hover:via-stone-950/35 transition-all" />
                 <div className="relative z-10">
@@ -295,7 +295,7 @@ export default async function Home() {
                 <img 
                   src={loc.img} 
                   alt={loc.name}
-                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-103 transition-transform duration-500" 
+                  className="absolute inset-0 object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950/85 via-stone-950/25 to-transparent group-hover:via-stone-950/35 transition-all" />
                 <div className="relative z-10">

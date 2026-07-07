@@ -14,7 +14,7 @@ export default function ContactPage() {
       <Navbar />
 
       <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-xl mx-auto mb-12">
+        <div className="text-center max-w-xl mx-auto mb-12 animate-fade-in-up">
           <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Get in Touch</span>
           <h1 className="text-3xl font-serif font-black text-stone-950">Contact Us</h1>
           <p className="text-stone-500 text-xs mt-2 leading-relaxed">
@@ -22,7 +22,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mt-6 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           {/* Contact Details Panel */}
           <div className="lg:col-span-4 bg-white rounded-2xl border border-stone-200 p-8 shadow-xs flex flex-col gap-6">
             <h3 className="text-lg font-serif font-bold text-stone-900 mb-2">Our Channels</h3>

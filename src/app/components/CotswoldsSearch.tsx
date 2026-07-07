@@ -636,10 +636,10 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                   return (
                     <div
                       key={item.id}
-                      className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-355 transform hover:-translate-y-1.5 ${
+                      className={`bg-white rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-md animate-fade-in-up ${
                         isGold 
                           ? 'border-2 border-amber-500 shadow-lg shadow-amber-500/5 hover:shadow-amber-500/15 ring-4 ring-amber-500/5' 
-                          : 'border border-stone-200 hover:border-stone-300 hover:shadow-xs'
+                          : 'border border-stone-200 hover:border-stone-300'
                       }`}
                     >
                       {/* Image & Card Head */}
