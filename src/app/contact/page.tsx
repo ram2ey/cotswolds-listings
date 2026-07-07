@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ContactForm from "../components/ContactForm";
-import { Mail, MapPin, MessageSquare } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 
 export const metadata = {
   title: "Contact Us | Cotswolds Pages Directory",
@@ -38,16 +38,6 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4 border-t border-stone-100 pt-6">
-              <div className="p-2.5 bg-amber-500/10 text-amber-700 rounded-xl shrink-0">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-500">Headquarters</h4>
-                <p className="text-sm font-semibold text-stone-900 mt-1">Broadway, Worcestershire</p>
-                <p className="text-[10px] text-stone-400 mt-0.5">The Heart of the Cotswolds</p>
-              </div>
-            </div>
             
             <div className="flex items-start gap-4 border-t border-stone-100 pt-6">
               <div className="p-2.5 bg-amber-500/10 text-amber-700 rounded-xl shrink-0">
