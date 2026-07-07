@@ -13,7 +13,8 @@ import {
   Star,
   MessageSquare,
   AlertCircle,
-  Loader2
+  Loader2,
+  ChevronDown
 } from 'lucide-react';
 
 interface Listing {
@@ -312,29 +313,31 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
         </div>
 
         {/* Category Dropdown Selector */}
-        <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 md:border-r border-stone-105">
+        <div className="relative w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 md:border-r border-stone-200">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
+            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer appearance-none pr-8"
           >
             {CATEGORIES.map(cat => (
               <option key={cat} value={cat} className="text-stone-900">{cat}</option>
             ))}
           </select>
+          <ChevronDown className="absolute right-3 h-4 w-4 text-stone-400 pointer-events-none" />
         </div>
 
         {/* Town Dropdown Selector */}
-        <div className="w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 border-stone-105 md:mr-2">
+        <div className="relative w-full md:w-56 flex items-center gap-2 px-3 py-2 md:py-0 border-b md:border-b-0 border-stone-250 md:mr-2">
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer"
+            className="w-full text-sm bg-transparent text-stone-850 focus:outline-hidden cursor-pointer appearance-none pr-8"
           >
             {dynamicTowns.map(reg => (
               <option key={reg} value={reg} className="text-stone-900">{reg}</option>
             ))}
           </select>
+          <ChevronDown className="absolute right-3 h-4 w-4 text-stone-400 pointer-events-none" />
         </div>
 
         {/* CTA Button Actions */}
@@ -657,6 +660,26 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
           {/* 4. Main Results Section Wrapper */}
           <div id="directory-results" className="scroll-mt-10 border-t border-stone-200 pt-10">
+            {selectedRegion && selectedRegion !== "Select Town" && (
+              <div className="mb-6 flex items-center gap-1.5 text-xs text-stone-500">
+                <button
+                  onClick={() => {
+                    setSelectedRegion("Select Town");
+                    if (typeof window !== 'undefined') {
+                      const params = new URLSearchParams(window.location.search);
+                      params.delete('town');
+                      params.delete('region');
+                      router.push(`/search?${params.toString()}`);
+                    }
+                  }}
+                  className="hover:text-stone-900 transition-colors font-medium underline cursor-pointer"
+                >
+                  Select Town
+                </button>
+                <span>&gt;</span>
+                <span className="font-semibold text-stone-900">{selectedRegion}</span>
+              </div>
+            )}
             {/* 2. Loading State */}
             {loading && (
               <div className="flex flex-col items-center justify-center py-16 gap-3">

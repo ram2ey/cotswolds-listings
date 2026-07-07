@@ -40,7 +40,7 @@ function getMockListings(
       town: "Broadway",
       latitude: 52.0366,
       longitude: -1.8558,
-      images: ["https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80"],
+      images: ["/construction-maintenance.jpg"],
       tier: "gold",
       is_approved: true,
       distance_miles: lat && lng ? calculateDistance(lat, lng, 52.0366, -1.8558) : undefined

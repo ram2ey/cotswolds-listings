@@ -12,6 +12,7 @@ export default function Navbar() {
   const navLinks = [
     { name: "Find Local Business", href: "/search" },
     { name: "How It Works", href: "/#how-it-works" },
+    { name: "Contact Us", href: "/contact" },
   ];
 
   return (

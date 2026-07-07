@@ -22,7 +22,7 @@ async function getFeaturedListings() {
         address: "High St, Broadway",
         phone: "+44 1386 852255",
         rating: 4.8,
-        images: ["https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80"]
+        images: ["/construction-maintenance.jpg"]
       },
       {
         id: "mock-2",
@@ -33,7 +33,7 @@ async function getFeaturedListings() {
         address: "Church St, Kingham",
         phone: "+44 1608 658389",
         rating: 4.7,
-        images: ["https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=800&q=80"]
+        images: ["/health-beauty.jpg"]
       },
       {
         id: "mock-3",
@@ -118,10 +118,10 @@ export default async function Home() {
   const featured = await getFeaturedListings();
 
   const categories = [
-    { name: "Construction & Home Maintenance", icon: Wrench, desc: "Plumbers, carpenters, builders & tradesmen", img: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=500&q=80" },
-    { name: "Health & Beauty", icon: Sparkles, desc: "Salons, wellness spas & local medical care", img: "https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=500&q=80" },
+    { name: "Construction & Home Maintenance", icon: Wrench, desc: "Plumbers, carpenters, builders & tradesmen", img: "/construction-maintenance.jpg" },
+    { name: "Health & Beauty", icon: Sparkles, desc: "Salons, wellness spas & local medical care", img: "/health-beauty.jpg" },
     { name: "Professional Services", icon: Briefcase, desc: "Accountants, lawyers & digital consultants", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=500&q=80" },
-    { name: "Car & Automotive", icon: Car, desc: "Mechanics, body shops, dealers & servicing", img: "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?auto=format&fit=crop&w=500&q=80" },
+    { name: "Car & Automotive", icon: Car, desc: "Mechanics, body shops, dealers & servicing", img: "/car-automotive.jpg" },
     { name: "Hotels & Motels", icon: Hotel, desc: "Verified guest houses, stays & motels", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=500&q=80" },
     { name: "Restaurants & Cafés", icon: Utensils, desc: "Local restaurants, cafes & bakeries", img: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80" }
   ];
@@ -310,7 +310,7 @@ export default async function Home() {
 
 
       {/* 7. How it Works Section */}
-      <section id="how-it-works" className="py-16 bg-white border-b border-stone-200">
+      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="flex justify-center mb-6">

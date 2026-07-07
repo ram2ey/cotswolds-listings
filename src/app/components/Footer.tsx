@@ -58,9 +58,6 @@ export default function Footer({ theme = "light" }: FooterProps) {
             <p className={`text-xs ${mutedTextClass} leading-relaxed pr-2`}>
               A premium, high-performance local business directory. Connecting visitors and residents to boutique hotels, local tradesmen, coaching inns, and artisan shops across the Cotswold region.
             </p>
-            <div className="flex items-center gap-1.5 text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-400 px-3 py-1 rounded-lg w-fit font-bold border border-amber-500/20">
-              Verified Cotswolds Partner
-            </div>
           </div>
 
           {/* Column 2: Discover Villages */}
@@ -114,9 +111,9 @@ export default function Footer({ theme = "light" }: FooterProps) {
                 </Link>
               </li>
               <li>
-                <a href="mailto:info@cotswoldspages.co.uk" className={`${linkHoverClass} transition`}>
-                  info@cotswoldspages.co.uk
-                </a>
+                <Link href="/contact" className={`${linkHoverClass} transition`}>
+                  Contact Us
+                </Link>
               </li>
             </ul>
             <div className={`pt-3 border-t ${dividerClass} flex gap-3 text-[11px] text-stone-400`}>
@@ -172,7 +169,7 @@ export default function Footer({ theme = "light" }: FooterProps) {
         {/* Bottom copyright & Scroll To Top bar */}
         <div className={`border-t ${dividerClass} mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6`}>
           <div className="text-[10px] text-stone-400 text-center sm:text-left">
-            <p>© {new Date().getFullYear()} Cotswolds Pages. All rights reserved. Connecting local communities online and offline.</p>
+            <p>© {new Date().getFullYear()} Ovance International. All rights reserved.</p>
           </div>
 
           {/* Back to Top button */}
