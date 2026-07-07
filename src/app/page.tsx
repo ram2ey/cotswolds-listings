@@ -126,11 +126,11 @@ export default async function Home() {
   ];
 
   const locations = [
-    { name: 'Broadway', desc: 'Gateway views & Broadway Tower', img: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Bourton-on-the-Water', desc: 'Little Venice of the Cotswolds', img: 'https://images.unsplash.com/photo-1543872084-c7bd3822856f?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Stow-on-the-Wold', desc: 'Historic market squares & portals', img: 'https://images.unsplash.com/photo-1627662235999-5f2122bc13d5?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Burford', desc: 'Iconic sloping streets & old bridges', img: 'https://images.unsplash.com/photo-1601918774946-25832a4be0d6?auto=format&fit=crop&w=500&q=80' },
-    { name: 'Cirencester', desc: 'Roman capital & historic markets', img: 'https://images.unsplash.com/photo-1576085898323-218337e3e43c?auto=format&fit=crop&w=500&q=80' }
+    { name: 'Broadway', desc: 'Gateway views & Broadway Tower', img: '/broadway.jpeg' },
+    { name: 'Bourton-on-the-Water', desc: 'Little Venice of the Cotswolds', img: '/bourton-on-the-water.jpeg' },
+    { name: 'Stow-on-the-Wold', desc: 'Historic market squares & portals', img: '/stow-on-the-wold.jpeg' },
+    { name: 'Chipping Campden', desc: 'Historic market town & limestone streets', img: '/chipping-campden.jpeg' },
+    { name: 'Cirencester', desc: 'Roman capital & historic markets', img: '/cirencester.jpeg' }
   ];
 
   return (

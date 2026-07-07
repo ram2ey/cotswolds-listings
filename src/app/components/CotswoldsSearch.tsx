@@ -66,11 +66,11 @@ const TOWNS = [
 ];
 
 const TOWN_CARDS = [
-  { name: 'Broadway', gradient: 'from-amber-700 to-amber-900 hover:from-amber-600 hover:to-amber-800 shadow-amber-900/10' },
-  { name: 'Chipping Campden', gradient: 'from-emerald-800 to-emerald-950 hover:from-emerald-700 hover:to-emerald-900 shadow-emerald-950/10' },
-  { name: 'Stow-on-the-Wold', gradient: 'from-rose-800 to-rose-950 hover:from-rose-700 hover:to-rose-905 shadow-rose-950/10' },
-  { name: 'Bourton-on-the-Water', gradient: 'from-slate-700 to-slate-900 hover:from-slate-650 hover:to-slate-800 shadow-slate-950/10' },
-  { name: 'Cirencester', gradient: 'from-purple-800 to-indigo-950 hover:from-purple-700 hover:to-indigo-900 shadow-purple-950/10' }
+  { name: 'Broadway', img: '/broadway.jpeg', gradient: 'from-amber-800/80 to-amber-950/90' },
+  { name: 'Chipping Campden', img: '/chipping-campden.jpeg', gradient: 'from-emerald-800/80 to-emerald-950/90' },
+  { name: 'Stow-on-the-Wold', img: '/stow-on-the-wold.jpeg', gradient: 'from-rose-800/80 to-rose-950/90' },
+  { name: 'Bourton-on-the-Water', img: '/bourton-on-the-water.jpeg', gradient: 'from-slate-700/80 to-slate-900/90' },
+  { name: 'Cirencester', img: '/cirencester.jpeg', gradient: 'from-purple-800/80 to-indigo-950/90' }
 ];
 
 interface CotswoldsSearchProps {
@@ -617,20 +617,29 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                       <button
                         key={town.name}
                         onClick={() => handleTownClick(town.name)}
-                        className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group bg-gradient-to-br ${town.gradient} text-white ${
+                        className={`relative p-5 rounded-2xl overflow-hidden text-left h-36 flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-md cursor-pointer group text-white ${
                           isActive ? 'ring-4 ring-amber-500 ring-offset-2 scale-[1.01]' : ''
                         }`}
                       >
+                        {/* Town Background Image */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={town.img} 
+                          alt={town.name}
+                          className="absolute inset-0 object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" 
+                        />
+                        <div className={`absolute inset-0 bg-gradient-to-br ${town.gradient} group-hover:opacity-95 transition-opacity duration-300`} />
+
                         {/* Decorative background character */}
-                        <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500">
+                        <span className="absolute -right-2 -bottom-6 text-8xl font-black text-white/5 font-serif select-none group-hover:scale-110 transition-transform duration-500 relative z-10">
                           {town.name[0]}
                         </span>
 
-                        <span className="bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider w-fit">
+                        <span className="bg-white/15 backdrop-blur-xs px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider w-fit relative z-10">
                           {town.name === 'Broadway' ? 'Bway' : town.name === 'Chipping Campden' ? 'Campden' : town.name === 'Stow-on-the-Wold' ? 'Stow' : town.name === 'Bourton-on-the-Water' ? 'Bourton' : town.name === 'Cirencester' ? 'Ciren' : 'Town'}
                         </span>
 
-                        <div>
+                        <div className="relative z-10">
                           <h4 className="font-serif font-bold text-base leading-tight group-hover:text-amber-300 transition-colors">
                             {town.name}
                           </h4>
