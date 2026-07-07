@@ -29,17 +29,24 @@ function generateMockMetadata(title: string, category: string, subRegion: string
     }
   ];
 
+  const description = isFood 
+    ? `A charming ${category.toLowerCase()} in the heart of ${subRegion}, celebrated for its fresh local menus and cozy, welcoming atmosphere.`
+    : isHotel
+    ? `A luxury ${category.toLowerCase()} situated in ${subRegion}, featuring elegantly decorated rooms and premium guest hospitality.`
+    : `A premier ${category.toLowerCase()} provider in ${subRegion}, dedicated to exceptional quality and service for locals and visitors alike.`;
+
   const specialSection = isFood ? {
     price_range: "££ - £££",
     signature_dishes: ["Slow-roasted Cotswold Lamb", "Truffle Honey Flatbread", "Signature Sunday roast with Yorkshire pudding"]
   } : isHotel ? {
     room_types: ["Classic Double Room", "Luxury Feature Suite", "Private Garden Lodge"],
-    amenities_list: ["Free high-speed WiFi", "Indoor heated pool & spa facilities", "Complimentary Cotswold breakfast breakfast"]
+    amenities_list: ["Free high-speed WiFi", "Indoor heated pool & spa facilities", "Complimentary Cotswold breakfast"]
   } : {
     services_offered: ["Bespoke guided estate walks", "Exclusive private dining & events", "Local artisan workshops"]
   };
 
   return {
+    description,
     highlights,
     faqs,
     specialSection,
@@ -65,13 +72,14 @@ async function callGeminiAPI(crawledText: string, title: string, category: strin
     - Location: "${subRegion}"
 
     Format the response as a clean, valid JSON object with the following fields:
-    1. "highlights": An array of 3 short, catchy unique selling points/features of the business.
-    2. "faqs": An array of 3 common question/answer objects: { "question": "...", "answer": "..." }.
-    3. "specialSection": An object representing specific amenities/specialties:
+    1. "description": A sophisticated, compelling 2-sentence description of the business based on the website content. Do not use generic placeholders.
+    2. "highlights": An array of 3 short, catchy unique selling points/features of the business.
+    3. "faqs": An array of 3 common question/answer objects: { "question": "...", "answer": "..." }.
+    4. "specialSection": An object representing specific amenities/specialties:
        - If it's a food/drink business (pub, restaurant, cafe): { "price_range": "e.g. ££-£££", "signature_dishes": ["Dish 1", "Dish 2"] }
        - If it's a hotel/accommodation: { "room_types": ["Standard Double", "Suite"], "amenities_list": ["Free Wifi", "Spa", "Pool"] }
        - For other businesses: { "services_offered": ["Service A", "Service B"] }
-    4. "socialLinks": An object with handles/links: { "instagram": "url or handle", "facebook": "url or handle" }
+    5. "socialLinks": An object with handles/links: { "instagram": "url or handle", "facebook": "url or handle" }
 
     Keep it structured, sophisticated, and do not wrap it in markdown block tags like \`\`\`json. Return only the raw JSON string.
 
@@ -197,6 +205,10 @@ export async function POST(request: NextRequest) {
       const updates: any = {
         premium_metadata: premiumMetadata
       };
+
+      if (premiumMetadata.description) {
+        updates.description = premiumMetadata.description;
+      }
 
       if (!listing.rating) {
         updates.rating = (4.3 + Math.random() * 0.6).toFixed(1); // Seed realistic rating 4.3 - 4.9
