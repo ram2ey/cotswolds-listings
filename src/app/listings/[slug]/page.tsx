@@ -465,10 +465,10 @@ export default function ListingProfile() {
               {/* Tiers Badge Indicators */}
               <div className="flex gap-2">
                 {isGold && (
-                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-stone-950 shadow-lg">
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-white shadow-lg">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-950 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-stone-950"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                     </span>
                     Gold Partner
                   </span>
@@ -672,7 +672,7 @@ export default function ListingProfile() {
                       setClaimStep(1);
                       setWebsiteInput(listing.website || '');
                     }}
-                    className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 text-xs font-bold rounded-xl shadow-md transition cursor-pointer text-center"
+                    className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer text-center"
                   >
                     Claim Listing Now
                   </button>
@@ -874,7 +874,7 @@ export default function ListingProfile() {
 
                   <button
                     onClick={() => { setSelectedPlan('gold'); setClaimStep(2); }}
-                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
+                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
                   >
                     Continue — £29/mo
                   </button>
@@ -1020,7 +1020,7 @@ export default function ListingProfile() {
                     </button>
                     <button
                       onClick={handleClaimSubmit}
-                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center"
+                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center"
                     >
                       Pay & Activate Claim (£{selectedPlan === 'silver' ? '9' : '29'}/mo)
                     </button>

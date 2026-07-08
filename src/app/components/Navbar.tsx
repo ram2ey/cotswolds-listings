@@ -47,7 +47,7 @@ export default function Navbar() {
             })}
             <Link
               href="/listings/submit"
-              className="flex items-center gap-1.5 px-4.5 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl shadow-md hover:shadow-lg transition text-xs font-bold"
+              className="flex items-center gap-1.5 px-4.5 py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl shadow-md hover:shadow-lg transition text-xs font-bold"
             >
               <PlusCircle className="h-3.5 w-3.5" />
               Add Your Listing
@@ -95,7 +95,7 @@ export default function Navbar() {
               <Link
                 href="/listings/submit"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center justify-center gap-1.5 w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-stone-950 rounded-xl shadow-md font-bold text-sm transition"
+                className="flex items-center justify-center gap-1.5 w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl shadow-md font-bold text-sm transition"
               >
                 <PlusCircle className="h-4 w-4" />
                 Add Your Listing

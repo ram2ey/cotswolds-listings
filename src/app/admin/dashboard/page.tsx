@@ -270,7 +270,7 @@ export default function AdminDashboard() {
             <div>
               <button
                 type="submit"
-                className="group relative flex w-full justify-center rounded-xl bg-amber-500 px-4 py-3 text-sm font-bold text-stone-950 hover:bg-amber-600 active:bg-amber-700 shadow-lg transition cursor-pointer"
+                className="group relative flex w-full justify-center rounded-xl bg-amber-500 px-4 py-3 text-sm font-bold text-white hover:bg-amber-600 active:bg-amber-700 shadow-lg transition cursor-pointer"
               >
                 Access Dashboard
               </button>
@@ -531,7 +531,7 @@ export default function AdminDashboard() {
                                 ? 'bg-stone-100 text-stone-400 border border-stone-200' 
                                 : !item.website 
                                 ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed' 
-                                : 'bg-amber-500 hover:bg-amber-600 text-stone-950 hover:shadow-md'
+                                : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
                             }`}
                             title={item.website ? "Scrape website content and generate premium AI metadata" : "Add website URL before scraping"}
                           >

@@ -537,7 +537,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
                           {isGold && (
                             <div className="absolute top-3 left-3 flex gap-1">
-                              <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                              <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                                 Gold
                               </span>
                             </div>
@@ -662,7 +662,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
 
                         <div className="absolute top-3.5 left-3.5 flex gap-1.5">
                           {isGold && (
-                            <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                            <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                               Gold Partner
                             </span>
                           )}

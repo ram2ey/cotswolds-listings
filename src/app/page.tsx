@@ -164,7 +164,7 @@ export default async function Home() {
           <Suspense fallback={
             <div className="text-center py-20 bg-white rounded-2xl shadow-xl p-8 max-w-3xl mx-auto">
               <span className="inline-block h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-stone-505 mt-2">Loading search console...</p>
+              <p className="text-xs text-stone-500 mt-2">Loading search console...</p>
             </div>
           }>
             <CotswoldsSearch hideListings={true} />
@@ -204,7 +204,7 @@ export default async function Home() {
                       />
                     )}
                     <div className="absolute top-3 left-3 flex gap-1.5">
-                      <span className="bg-amber-500 text-stone-950 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                      <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                         Featured
                       </span>
                       <span className="bg-stone-900/90 text-amber-400 text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
@@ -219,7 +219,7 @@ export default async function Home() {
                       <h3 className="text-md font-bold font-serif text-stone-950 hover:text-amber-700 transition">
                         <Link href={`/listings/${item.slug}`}>{item.title}</Link>
                       </h3>
-                      <p className="text-xs text-stone-505 mt-2 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-stone-500 mt-2 line-clamp-2 leading-relaxed">
                         {item.description}
                       </p>
                     </div>
@@ -245,11 +245,11 @@ export default async function Home() {
       )}
 
       {/* 4. Explore Popular Categories */}
-      <section className="py-16 bg-stone-50 border-b border-stone-200">
+      <section className="py-16 bg-amber-900 border-b border-amber-950/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Tailored Search</span>
-            <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">Explore Popular Categories</h2>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-300 block mb-1">Tailored Search</span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-black text-white">Explore Popular Categories</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -310,28 +310,28 @@ export default async function Home() {
 
 
       {/* 7. How it Works Section */}
-      <section id="how-it-works" className="py-16 bg-stone-50 border-b border-stone-200">
+      <section id="how-it-works" className="py-16 bg-amber-900 border-b border-amber-950/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <div className="flex justify-center mb-6">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/logo-light.jpg"
+                src="/logo-dark.jpg"
                 alt="Cotswolds Pages"
                 className="h-16 w-auto object-contain"
               />
             </div>
-            <p className="text-stone-850 text-base font-bold leading-relaxed mb-3 max-w-xl mx-auto">
+            <p className="text-white text-base font-bold leading-relaxed mb-3 max-w-xl mx-auto">
               Cotswolds Pages is a comprehensive Directory to help you find Local Business.
             </p>
-            <p className="text-stone-505 text-xs leading-relaxed max-w-xl mx-auto">
+            <p className="text-amber-100/80 text-xs leading-relaxed max-w-xl mx-auto">
               An intuitive Directory that aims to connect local residents and visitors to local services in the area.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
             {/* Card 1 */}
-            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+            <div className="bg-white/95 backdrop-blur-xs p-8 rounded-2xl border border-amber-500/10 shadow-sm text-center flex flex-col items-center hover:scale-[1.02] hover:shadow-md transition-all duration-300">
               <ShopIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">All Cotswolds - All In One Place</h3>
               <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
@@ -340,7 +340,7 @@ export default async function Home() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+            <div className="bg-white/95 backdrop-blur-xs p-8 rounded-2xl border border-amber-500/10 shadow-sm text-center flex flex-col items-center hover:scale-[1.02] hover:shadow-md transition-all duration-300">
               <SearchSlidersIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Exploring the Cotswolds Made Easy</h3>
               <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
@@ -349,7 +349,7 @@ export default async function Home() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-sm text-center flex flex-col items-center">
+            <div className="bg-white/95 backdrop-blur-xs p-8 rounded-2xl border border-amber-500/10 shadow-sm text-center flex flex-col items-center hover:scale-[1.02] hover:shadow-md transition-all duration-300">
               <SupportIcon />
               <h3 className="text-sm font-bold text-stone-950 mb-2">Supporting Local Businesses</h3>
               <p className="text-[11px] text-stone-500 leading-relaxed pr-2">
@@ -373,7 +373,7 @@ export default async function Home() {
           <div className="mt-8 flex flex-col items-center gap-2">
             <Link
               href="/listings/submit"
-              className="px-8 py-3.5 bg-amber-500 text-stone-950 font-bold text-xs rounded-xl shadow-lg hover:bg-amber-600 transition"
+              className="px-8 py-3.5 bg-amber-500 text-white font-bold text-xs rounded-xl shadow-lg hover:bg-amber-600 transition"
             >
               Claim Your Free Listing
             </Link>
