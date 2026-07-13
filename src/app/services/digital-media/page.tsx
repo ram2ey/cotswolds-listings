@@ -1,0 +1,147 @@
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import Link from "next/link";
+import { Video, Camera, Compass, Users, Sparkles, Image, ArrowRight } from "lucide-react";
+
+export const metadata = {
+  title: "Digital Media Management | Cotswolds Pages",
+  description: "Dynamic content creation & bespoke storytelling. Turn your business's daily operations into high-converting digital content.",
+};
+
+export default function DigitalMediaManagement() {
+  const advantages = [
+    {
+      title: "On-Site Collaboration",
+      description: "Regular face-to-face visits from our team to deeply understand your day-to-day operations.",
+      icon: Users,
+    },
+    {
+      title: "Professional Media Crew",
+      description: "Expert photography and videography tailored precisely to your specific industry.",
+      icon: Camera,
+    },
+    {
+      title: "Authentic Branding",
+      description: "We showcase the real people and real value behind your brand name, building authentic trust.",
+      icon: Sparkles,
+    },
+    {
+      title: "Ready-to-Post Content",
+      description: "High-resolution digital assets optimized perfectly for your active marketing channels.",
+      icon: Image,
+    },
+  ];
+
+  return (
+    <div className="flex flex-col min-h-screen bg-stone-50 text-stone-900 font-sans">
+      <Navbar />
+
+      <main className="flex-1">
+        {/* Breadcrumb */}
+        <div className="bg-stone-100 py-3 border-b border-stone-250/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
+            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-stone-500">
+              <Link href="/" className="hover:text-stone-900 transition">Home</Link>
+              <span>/</span>
+              <span className="text-stone-400">Services</span>
+              <span>/</span>
+              <span className="text-amber-600">Digital Media</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <section className="bg-stone-950 text-white py-20 px-4 relative overflow-hidden border-b border-amber-500/20">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-955/40 via-stone-955 to-stone-955 z-0" />
+          <div className="max-w-4xl mx-auto text-center relative z-10 animate-fade-in-up">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-500 block mb-2">Service 02</span>
+            <h1 className="text-4xl sm:text-5xl font-serif font-black text-white leading-tight">
+              Dynamic Content Creation & Bespoke Storytelling
+            </h1>
+          </div>
+        </section>
+
+        {/* Introduction & First-Class content */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col lg:flex-row gap-12 items-stretch">
+          <div className="flex-1 bg-white rounded-3xl border border-stone-200 p-8 md:p-10 shadow-xs flex flex-col justify-between animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-2">Our Philosophy</span>
+              <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-950 mb-4">Collaborative, Hands-On Approach</h2>
+              <p className="text-stone-605 text-xs sm:text-sm leading-relaxed mb-4">
+                We believe every great business has a unique story to tell. To capture what makes your business and your team truly special, we use a collaborative, hands-on approach.
+              </p>
+              <p className="text-stone-500 text-xs sm:text-sm leading-relaxed">
+                We work closely with you on-site, meaning you can expect to see our friendly team on a regular basis, learning the ins and outs of your brand. With Cotswolds Pages, you will have access to an army of Digital Media Staff for less than the price that it would take you to hire one full-time employee.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 bg-white rounded-3xl border border-stone-200 p-8 md:p-10 shadow-xs flex flex-col justify-between animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-2">Visual Content</span>
+              <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-950 mb-4">First-Class Visual Content Creation</h2>
+              <p className="text-stone-605 text-xs sm:text-sm leading-relaxed mb-4">
+                Capturing professional-grade photos and videos that do your products or services justice can be incredibly difficult when you are running a business.
+              </p>
+              <p className="text-stone-500 text-xs sm:text-sm leading-relaxed">
+                That is why our expert media creators come directly to you. We capture high-quality, striking visuals designed specifically to elevate your social media platforms and captivate your audience.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Advantage Grid */}
+        <section className="bg-white border-t border-b border-stone-200 py-16 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-xl mx-auto mb-12">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-1">Our Advantage</span>
+              <h2 className="text-2xl sm:text-3xl font-serif font-black text-stone-950">
+                The Cotswold PAGES Advantage
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {advantages.map((adv, idx) => {
+                const Icon = adv.icon;
+                return (
+                  <div key={idx} className="bg-stone-50 rounded-2xl border border-stone-200 p-8 shadow-xs hover:shadow-md hover:scale-[1.01] transition duration-300 flex flex-col items-start text-left">
+                    <div className="p-3 bg-amber-500/10 text-amber-600 rounded-xl mb-6 shrink-0">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-base font-bold text-stone-950 mb-2">{adv.title}</h3>
+                    <p className="text-xs text-stone-500 leading-relaxed">{adv.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="bg-stone-950 rounded-3xl text-white p-8 md:p-12 relative overflow-hidden border border-amber-500/10 shadow-lg text-center md:text-left">
+            <div className="absolute inset-0 bg-gradient-to-r from-stone-950 to-stone-900 z-0" />
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="max-w-xl">
+                <h3 className="text-xl sm:text-2xl font-serif font-black mb-3">Partner with us today to turn your business's daily operations into high-converting digital content</h3>
+                <p className="text-stone-300 text-xs leading-relaxed font-normal">
+                  Contact our content specialists and book a discovery call to kickstart your campaign.
+                </p>
+              </div>
+              <div className="shrink-0 w-full md:w-auto">
+                <Link 
+                  href="/contact" 
+                  className="w-full sm:w-auto px-8 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                >
+                  Get Started <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer theme="light" />
+    </div>
+  );
+}
