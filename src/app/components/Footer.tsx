@@ -44,7 +44,7 @@ export default function Footer({ theme = "light" }: FooterProps) {
   return (
     <footer className={`${bgClass} py-16 transition-colors duration-300 relative z-20`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-left mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 text-left mb-12">
           {/* Column 1: Branding */}
           <div className="flex flex-col gap-4">
             <Link href="/" className="flex items-center gap-2">
@@ -60,7 +60,46 @@ export default function Footer({ theme = "light" }: FooterProps) {
             </p>
           </div>
 
-          {/* Column 2: Discover Villages */}
+          {/* Column 2: Our Services */}
+          <div>
+            <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${titleClass} mb-4`}>
+              Our Services
+            </h4>
+            <ul className={`space-y-2 text-xs font-semibold ${mutedTextClass}`}>
+              <li>
+                <Link href="/services/social-media" className={`${linkHoverClass} transition`}>
+                  Social Media Services
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/digital-media" className={`${linkHoverClass} transition`}>
+                  Digital Media Management
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/website-development" className={`${linkHoverClass} transition`}>
+                  Website Development
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/seo" className={`${linkHoverClass} transition`}>
+                  Search Engine Optimization
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/graphic-design" className={`${linkHoverClass} transition`}>
+                  Graphic Design
+                </Link>
+              </li>
+              <li>
+                <Link href="/services/photography-video" className={`${linkHoverClass} transition`}>
+                  Photography & Video
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Discover Villages */}
           <div>
             <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${titleClass} mb-4`}>
               Explore Locations
@@ -94,7 +133,7 @@ export default function Footer({ theme = "light" }: FooterProps) {
             </ul>
           </div>
 
-          {/* Column 3: Navigation & Contact */}
+          {/* Column 4: Navigation & Contact */}
           <div>
             <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${titleClass} mb-4`}>
               Quick Directory
@@ -103,6 +142,11 @@ export default function Footer({ theme = "light" }: FooterProps) {
               <li>
                 <Link href="/search" className={`${linkHoverClass} transition`}>
                   Directory Search
+                </Link>
+              </li>
+              <li>
+                <Link href="/how-it-works" className={`${linkHoverClass} transition`}>
+                  How It Works
                 </Link>
               </li>
               <li>
@@ -125,7 +169,7 @@ export default function Footer({ theme = "light" }: FooterProps) {
             </div>
           </div>
 
-          {/* Column 4: Newsletter */}
+          {/* Column 5: Newsletter */}
           <div className="flex flex-col gap-4">
             <h4 className={`text-[10px] font-extrabold uppercase tracking-widest ${titleClass}`}>
               Join Our Newsletter
