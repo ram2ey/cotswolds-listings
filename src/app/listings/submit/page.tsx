@@ -92,6 +92,10 @@ export default function SubmitListing() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Subscription plans state
+  const [selectedTier, setSelectedTier] = useState<'basic' | 'gold' | 'featured'>('basic');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Convert and resize uploaded image on client side (max 1200px width)
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,6 +186,11 @@ export default function SubmitListing() {
 
 
 
+    if (selectedTier !== 'basic' && (!website.trim() || !/^https?:\/\//i.test(website))) {
+      setError('A valid website URL starting with http:// or https:// is required for premium plans so we can enrich your profile.');
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
@@ -215,12 +224,43 @@ export default function SubmitListing() {
         throw new Error('Our servers encountered an issue storing your submission.');
       }
 
-      setSubmitted(true);
+      const result = await res.json();
+
+      if (selectedTier === 'basic') {
+        setSubmitted(true);
+      } else {
+        setSubmitting(false);
+        setCheckoutLoading(true);
+        
+        const checkoutRes = await fetch('/api/checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            listingId: result.id,
+            tier: selectedTier,
+            website: website
+          })
+        });
+
+        if (!checkoutRes.ok) {
+          const errorData = await checkoutRes.json();
+          throw new Error(errorData.error || 'Failed to initialize premium checkout session.');
+        }
+
+        const session = await checkoutRes.json();
+        if (session.url) {
+          window.location.href = session.url;
+        } else {
+          throw new Error('No redirect URL returned from payment server.');
+        }
+      }
     } catch (err: any) {
-      // Error masking: Shield database details and show clean error description
-      setError('We could not save your submission. Please verify your details, check your network, and try again.');
+      setError(err.message || 'We could not save your submission. Please verify your details, check your network, and try again.');
     } finally {
       setSubmitting(false);
+      setCheckoutLoading(false);
     }
   };
 
@@ -492,6 +532,71 @@ export default function SubmitListing() {
                 </div>
               </div>
 
+              {/* Block 5: Choose Membership Tier */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                  5. Choose Membership Tier
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Basic Card */}
+                  <div 
+                    onClick={() => setSelectedTier('basic')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'basic' 
+                        ? 'border-stone-500 bg-stone-100/50' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-stone-705">Basic Directory</span>
+                      <p className="text-[10px] text-stone-450 mt-1 leading-normal">Free entry. Subject to manual validation staging queue review.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">Free</span>
+                    </div>
+                  </div>
+
+                  {/* Gold Partner Card */}
+                  <div 
+                    onClick={() => setSelectedTier('gold')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'gold' 
+                        ? 'border-amber-500 bg-amber-500/5 shadow-xs' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-amber-705">Gold Partner</span>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Priority ranking, photo gallery, AI enrichments.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">£30</span>
+                      <span className="text-[9px] text-stone-450">/month</span>
+                    </div>
+                  </div>
+
+                  {/* Featured Partner Card */}
+                  <div 
+                    onClick={() => setSelectedTier('featured')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'featured' 
+                        ? 'border-indigo-600 bg-indigo-500/5 shadow-xs' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-indigo-755">Featured Partner</span>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Absolute top positioning, standout featured badge.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">£100</span>
+                      <span className="text-[9px] text-stone-450">/month</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Submit Buttons */}
               <div className="border-t border-stone-100 pt-6 flex gap-4">
                 <Link
@@ -503,7 +608,7 @@ export default function SubmitListing() {
                 
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || checkoutLoading}
                   className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-900 text-white font-semibold rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-55"
                 >
                   {submitting ? (
@@ -511,10 +616,20 @@ export default function SubmitListing() {
                       <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
                       Submitting Listing...
                     </>
-                  ) : (
+                  ) : checkoutLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-amber-450" />
+                      Redirecting to payment...
+                    </>
+                  ) : selectedTier === 'basic' ? (
                     <>
                       <Store className="h-4 w-4" />
                       Register Business
+                    </>
+                  ) : (
+                    <>
+                      <Store className="h-4 w-4" />
+                      Pay & Register
                     </>
                   )}
                 </button>

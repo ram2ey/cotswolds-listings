@@ -59,7 +59,7 @@ let mockApprovedListings = [
     category: "Hotels & Motels",
     address: "Digbeth St, Stow-on-the-Wold GL54 1BN",
     town: "Stow-on-the-Wold",
-    tier: "silver",
+    tier: "gold",
     is_approved: true,
     website: "https://broadwayhotelsuites.example.com"
   }

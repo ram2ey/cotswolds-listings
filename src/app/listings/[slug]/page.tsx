@@ -45,7 +45,7 @@ interface Listing {
   latitude?: number;
   longitude?: number;
   images: string[];
-  tier: 'gold' | 'silver' | 'basic';
+  tier: 'gold' | 'featured' | 'basic';
   is_approved: boolean;
   created_at?: string;
   rating?: number;
@@ -191,7 +191,7 @@ const MOCK_LISTINGS: Listing[] = [
     latitude: 51.9967,
     longitude: -1.7483,
     images: [],
-    tier: "silver",
+    tier: "gold",
     is_approved: true
   },
   {
@@ -227,7 +227,7 @@ const MOCK_LISTINGS: Listing[] = [
     latitude: 52.0244,
     longitude: -1.8322,
     images: [],
-    tier: "silver",
+    tier: "gold",
     is_approved: true
   }
 ];
@@ -244,69 +244,42 @@ export default function ListingProfile() {
   // Claim listing flow states
   const [isClaimModalOpen, setIsClaimModalOpen] = useState<boolean>(false);
   const [claimStep, setClaimStep] = useState<number>(1);
-  const [selectedPlan, setSelectedPlan] = useState<'silver' | 'gold'>('silver');
+  const [selectedPlan, setSelectedPlan] = useState<'gold' | 'featured'>('gold');
   const [websiteInput, setWebsiteInput] = useState<string>('');
-  const [cardNumber, setCardNumber] = useState<string>('');
-  const [cardExpiry, setCardExpiry] = useState<string>('');
-  const [cardCvv, setCardCvv] = useState<string>('');
-  const [cardName, setCardName] = useState<string>('');
   const [claimError, setClaimError] = useState<string | null>(null);
-  const [scrapeStatusText, setScrapeStatusText] = useState<string>('Processing secure payment...');
+  const [checkoutLoading, setCheckoutLoading] = useState<boolean>(false);
 
-  // Handles submitting the listing claim to our claim API route
-  const handleClaimSubmit = async () => {
+  // Handles redirecting the user to Stripe Checkout Session
+  const handleStripeCheckout = async () => {
     if (!listing) return;
     setClaimError(null);
-    setClaimStep(4); // Show progress screen
-    
-    const messages = [
-      'Processing your secure payment...',
-      'Payment authorised successfully ✓',
-      'Setting up your business profile...',
-      'Analysing your website content...',
-      'Generating your highlights and FAQs...',
-      'Crafting your premium listing details...',
-      'Almost there — applying finishing touches...',
-      'Saving your new Gold Partner status...',
-      'Preparing your premium profile...'
-    ];
-    
-    let msgIdx = 0;
-    const interval = setInterval(() => {
-      if (msgIdx < messages.length - 1) {
-        msgIdx++;
-        setScrapeStatusText(messages[msgIdx]);
-      }
-    }, 2500);
+    setCheckoutLoading(true);
 
     try {
-      const res = await fetch('/api/listings/claim', {
+      const res = await fetch('/api/checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: listing.id,
+          listingId: listing.id,
           tier: selectedPlan,
           website: websiteInput
         })
       });
 
-      clearInterval(interval);
-
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Server error occurred during payment processing.');
+        throw new Error(errorData.error || 'Server error occurred while creating checkout session.');
       }
 
-      setScrapeStatusText('Success! Listing Claimed and Scraped Successfully.');
-      
-      setTimeout(() => {
-        setIsClaimModalOpen(false);
-        window.location.reload();
-      }, 1500);
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No redirect URL returned from payment server.');
+      }
     } catch (err: any) {
-      clearInterval(interval);
-      setClaimError(err.message || 'An unexpected error occurred during claims processing.');
-      setClaimStep(3); // Go back to payment step to allow correcting details
+      setClaimError(err.message || 'An unexpected error occurred during payment processing.');
+      setCheckoutLoading(false);
     }
   };
 
@@ -387,7 +360,7 @@ export default function ListingProfile() {
   }
 
   const isGold = listing.tier === 'gold';
-  const isSilver = false; // Silver tier retired — all claimed listings are Gold
+  const isFeatured = listing.tier === 'featured';
   
   // Format WhatsApp Link
   const whatsappNumber = listing.whatsapp || listing.phone;
@@ -464,6 +437,15 @@ export default function ListingProfile() {
 
               {/* Tiers Badge Indicators */}
               <div className="flex gap-2">
+                {isFeatured && (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-600 text-white shadow-lg border border-indigo-500 animate-pulse">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    Featured Partner
+                  </span>
+                )}
                 {isGold && (
                   <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-white shadow-lg">
                     <span className="relative flex h-2 w-2">
@@ -473,7 +455,6 @@ export default function ListingProfile() {
                     Gold Partner
                   </span>
                 )}
-
               </div>
             </div>
           </div>
@@ -497,7 +478,7 @@ export default function ListingProfile() {
               </div>
 
               {/* Premium Features & Highlights (Claimed Listings Only) */}
-              {isGold && listing.premium_metadata && (
+              {(isGold || isFeatured) && listing.premium_metadata && (
                 <>
                   {/* Unique Highlights */}
                   {listing.premium_metadata.highlights && listing.premium_metadata.highlights.length > 0 && (
@@ -604,7 +585,7 @@ export default function ListingProfile() {
               )}
 
               {/* Cover Photo Gallery section (Claimed Listings Only) */}
-              {isGold && listing.images && listing.images.length > 1 && (
+              {(isGold || isFeatured) && listing.images && listing.images.length > 1 && (
                 <div className="bg-white rounded-2xl p-8 border border-stone-200 shadow-xs">
                   <h3 className="text-lg font-serif font-bold text-stone-950 border-b border-stone-100 pb-3 mb-6">
                     Photos
@@ -734,7 +715,7 @@ export default function ListingProfile() {
                   )}
 
                   {/* Social Media links for premium listings */}
-                  {isGold && listing.premium_metadata?.socialLinks && (
+                  {(isGold || isFeatured) && listing.premium_metadata?.socialLinks && (
                     <div className="flex gap-2 pt-2 border-t border-stone-100 mt-2">
                       {listing.premium_metadata.socialLinks.instagram && (
                         <a
@@ -840,43 +821,72 @@ export default function ListingProfile() {
                   <span className="font-bold">Error:</span> {claimError}
                 </div>
               )}
-
               {/* STEP 1: Select Plan */}
               {claimStep === 1 && (
                 <div className="space-y-4">
                   <p className="text-xs text-stone-605 leading-relaxed">
-                    Verify your ownership and unlock the full Gold Partner experience — premium search placement, a photo gallery, AI-generated highlights, and more.
+                    Verify your ownership and unlock the premium partner experience. Choose a subscription tier to start:
                   </p>
 
-                  {/* Gold-Only Plan Card */}
-                  <div className="p-5 rounded-2xl border-2 border-amber-500 bg-gradient-to-br from-amber-500/5 to-amber-500/10 shadow-xs">
-                    <div className="flex justify-between items-start mb-3">
+                  {/* Gold Card */}
+                  <div 
+                    onClick={() => setSelectedPlan('gold')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                      selectedPlan === 'gold' 
+                        ? 'border-amber-500 bg-amber-500/5 shadow-sm' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
                       <div>
                         <span className="text-sm font-extrabold text-amber-700">Gold Partner</span>
                         <p className="text-[10px] text-stone-500 mt-0.5">The complete premium listing experience.</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-xl font-black text-stone-900">£29</span>
+                        <span className="text-lg font-black text-stone-900">£30</span>
                         <span className="text-[10px] font-normal text-stone-450">/mo</span>
                       </div>
                     </div>
-                    <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-stone-700 font-medium">
+                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
                       <li>✓ Gold Partner Badge</li>
                       <li>✓ Priority Search Ranking</li>
                       <li>✓ Full Photo Gallery</li>
-                      <li>✓ AI-Generated Highlights</li>
-                      <li>✓ Star Ratings & Reviews</li>
-                      <li>✓ Opening Hours Display</li>
-                      <li>✓ Social Media Links</li>
-                      <li>✓ Direct Contact Links</li>
+                      <li>✓ AI-Generated Details</li>
+                    </ul>
+                  </div>
+
+                  {/* Featured Card */}
+                  <div 
+                    onClick={() => setSelectedPlan('featured')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                      selectedPlan === 'featured' 
+                        ? 'border-indigo-600 bg-indigo-500/5 shadow-sm' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="text-sm font-extrabold text-indigo-700">Featured Partner</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5">Absolute maximum visibility across Cotswolds Pages.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-stone-900">£100</span>
+                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
+                      <li className="font-bold text-indigo-750">✓ Featured Standout Badge</li>
+                      <li className="font-bold text-indigo-750">✓ Absolute Top Ranking</li>
+                      <li>✓ Full Photo Gallery</li>
+                      <li>✓ AI-Generated Details</li>
                     </ul>
                   </div>
 
                   <button
-                    onClick={() => { setSelectedPlan('gold'); setClaimStep(2); }}
-                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
+                    onClick={() => setClaimStep(2)}
+                    className="w-full py-3 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
                   >
-                    Continue — £29/mo
+                    Continue with {selectedPlan === 'gold' ? 'Gold Partner' : 'Featured Partner'}
                   </button>
                 </div>
               )}
@@ -928,123 +938,75 @@ export default function ListingProfile() {
               {/* STEP 3: Payment Checkout */}
               {claimStep === 3 && (
                 <div className="space-y-5">
-                  {/* Elegant Glassmorphic Card Preview */}
-                  <div className="w-full h-44 rounded-2xl bg-gradient-to-br from-stone-850 to-stone-950 text-white p-6 flex flex-col justify-between shadow-lg relative overflow-hidden border border-stone-800">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl" />
+                  {/* Order Summary Card */}
+                  <div className="bg-stone-50 border border-stone-250 rounded-2xl p-5 space-y-4">
+                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-stone-400 border-b border-stone-100 pb-2">
+                      Order Summary
+                    </h4>
                     
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] uppercase font-bold tracking-widest text-amber-500">Cotswolds Tourism Premium</span>
-                      <span className="text-xs font-extrabold italic font-serif">Visa</span>
-                    </div>
-
-                    <div className="space-y-4">
-                      {/* Card Number */}
-                      <p className="font-mono text-base tracking-widest text-stone-200">
-                        {cardNumber ? cardNumber.replace(/(\d{4})/g, '$1 ').trim() : '•••• •••• •••• ••••'}
-                      </p>
-
+                    <div className="space-y-2.5">
                       <div className="flex justify-between items-center text-xs">
-                        <div>
-                          <p className="text-[8px] text-stone-500 uppercase font-bold tracking-wider">Cardholder</p>
-                          <p className="font-semibold truncate max-w-[180px]">{cardName || 'YOUR NAME'}</p>
-                        </div>
+                        <span className="text-stone-550 font-medium">Business listing</span>
+                        <span className="text-stone-900 font-bold">{listing?.title}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-stone-550 font-medium">Selected Plan</span>
+                        <span className={`font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded border ${
+                          selectedPlan === 'featured'
+                            ? 'text-indigo-655 bg-indigo-50 border-indigo-100'
+                            : 'text-amber-605 bg-amber-50 border-amber-100'
+                        }`}>
+                          {selectedPlan} Partner
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-stone-550 font-medium">Website URL</span>
+                        <span className="text-stone-900 font-medium truncate max-w-[180px]">{websiteInput}</span>
+                      </div>
+                      <div className="border-t border-stone-150 pt-2.5 flex justify-between items-center">
+                        <span className="text-xs font-bold text-stone-900">Total Price</span>
                         <div className="text-right">
-                          <p className="text-[8px] text-stone-500 uppercase font-bold tracking-wider">Expires</p>
-                          <p className="font-semibold font-mono">{cardExpiry || 'MM/YY'}</p>
+                          <span className="text-base font-black text-stone-900">£{selectedPlan === 'gold' ? '30' : '100'}</span>
+                          <span className="text-[10px] font-bold text-stone-450">/month</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Card Name */}
-                    <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Cardholder Name</label>
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={cardName}
-                        onChange={(e) => setCardName(e.target.value)}
-                        className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition"
-                      />
-                    </div>
-
-                    {/* Card Number Input */}
-                    <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Card Number</label>
-                      <input
-                        type="text"
-                        placeholder="4000 1234 5678 9010"
-                        maxLength={16}
-                        value={cardNumber.replace(/\D/g, '')}
-                        onChange={(e) => setCardNumber(e.target.value)}
-                        className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Expiry */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">Expiry Date</label>
-                        <input
-                          type="text"
-                          placeholder="MM/YY"
-                          maxLength={5}
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                          className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
-                        />
-                      </div>
-                      
-                      {/* CVV */}
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase font-extrabold tracking-wider text-stone-400 block">CVV</label>
-                        <input
-                          type="password"
-                          placeholder="•••"
-                          maxLength={3}
-                          value={cardCvv.replace(/\D/g, '')}
-                          onChange={(e) => setCardCvv(e.target.value)}
-                          className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-xs bg-stone-50 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/15 focus:border-amber-500 transition font-mono"
-                        />
-                      </div>
-                    </div>
+                  {/* Stripe Explanation */}
+                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-3 items-start text-xs">
+                    <span className="text-lg leading-none mt-0.5">🔒</span>
+                    <p className="text-stone-650 leading-relaxed">
+                      You will be securely redirected to **Stripe Checkout** to finalize your billing. Once completed, your profile will be updated automatically and our AI agent will crawl your website.
+                    </p>
                   </div>
 
                   <div className="flex gap-3 mt-6">
                     <button
                       onClick={() => setClaimStep(2)}
-                      className="flex-1 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                      disabled={checkoutLoading}
+                      className="flex-1 py-3 border border-stone-250 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
                     >
                       Back
                     </button>
                     <button
-                      onClick={handleClaimSubmit}
-                      className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center"
+                      onClick={handleStripeCheckout}
+                      disabled={checkoutLoading}
+                      className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center flex items-center justify-center gap-2 disabled:opacity-55"
                     >
-                      Pay & Activate Claim (£{selectedPlan === 'silver' ? '9' : '29'}/mo)
+                      {checkoutLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin text-amber-450" />
+                          Redirecting to Stripe...
+                        </>
+                      ) : (
+                        `Pay & Redirect (£${selectedPlan === 'gold' ? '30' : '100'}/mo)`
+                      )}
                     </button>
                   </div>
                 </div>
               )}
-
-              {/* STEP 4: Processing Scrape & Payment */}
-              {claimStep === 4 && (
-                <div className="py-12 flex flex-col items-center justify-center gap-4 text-center">
-                  <Loader2 className="h-12 w-12 text-amber-600 animate-spin" />
-                  <div>
-                    <h4 className="font-serif font-bold text-base text-stone-900">Activating Premium Status</h4>
-                    <p className="text-xs text-stone-500 mt-1 max-w-xs leading-relaxed">
-                      {scrapeStatusText}
-                    </p>
-                  </div>
-                  <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-4">
-                    Please do not close this window
-                  </p>
-                </div>
-              )}
             </div>
-
           </div>
         </div>
       )}

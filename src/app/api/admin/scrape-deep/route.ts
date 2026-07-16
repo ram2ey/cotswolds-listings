@@ -134,9 +134,9 @@ export async function POST(request: NextRequest) {
       } else if (id === 'mock-2') {
         listing = { title: "Cotswold Tea Room", category: "Restaurants & Cafés", town: "Kingham", website: "https://cotswoldtearoom.example.com", tier: "gold" };
       } else if (id === 'mock-3') {
-        listing = { title: "Broadway Hotel & Suites", category: "Hotels & Motels", town: "Stow-on-the-Wold", website: "https://broadwayhotelsuites.example.com", tier: "silver" };
+        listing = { title: "Broadway Hotel & Suites", category: "Hotels & Motels", town: "Stow-on-the-Wold", website: "https://broadwayhotelsuites.example.com", tier: "featured" };
       } else {
-        listing = { title: "Claimed Premium Business", category: "Professional Services", town: "Cotswolds", website: "", tier: "silver" };
+        listing = { title: "Claimed Premium Business", category: "Professional Services", town: "Cotswolds", website: "", tier: "gold" };
       }
     } else {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);

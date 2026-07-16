@@ -33,7 +33,7 @@ interface Listing {
   latitude?: number;
   longitude?: number;
   images?: string[];
-  tier: 'basic' | 'silver' | 'gold';
+  tier: 'basic' | 'gold' | 'featured';
   distance_miles?: number;
   rating?: number;
   reviews_count?: number;
@@ -278,7 +278,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   });
 
   const sortedListings = [...filteredListings];
-  const tierOrder: Record<string, number> = { gold: 1, silver: 2, basic: 3 };
+  const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
   sortedListings.sort((a, b) => {
     const tierA = tierOrder[a.tier] || 99;
     const tierB = tierOrder[b.tier] || 99;
@@ -433,7 +433,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                   onChange={(e) => setOnlyPremium(e.target.checked)}
                   className="rounded border-stone-700 bg-stone-850 text-amber-500 focus:ring-amber-500 cursor-pointer h-4 w-4"
                 />
-                Show Premium Claims Only (Gold & Silver)
+                Show Premium Claims Only (Gold & Featured)
               </label>
 
               <label className="flex items-center gap-2.5 text-xs text-stone-300 hover:text-white cursor-pointer select-none">
@@ -485,7 +485,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
           {/* 2. Featured Claimed Listings Carousel */}
           {(() => {
             const featuredListings = (allListings.length ? allListings : listings).filter(
-              (item) => item.tier === 'gold' || item.tier === 'silver'
+              (item) => item.tier === 'gold' || item.tier === 'featured'
             );
 
             if (featuredListings.length === 0) return null;
@@ -535,13 +535,19 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                             />
                           )}
 
-                          {isGold && (
+                          {item.tier === 'featured' ? (
+                            <div className="absolute top-3 left-3 flex gap-1">
+                              <span className="bg-indigo-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                                Featured
+                              </span>
+                            </div>
+                          ) : isGold ? (
                             <div className="absolute top-3 left-3 flex gap-1">
                               <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                                 Gold
                               </span>
                             </div>
-                          )}
+                          ) : null}
                         </Link>
 
                         {/* Text card info */}
@@ -661,11 +667,15 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                         )}
 
                         <div className="absolute top-3.5 left-3.5 flex gap-1.5">
-                          {isGold && (
+                          {item.tier === 'featured' ? (
+                            <span className="bg-indigo-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                              Featured Partner
+                            </span>
+                          ) : isGold ? (
                             <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                               Gold Partner
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       </Link>
 

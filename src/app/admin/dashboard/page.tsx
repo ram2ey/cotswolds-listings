@@ -22,7 +22,7 @@ interface Listing {
   address: string;
   phone?: string;
   website?: string;
-  tier?: 'basic' | 'silver' | 'gold';
+  tier?: 'basic' | 'gold' | 'featured';
   is_approved?: boolean;
 }
 
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
   };
 
   // Change listing tier (PUT)
-  const handleTierChange = async (id: string, tier: 'basic' | 'silver' | 'gold') => {
+  const handleTierChange = async (id: string, tier: 'basic' | 'gold' | 'featured') => {
     try {
       setListings(prev => prev.map(l => l.id === id ? { ...l, tier } : l));
       
@@ -436,10 +436,10 @@ export default function AdminDashboard() {
                       </span>
                       {activeTab === 'live' && (
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                          item.tier === 'gold' 
+                          item.tier === 'featured' 
+                            ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' 
+                            : item.tier === 'gold' 
                             ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                            : item.tier === 'silver' 
-                            ? 'bg-stone-200 text-stone-850 border border-stone-300' 
                             : 'bg-stone-100 text-stone-600 border border-stone-200'
                         }`}>
                           {item.tier || 'basic'}
@@ -517,12 +517,12 @@ export default function AdminDashboard() {
                             className="bg-white border border-stone-200 rounded-md px-2 py-1 text-xs outline-hidden text-stone-800 cursor-pointer"
                           >
                             <option value="basic">Basic (Standard)</option>
-                            <option value="silver">Silver (Premium)</option>
-                            <option value="gold">Gold (Elite)</option>
+                            <option value="gold">Gold Partner</option>
+                            <option value="featured">Featured Partner</option>
                           </select>
                         </div>
                         
-                        {(item.tier === 'gold' || item.tier === 'silver') && (
+                        {(item.tier === 'gold' || item.tier === 'featured') && (
                           <button
                             onClick={() => handleDeepScrape(item.id)}
                             disabled={actionInProgress === item.id || !item.website}

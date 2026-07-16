@@ -11,8 +11,8 @@ DROP TYPE IF EXISTS membership_tier CASCADE;
 -- Create custom enum for membership tiers.
 CREATE TYPE membership_tier AS ENUM (
   'basic', 
-  'silver', 
-  'gold'
+  'gold', 
+  'featured'
 );
 
 -- Create listings table
@@ -164,8 +164,8 @@ BEGIN
     AND (filter_town IS NULL OR filter_town = '' OR l.town ILIKE '%' || filter_town || '%')
   ORDER BY 
     CASE 
-      WHEN l.tier = 'gold' THEN 1
-      WHEN l.tier = 'silver' THEN 2
+      WHEN l.tier = 'featured' THEN 1
+      WHEN l.tier = 'gold' THEN 2
       ELSE 3
     END ASC,
     distance_miles ASC;

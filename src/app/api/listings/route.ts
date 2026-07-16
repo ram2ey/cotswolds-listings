@@ -61,7 +61,7 @@ function getMockListings(
       latitude: 51.9083,
       longitude: -1.6146,
       images: ["https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80"],
-      tier: "silver",
+      tier: "gold",
       is_approved: true,
       distance_miles: lat && lng ? calculateDistance(lat, lng, 51.9083, -1.6146) : undefined
     },
@@ -149,8 +149,8 @@ export async function GET(request: NextRequest) {
     if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-supabase-url-here')) {
       const mockResult = getMockListings(category, town, lat, lng, radius);
       
-      // Sort results (gold -> silver -> basic)
-      const tierOrder: Record<string, number> = { gold: 1, silver: 2, basic: 3 };
+      // Sort results (featured -> gold -> basic)
+      const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
       mockResult.sort((a, b) => {
         const tierA = tierOrder[a.tier] || 99;
         const tierB = tierOrder[b.tier] || 99;
@@ -194,9 +194,9 @@ export async function GET(request: NextRequest) {
       listings = await fallbackTableQuery(supabase, category, town);
     }
 
-    // Explicit sorting: bubble 'gold' listings to the top, then 'silver', then 'basic'.
+    // Explicit sorting: bubble 'featured' listings to the top, then 'gold', then 'basic'.
     // If distance is present, sort by distance within each tier.
-    const tierOrder: Record<string, number> = { gold: 1, silver: 2, basic: 3 };
+    const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
     listings.sort((a: any, b: any) => {
       const tierA = tierOrder[a.tier] || 99;
       const tierB = tierOrder[b.tier] || 99;
@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Explicitly enforce tier='basic' and is_approved=false
-      const { error: dbError } = await supabase
+      const { data, error: dbError } = await supabase
         .from('listings')
         .insert({
           title,
@@ -302,16 +302,19 @@ export async function POST(request: NextRequest) {
           images: imageUrls,
           tier: 'basic',
           is_approved: false
-        });
+        })
+        .select()
+        .single();
 
       if (dbError) {
         throw new Error(dbError.message);
       }
+      return NextResponse.json({ success: true, slug, id: data.id });
     } else {
-      console.log("Mock Submit: Submitting listing", { title, slug, is_approved: false, tier: 'basic' });
+      const mockId = 'mock-id-' + Math.random().toString(36).substr(2, 9);
+      console.log("Mock Submit: Submitting listing", { id: mockId, title, slug, is_approved: false, tier: 'basic' });
+      return NextResponse.json({ success: true, slug, id: mockId });
     }
-
-    return NextResponse.json({ success: true, slug });
   } catch (err: any) {
     console.error("Submission API Error:", err.message);
     return NextResponse.json({ error: err.message || 'Server Error' }, { status: 500 });
