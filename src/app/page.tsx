@@ -5,6 +5,8 @@ import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldC
 import Link from "next/link";
 import { Suspense } from "react";
 
+export const dynamic = 'force-dynamic';
+
 // Fetch live Gold Partner featured listings
 async function getFeaturedListings() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

@@ -3,6 +3,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Suspense } from "react";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Search Local Listings | Cotswolds Pages Directory",
   description: "Browse and search through our verified database of local trades, services, hotels, and restaurants across the Cotswolds.",
