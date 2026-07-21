@@ -22,8 +22,12 @@ interface Listing {
   address: string;
   phone?: string;
   website?: string;
-  tier?: 'basic' | 'gold' | 'featured';
+  tier?: 'basic' | 'claimed' | 'gold' | 'featured';
   is_approved?: boolean;
+  premium_metadata?: {
+    package_name?: string;
+    has_social_addon?: boolean;
+  };
 }
 
 export default function AdminDashboard() {
@@ -34,6 +38,10 @@ export default function AdminDashboard() {
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'staging' | 'live'>('staging');
+
+  // Filter states
+  const [filterTier, setFilterTier] = useState<string>('all');
+  const [filterPromo, setFilterPromo] = useState<boolean>(false);
 
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -62,6 +70,12 @@ export default function AdminDashboard() {
       setAuthError('Incorrect authentication credentials. Access denied.');
     }
   };
+
+  // Reset filters when activeTab changes
+  useEffect(() => {
+    setFilterTier('all');
+    setFilterPromo(false);
+  }, [activeTab]);
 
   // Fetch listings from the API based on active tab
   useEffect(() => {
@@ -94,7 +108,7 @@ export default function AdminDashboard() {
   };
 
   // Change listing tier (PUT)
-  const handleTierChange = async (id: string, tier: 'basic' | 'gold' | 'featured') => {
+  const handleTierChange = async (id: string, tier: 'basic' | 'claimed' | 'gold' | 'featured') => {
     try {
       setListings(prev => prev.map(l => l.id === id ? { ...l, tier } : l));
       
@@ -406,156 +420,240 @@ export default function AdminDashboard() {
         )}
 
         {/* Listings Grid */}
-        {!loading && !error && listings.length > 0 && (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-sm font-semibold tracking-wider text-stone-400 uppercase">
-                {activeTab === 'live' ? 'Active Directory Listings' : 'Awaiting Business Verification'} ({listings.length})
-              </h2>
-              <p className="text-xs text-stone-500 mt-1">
-                {activeTab === 'live'
-                  ? 'Manage membership levels (Basic, Silver, Gold), add websites, and trigger deep crawls for claimed listings.'
-                  : 'Please verify details carefully. Approvals are pushed live immediately. Rejections permanently purge records.'}
-              </p>
-            </div>
+        {!loading && !error && listings.length > 0 && (() => {
+          // Filter listings based on selected filters
+          const displayedListings = listings.filter((item) => {
+            if (activeTab === 'live') {
+              if (filterTier !== 'all' && (item.tier || 'basic') !== filterTier) {
+                return false;
+              }
+              if (filterPromo && !item.premium_metadata?.has_social_addon) {
+                return false;
+              }
+            }
+            return true;
+          });
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {listings.map((item) => (
-                <div 
-                  key={item.id} 
-                  className={`bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
-                    actionInProgress === item.id ? 'opacity-50 pointer-events-none scale-95' : 'scale-100'
-                  }`}
-                >
-                  {/* Card Content */}
-                  <div className="p-6">
-                    <div className="flex justify-between items-start gap-2 mb-3">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100">
-                        <Layers className="h-3.5 w-3.5" />
-                        {item.category}
-                      </span>
-                      {activeTab === 'live' && (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                          item.tier === 'featured' 
-                            ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' 
-                            : item.tier === 'gold' 
-                            ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                            : 'bg-stone-100 text-stone-600 border border-stone-200'
-                        }`}>
-                          {item.tier || 'basic'}
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="font-serif font-bold text-lg text-stone-950 leading-tight mb-2">
-                      {item.title}
-                    </h3>
-
-                    <div className="space-y-2 mt-4 text-xs text-stone-600">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
-                        <span className="truncate">{item.address}</span>
-                      </div>
-                      
-                      {item.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-stone-400 shrink-0" />
-                          <span>{item.phone}</span>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-stone-400 shrink-0" />
-                        {activeTab === 'live' ? (
-                          <input
-                            type="text"
-                            placeholder="Add website URL..."
-                            defaultValue={item.website || ''}
-                            onBlur={(e) => handleWebsiteUpdate(item.id, e.target.value)}
-                            className="bg-stone-50 hover:bg-stone-100 focus:bg-white px-2 py-1 rounded border border-stone-200 text-xs w-full outline-hidden text-stone-800"
-                          />
-                        ) : (
-                          <span className="truncate">{item.website || 'No website listed'}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="border-t border-stone-100 bg-stone-50 px-6 py-4 flex flex-col gap-3">
-                    {activeTab === 'staging' ? (
-                      <div className="flex gap-4">
-                        {/* Reject Button (Red) */}
-                        <button
-                          onClick={() => handleReject(item.id)}
-                          disabled={actionInProgress === item.id}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-rose-200 hover:border-rose-300 text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 rounded-lg text-xs font-semibold transition cursor-pointer"
-                          title="Reject and permanently delete listing record"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Reject & Delete
-                        </button>
-                        
-                        {/* Approve Button (Green) */}
-                        <button
-                          onClick={() => handleApprove(item.id)}
-                          disabled={actionInProgress === item.id}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-xs transition hover:shadow-md cursor-pointer"
-                          title="Approve and publish listing to live directory"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Approve Listing
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-xs text-stone-800">
-                          <span className="font-semibold text-stone-600">Membership Tier:</span>
-                          <select
-                            value={item.tier || 'basic'}
-                            onChange={(e) => handleTierChange(item.id, e.target.value as any)}
-                            className="bg-white border border-stone-200 rounded-md px-2 py-1 text-xs outline-hidden text-stone-800 cursor-pointer"
-                          >
-                            <option value="basic">Basic (Standard)</option>
-                            <option value="gold">Gold Partner</option>
-                            <option value="featured">Featured Partner</option>
-                          </select>
-                        </div>
-                        
-                        {(item.tier === 'gold' || item.tier === 'featured') && (
-                          <button
-                            onClick={() => handleDeepScrape(item.id)}
-                            disabled={actionInProgress === item.id || !item.website}
-                            className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer ${
-                              actionInProgress === item.id 
-                                ? 'bg-stone-100 text-stone-400 border border-stone-200' 
-                                : !item.website 
-                                ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed' 
-                                : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
-                            }`}
-                            title={item.website ? "Scrape website content and generate premium AI metadata" : "Add website URL before scraping"}
-                          >
-                            {actionInProgress === item.id ? (
-                              <>
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                Scraping & Formatting...
-                              </>
-                            ) : (
-                              <>
-                                <Layers className="h-3.5 w-3.5" />
-                                Deep Scrape Web info
-                              </>
-                            )}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
+          return (
+            <div>
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-sm font-semibold tracking-wider text-stone-400 uppercase">
+                    {activeTab === 'live' ? 'Active Directory Listings' : 'Awaiting Business Verification'} ({displayedListings.length})
+                  </h2>
+                  <p className="text-xs text-stone-500 mt-1">
+                    {activeTab === 'live'
+                      ? 'Manage membership levels, add websites, and trigger deep crawls for claimed listings.'
+                      : 'Please verify details carefully. Approvals are pushed live immediately. Rejections permanently purge records.'}
+                  </p>
                 </div>
-              ))}
+
+                {activeTab === 'live' && (
+                  <div className="flex flex-wrap items-center gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-stone-500 font-medium">Filter Tier:</span>
+                      <select
+                        value={filterTier}
+                        onChange={(e) => setFilterTier(e.target.value)}
+                        className="bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 outline-hidden text-stone-850 font-semibold cursor-pointer"
+                      >
+                        <option value="all">All Tiers</option>
+                        <option value="basic">Basic (Standard)</option>
+                        <option value="claimed">Claimed Partner</option>
+                        <option value="gold">Gold Partner</option>
+                        <option value="featured">Featured Partner</option>
+                      </select>
+                    </div>
+
+                    <label className="flex items-center gap-2 font-medium text-stone-600 bg-white border border-stone-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-stone-50/50">
+                      <input
+                        type="checkbox"
+                        checked={filterPromo}
+                        onChange={(e) => setFilterPromo(e.target.checked)}
+                        className="rounded text-amber-500 focus:ring-amber-500/20"
+                      />
+                      <span>Social Promo Only</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {displayedListings.length === 0 ? (
+                <div className="bg-white border border-stone-200 rounded-2xl p-16 text-center max-w-md mx-auto shadow-xs">
+                  <p className="text-sm text-stone-500 font-semibold">No listings match the selected filters.</p>
+                  <button
+                    onClick={() => {
+                      setFilterTier('all');
+                      setFilterPromo(false);
+                    }}
+                    className="mt-4 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition cursor-pointer"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayedListings.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className={`bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
+                        actionInProgress === item.id ? 'opacity-50 pointer-events-none scale-95' : 'scale-100'
+                      }`}
+                    >
+                      {/* Card Content */}
+                      <div className="p-6">
+                        <div className="flex justify-between items-start gap-2 mb-3">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100">
+                            <Layers className="h-3.5 w-3.5" />
+                            {item.category}
+                          </span>
+                          {activeTab === 'live' && (
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                              item.tier === 'featured' 
+                                ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' 
+                                : item.tier === 'gold' 
+                                ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                                : item.tier === 'claimed'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                : 'bg-stone-100 text-stone-600 border border-stone-200'
+                            }`}>
+                              {item.tier || 'basic'}
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="font-serif font-bold text-lg text-stone-950 leading-tight mb-2">
+                          {item.title}
+                        </h3>
+
+                        <div className="space-y-2 mt-4 text-xs text-stone-600">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
+                            <span className="truncate">{item.address}</span>
+                          </div>
+                          
+                          {item.phone && (
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-stone-400 shrink-0" />
+                              <span>{item.phone}</span>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-2">
+                            <Globe className="h-4 w-4 text-stone-400 shrink-0" />
+                            {activeTab === 'live' ? (
+                              <input
+                                type="text"
+                                placeholder="Add website URL..."
+                                defaultValue={item.website || ''}
+                                onBlur={(e) => handleWebsiteUpdate(item.id, e.target.value)}
+                                className="bg-stone-50 hover:bg-stone-100 focus:bg-white px-2 py-1 rounded border border-stone-200 text-xs w-full outline-hidden text-stone-800"
+                              />
+                            ) : (
+                              <span className="truncate">{item.website || 'No website listed'}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actions Bar */}
+                      <div className="border-t border-stone-100 bg-stone-50 px-6 py-4 flex flex-col gap-3">
+                        {activeTab === 'staging' ? (
+                          <div className="flex gap-4">
+                            {/* Reject Button (Red) */}
+                            <button
+                              onClick={() => handleReject(item.id)}
+                              disabled={actionInProgress === item.id}
+                              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-rose-200 hover:border-rose-300 text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 rounded-lg text-xs font-semibold transition cursor-pointer"
+                              title="Reject and permanently delete listing record"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Reject & Delete
+                            </button>
+                            
+                            {/* Approve Button (Green) */}
+                            <button
+                              onClick={() => handleApprove(item.id)}
+                              disabled={actionInProgress === item.id}
+                              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-xs transition hover:shadow-md cursor-pointer"
+                              title="Approve and publish listing to live directory"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              Approve Listing
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between text-xs text-stone-800">
+                              <span className="font-semibold text-stone-600">Membership Tier:</span>
+                              <select
+                                value={item.tier || 'basic'}
+                                onChange={(e) => handleTierChange(item.id, e.target.value as any)}
+                                className="bg-white border border-stone-200 rounded-md px-2 py-1 text-xs outline-hidden text-stone-800 cursor-pointer"
+                              >
+                                <option value="basic">Basic (Standard)</option>
+                                <option value="claimed">Claimed Partner</option>
+                                <option value="gold">Gold Partner</option>
+                                <option value="featured">Featured Partner</option>
+                              </select>
+                            </div>
+
+                            {item.premium_metadata?.package_name && (
+                              <div className="flex justify-between items-center text-xs text-stone-850 border-t border-stone-100 pt-2">
+                                <span className="font-semibold text-stone-600">Active Package:</span>
+                                <span className="font-bold text-stone-900 capitalize">
+                                  {item.premium_metadata.package_name.replace('_', ' ')}
+                                </span>
+                              </div>
+                            )}
+
+                            {item.premium_metadata?.has_social_addon && (
+                              <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-2.5 flex items-center justify-between text-xs mt-1">
+                                <span className="text-indigo-850 font-extrabold flex items-center gap-1.5">
+                                  📢 Social Media Promo Active
+                                </span>
+                                <span className="text-[9px] bg-indigo-200 text-indigo-800 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
+                                  Pending Post
+                                </span>
+                              </div>
+                            )}
+                            
+                            {(item.tier === 'gold' || item.tier === 'featured') && (
+                              <button
+                                onClick={() => handleDeepScrape(item.id)}
+                                disabled={actionInProgress === item.id || !item.website}
+                                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer ${
+                                  actionInProgress === item.id 
+                                    ? 'bg-stone-100 text-stone-400 border border-stone-200' 
+                                    : !item.website 
+                                    ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed' 
+                                    : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
+                                }`}
+                                title={item.website ? "Scrape website content and generate premium AI metadata" : "Add website URL before scraping"}
+                              >
+                                {actionInProgress === item.id ? (
+                                  <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    Scraping & Formatting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Layers className="h-3.5 w-3.5" />
+                                    Deep Scrape Web info
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
       </main>
     </div>
   );

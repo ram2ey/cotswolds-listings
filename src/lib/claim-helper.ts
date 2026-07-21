@@ -148,8 +148,21 @@ export async function callGeminiAPI(crawledText: string, title: string, category
 export async function claimAndScrapeListing(listingId: string, tier: string, website: string): Promise<any> {
   console.log(`[claimAndScrapeListing] Starting claim/scrape for ID: ${listingId}, Tier: ${tier}, Website: ${website}`);
   
-  if (tier !== 'gold' && tier !== 'featured') {
-    throw new Error('Invalid tier. Only gold and featured tiers are allowed for upgrades.');
+  const validPlans = ['claim', 'gold', 'gold_social', 'featured', 'featured_social'];
+  if (!validPlans.includes(tier)) {
+    throw new Error('Invalid plan selected.');
+  }
+
+  let dbTier = 'basic';
+  let hasSocial = false;
+  if (tier === 'claim') {
+    dbTier = 'claimed';
+  } else if (tier === 'gold' || tier === 'gold_social') {
+    dbTier = 'gold';
+    if (tier === 'gold_social') hasSocial = true;
+  } else if (tier === 'featured' || tier === 'featured_social') {
+    dbTier = 'featured';
+    if (tier === 'featured_social') hasSocial = true;
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -167,7 +180,7 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
       category: "Hotels & Motels",
       town: "Bibury",
       website,
-      tier
+      tier: dbTier
     };
   } else {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
@@ -176,7 +189,7 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
     const { data, error } = await supabase
       .from('listings')
       .update({
-        tier,
+        tier: dbTier,
         website,
         is_approved: true
       })
@@ -285,8 +298,14 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
   if (!isMock) {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     
+    const finalMetadata = {
+      ...premiumMetadata,
+      package_name: tier,
+      has_social_addon: hasSocial
+    };
+
     const updates: any = {
-      premium_metadata: premiumMetadata
+      premium_metadata: finalMetadata
     };
 
     if (premiumMetadata && premiumMetadata.description) {

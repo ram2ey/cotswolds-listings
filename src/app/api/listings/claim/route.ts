@@ -8,8 +8,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameters (id, tier, website)' }, { status: 400 });
     }
 
-    if (tier !== 'gold' && tier !== 'featured') {
-      return NextResponse.json({ error: 'Invalid plan selected. Only Gold and Featured tiers are available for claims.' }, { status: 400 });
+    const validPlans = ['claim', 'gold', 'gold_social', 'featured', 'featured_social'];
+    if (!validPlans.includes(tier)) {
+      return NextResponse.json({ error: 'Invalid plan selected. Must be claim, gold, gold_social, featured, or featured_social.' }, { status: 400 });
     }
 
     const result = await claimAndScrapeListing(id, tier, website);

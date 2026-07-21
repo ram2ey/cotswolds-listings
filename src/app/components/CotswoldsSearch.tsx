@@ -33,7 +33,7 @@ interface Listing {
   latitude?: number;
   longitude?: number;
   images?: string[];
-  tier: 'basic' | 'gold' | 'featured';
+  tier: 'basic' | 'gold' | 'featured' | 'claimed';
   distance_miles?: number;
   rating?: number;
   reviews_count?: number;
@@ -278,7 +278,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
   });
 
   const sortedListings = [...filteredListings];
-  const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
+  const tierOrder: Record<string, number> = { featured: 1, gold: 2, claimed: 3, basic: 4 };
   sortedListings.sort((a, b) => {
     const tierA = tierOrder[a.tier] || 99;
     const tierB = tierOrder[b.tier] || 99;
@@ -547,6 +547,12 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                                 Gold
                               </span>
                             </div>
+                          ) : item.tier === 'claimed' ? (
+                            <div className="absolute top-3 left-3 flex gap-1">
+                              <span className="bg-emerald-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                                Claimed
+                              </span>
+                            </div>
                           ) : null}
                         </Link>
 
@@ -674,6 +680,10 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                           ) : isGold ? (
                             <span className="bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
                               Gold Partner
+                            </span>
+                          ) : item.tier === 'claimed' ? (
+                            <span className="bg-emerald-600 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-md shadow-sm">
+                              Claimed
                             </span>
                           ) : null}
                         </div>

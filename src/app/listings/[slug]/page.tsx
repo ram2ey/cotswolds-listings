@@ -45,7 +45,7 @@ interface Listing {
   latitude?: number;
   longitude?: number;
   images: string[];
-  tier: 'gold' | 'featured' | 'basic';
+  tier: 'gold' | 'featured' | 'claimed' | 'basic';
   is_approved: boolean;
   created_at?: string;
   rating?: number;
@@ -244,7 +244,7 @@ export default function ListingProfile() {
   // Claim listing flow states
   const [isClaimModalOpen, setIsClaimModalOpen] = useState<boolean>(false);
   const [claimStep, setClaimStep] = useState<number>(1);
-  const [selectedPlan, setSelectedPlan] = useState<'gold' | 'featured'>('gold');
+  const [selectedPlan, setSelectedPlan] = useState<'claim' | 'gold' | 'gold_social' | 'featured' | 'featured_social'>('gold');
   const [websiteInput, setWebsiteInput] = useState<string>('');
   const [claimError, setClaimError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<boolean>(false);
@@ -453,6 +453,15 @@ export default function ListingProfile() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                     </span>
                     Gold Partner
+                  </span>
+                )}
+                {listing.tier === 'claimed' && (
+                  <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-600 text-white shadow-lg">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    Claimed Partner
                   </span>
                 )}
               </div>
@@ -828,6 +837,32 @@ export default function ListingProfile() {
                     Verify your ownership and unlock the premium partner experience. Choose a subscription tier to start:
                   </p>
 
+                  {/* Claim Listing Card */}
+                  <div 
+                    onClick={() => setSelectedPlan('claim')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                      selectedPlan === 'claim' 
+                        ? 'border-emerald-500 bg-emerald-500/5 shadow-sm' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="text-sm font-extrabold text-emerald-700">Claim Listing</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5">Verify ownership, link your website, and display reviews.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-stone-900">£20</span>
+                        <span className="text-[10px] font-normal text-stone-455">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
+                      <li>✓ Verify Ownership</li>
+                      <li>✓ Link Official Website</li>
+                      <li>✓ Rating Stars & Reviews</li>
+                    </ul>
+                  </div>
+
                   {/* Gold Card */}
                   <div 
                     onClick={() => setSelectedPlan('gold')}
@@ -843,7 +878,7 @@ export default function ListingProfile() {
                         <p className="text-[10px] text-stone-500 mt-0.5">The complete premium listing experience.</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-lg font-black text-stone-900">£30</span>
+                        <span className="text-lg font-black text-stone-900">£50</span>
                         <span className="text-[10px] font-normal text-stone-450">/mo</span>
                       </div>
                     </div>
@@ -855,12 +890,39 @@ export default function ListingProfile() {
                     </ul>
                   </div>
 
+                  {/* Gold Card with Social */}
+                  <div 
+                    onClick={() => setSelectedPlan('gold_social')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                      selectedPlan === 'gold_social' 
+                        ? 'border-amber-500 bg-amber-500/5 shadow-sm' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="text-sm font-extrabold text-amber-700">Gold & Social Package</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5">All Gold features + dedicated social media promotion.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-stone-900">£150</span>
+                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
+                      <li>✓ Gold Partner Badge</li>
+                      <li>✓ Priority Search Ranking</li>
+                      <li className="font-bold text-amber-750">✓ Social Media Promotion</li>
+                      <li>✓ AI-Generated Details</li>
+                    </ul>
+                  </div>
+
                   {/* Featured Card */}
                   <div 
                     onClick={() => setSelectedPlan('featured')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
                       selectedPlan === 'featured' 
-                        ? 'border-indigo-600 bg-indigo-500/5 shadow-sm' 
+                        ? 'border-indigo-650 bg-indigo-500/5 shadow-sm' 
                         : 'border-stone-200 hover:border-stone-300 bg-white'
                     }`}
                   >
@@ -870,7 +932,7 @@ export default function ListingProfile() {
                         <p className="text-[10px] text-stone-500 mt-0.5">Absolute maximum visibility across Cotswolds Pages.</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-lg font-black text-stone-900">£100</span>
+                        <span className="text-lg font-black text-indigo-900">£100</span>
                         <span className="text-[10px] font-normal text-stone-450">/mo</span>
                       </div>
                     </div>
@@ -882,11 +944,44 @@ export default function ListingProfile() {
                     </ul>
                   </div>
 
+                  {/* Featured Card with Social */}
+                  <div 
+                    onClick={() => setSelectedPlan('featured_social')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                      selectedPlan === 'featured_social' 
+                        ? 'border-indigo-600 bg-indigo-500/5 shadow-sm' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <span className="text-sm font-extrabold text-indigo-700">Featured & Social Promotion</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5">Absolute max visibility + premium campaigns.</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-indigo-900">£200</span>
+                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                      </div>
+                    </div>
+                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
+                      <li className="font-bold text-indigo-750">✓ Featured Standout Badge</li>
+                      <li className="font-bold text-indigo-750">✓ Absolute Top Ranking</li>
+                      <li className="font-bold text-indigo-750">✓ Premium Social Campaigns</li>
+                      <li>✓ AI-Generated Details</li>
+                    </ul>
+                  </div>
+
                   <button
                     onClick={() => setClaimStep(2)}
                     className="w-full py-3 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
                   >
-                    Continue with {selectedPlan === 'gold' ? 'Gold Partner' : 'Featured Partner'}
+                    Continue with {
+                      selectedPlan === 'claim' ? 'Claim Listing' : 
+                      selectedPlan === 'gold' ? 'Gold Partner' : 
+                      selectedPlan === 'gold_social' ? 'Gold & Social Package' : 
+                      selectedPlan === 'featured' ? 'Featured Partner' : 
+                      'Featured & Social Promotion'
+                    }
                   </button>
                 </div>
               )}
@@ -952,11 +1047,19 @@ export default function ListingProfile() {
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-stone-550 font-medium">Selected Plan</span>
                         <span className={`font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded border ${
-                          selectedPlan === 'featured'
+                          selectedPlan.includes('featured')
                             ? 'text-indigo-655 bg-indigo-50 border-indigo-100'
-                            : 'text-amber-605 bg-amber-50 border-amber-100'
+                            : selectedPlan.includes('gold')
+                            ? 'text-amber-605 bg-amber-50 border-amber-100'
+                            : 'text-emerald-605 bg-emerald-50 border-emerald-100'
                         }`}>
-                          {selectedPlan} Partner
+                          {
+                            selectedPlan === 'claim' ? 'Claim Listing' : 
+                            selectedPlan === 'gold' ? 'Gold Partner' : 
+                            selectedPlan === 'gold_social' ? 'Gold & Social' : 
+                            selectedPlan === 'featured' ? 'Featured Partner' : 
+                            'Featured & Social'
+                          }
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
@@ -966,7 +1069,13 @@ export default function ListingProfile() {
                       <div className="border-t border-stone-150 pt-2.5 flex justify-between items-center">
                         <span className="text-xs font-bold text-stone-900">Total Price</span>
                         <div className="text-right">
-                          <span className="text-base font-black text-stone-900">£{selectedPlan === 'gold' ? '30' : '100'}</span>
+                          <span className="text-base font-black text-stone-900">£{
+                            selectedPlan === 'claim' ? '20' : 
+                            selectedPlan === 'gold' ? '50' : 
+                            selectedPlan === 'gold_social' ? '150' : 
+                            selectedPlan === 'featured' ? '100' : 
+                            '200'
+                          }</span>
                           <span className="text-[10px] font-bold text-stone-450">/month</span>
                         </div>
                       </div>
@@ -1000,7 +1109,13 @@ export default function ListingProfile() {
                           Redirecting to Stripe...
                         </>
                       ) : (
-                        `Pay & Redirect (£${selectedPlan === 'gold' ? '30' : '100'}/mo)`
+                        `Pay & Redirect (£${
+                          selectedPlan === 'claim' ? '20' : 
+                          selectedPlan === 'gold' ? '50' : 
+                          selectedPlan === 'gold_social' ? '150' : 
+                          selectedPlan === 'featured' ? '100' : 
+                          '200'
+                        }/mo)`
                       )}
                     </button>
                   </div>

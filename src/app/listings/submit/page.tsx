@@ -94,7 +94,7 @@ export default function SubmitListing() {
   const [error, setError] = useState<string | null>(null);
   
   // Subscription plans state
-  const [selectedTier, setSelectedTier] = useState<'basic' | 'gold' | 'featured'>('basic');
+  const [selectedTier, setSelectedTier] = useState<'basic' | 'claim' | 'gold' | 'gold_social' | 'featured' | 'featured_social'>('basic');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Convert and resize uploaded image on client side (max 1200px width)
@@ -537,8 +537,7 @@ export default function SubmitListing() {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
                   5. Choose Membership Tier
                 </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Basic Card */}
                   <div 
                     onClick={() => setSelectedTier('basic')}
@@ -550,10 +549,29 @@ export default function SubmitListing() {
                   >
                     <div>
                       <span className="text-xs font-bold text-stone-705">Basic Directory</span>
-                      <p className="text-[10px] text-stone-450 mt-1 leading-normal">Free entry. Subject to manual validation staging queue review.</p>
+                      <p className="text-[10px] text-stone-455 mt-1 leading-normal">Free entry. Subject to manual validation staging queue review.</p>
                     </div>
                     <div className="mt-4 pt-2 border-t border-stone-100">
                       <span className="text-xs font-extrabold text-stone-900">Free</span>
+                    </div>
+                  </div>
+
+                  {/* Claim Listing Card */}
+                  <div 
+                    onClick={() => setSelectedTier('claim')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'claim' 
+                        ? 'border-emerald-500 bg-emerald-500/5 shadow-xs' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-emerald-705">Claim Listing Plan</span>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Verified badge, reviews, official website link.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">£20</span>
+                      <span className="text-[9px] text-stone-450">/month</span>
                     </div>
                   </div>
 
@@ -568,10 +586,29 @@ export default function SubmitListing() {
                   >
                     <div>
                       <span className="text-xs font-bold text-amber-705">Gold Partner</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Priority ranking, photo gallery, AI enrichments.</p>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Priority ranking, full photo gallery, AI enrichments.</p>
                     </div>
                     <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£30</span>
+                      <span className="text-xs font-extrabold text-stone-900">£50</span>
+                      <span className="text-[9px] text-stone-450">/month</span>
+                    </div>
+                  </div>
+
+                  {/* Gold & Social Card */}
+                  <div 
+                    onClick={() => setSelectedTier('gold_social')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'gold_social' 
+                        ? 'border-amber-500 bg-amber-500/5 shadow-xs' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-amber-705">Gold & Social Package</span>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">All Gold features + dedicated monthly social promotion updates.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">£150</span>
                       <span className="text-[9px] text-stone-450">/month</span>
                     </div>
                   </div>
@@ -591,6 +628,25 @@ export default function SubmitListing() {
                     </div>
                     <div className="mt-4 pt-2 border-t border-stone-100">
                       <span className="text-xs font-extrabold text-stone-900">£100</span>
+                      <span className="text-[9px] text-stone-450">/month</span>
+                    </div>
+                  </div>
+
+                  {/* Featured & Social Card */}
+                  <div 
+                    onClick={() => setSelectedTier('featured_social')}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      selectedTier === 'featured_social' 
+                        ? 'border-indigo-600 bg-indigo-500/5 shadow-xs' 
+                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-indigo-755">Featured & Social</span>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Absolute top positioning + premium monthly marketing campaigns.</p>
+                    </div>
+                    <div className="mt-4 pt-2 border-t border-stone-100">
+                      <span className="text-xs font-extrabold text-stone-900">£200</span>
                       <span className="text-[9px] text-stone-450">/month</span>
                     </div>
                   </div>

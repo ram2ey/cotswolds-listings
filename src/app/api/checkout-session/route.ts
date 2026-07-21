@@ -14,9 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (tier !== 'gold' && tier !== 'featured') {
+    const validPlans = ['claim', 'gold', 'gold_social', 'featured', 'featured_social'];
+    if (!validPlans.includes(tier)) {
       return NextResponse.json(
-        { error: 'Invalid tier. Select either gold or featured.' },
+        { error: 'Invalid plan selected. Must be claim, gold, gold_social, featured, or featured_social.' },
         { status: 400 }
       );
     }
@@ -47,11 +48,18 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin') || 'http://localhost:3000';
 
     // Check if we are running in Mock Checkout mode
+    const claimPriceId = process.env.STRIPE_CLAIM_PRICE_ID;
     const goldPriceId = process.env.STRIPE_GOLD_PRICE_ID;
+    const goldSocialPriceId = process.env.STRIPE_GOLD_SOCIAL_PRICE_ID;
     const featuredPriceId = process.env.STRIPE_FEATURED_PRICE_ID;
-    const hasPriceIds = goldPriceId && featuredPriceId && 
-                       !goldPriceId.includes('your-stripe-') && 
-                       !featuredPriceId.includes('your-stripe-');
+    const featuredSocialPriceId = process.env.STRIPE_FEATURED_SOCIAL_PRICE_ID;
+
+    const hasPriceIds = claimPriceId && goldPriceId && goldSocialPriceId && featuredPriceId && featuredSocialPriceId &&
+                       !claimPriceId.includes('your-stripe-') &&
+                       !goldPriceId.includes('your-stripe-') &&
+                       !goldSocialPriceId.includes('your-stripe-') &&
+                       !featuredPriceId.includes('your-stripe-') &&
+                       !featuredSocialPriceId.includes('your-stripe-');
 
     if (isStripeMock() || !hasPriceIds) {
       console.log(`[checkout-session] Running in MOCK mode. Tier: ${tier}, Website: ${website}`);
@@ -72,7 +80,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Real Stripe Flow
-    const priceId = tier === 'featured' ? featuredPriceId : goldPriceId;
+    let priceId = '';
+    switch (tier) {
+      case 'claim':
+        priceId = claimPriceId;
+        break;
+      case 'gold':
+        priceId = goldPriceId;
+        break;
+      case 'gold_social':
+        priceId = goldSocialPriceId;
+        break;
+      case 'featured':
+        priceId = featuredPriceId;
+        break;
+      case 'featured_social':
+        priceId = featuredSocialPriceId;
+        break;
+    }
 
     console.log(`[checkout-session] Creating Stripe Checkout session for listing: ${listingId}, priceId: ${priceId}`);
 

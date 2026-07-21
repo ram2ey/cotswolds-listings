@@ -149,8 +149,8 @@ export async function GET(request: NextRequest) {
     if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-supabase-url-here')) {
       const mockResult = getMockListings(category, town, lat, lng, radius);
       
-      // Sort results (featured -> gold -> basic)
-      const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
+      // Sort results (featured -> gold -> claimed -> basic)
+      const tierOrder: Record<string, number> = { featured: 1, gold: 2, claimed: 3, basic: 4 };
       mockResult.sort((a, b) => {
         const tierA = tierOrder[a.tier] || 99;
         const tierB = tierOrder[b.tier] || 99;
@@ -194,9 +194,9 @@ export async function GET(request: NextRequest) {
       listings = await fallbackTableQuery(supabase, category, town);
     }
 
-    // Explicit sorting: bubble 'featured' listings to the top, then 'gold', then 'basic'.
+    // Explicit sorting: bubble 'featured' listings to the top, then 'gold', then 'claimed', then 'basic'.
     // If distance is present, sort by distance within each tier.
-    const tierOrder: Record<string, number> = { featured: 1, gold: 2, basic: 3 };
+    const tierOrder: Record<string, number> = { featured: 1, gold: 2, claimed: 3, basic: 4 };
     listings.sort((a: any, b: any) => {
       const tierA = tierOrder[a.tier] || 99;
       const tierB = tierOrder[b.tier] || 99;

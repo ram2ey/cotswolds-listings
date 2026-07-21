@@ -11,6 +11,7 @@ DROP TYPE IF EXISTS membership_tier CASCADE;
 -- Create custom enum for membership tiers.
 CREATE TYPE membership_tier AS ENUM (
   'basic', 
+  'claimed',
   'gold', 
   'featured'
 );
@@ -162,13 +163,14 @@ BEGIN
     AND (radius_miles IS NULL OR ST_DWithin(l.geom::geography, user_geom::geography, radius_meters))
     AND (filter_category IS NULL OR filter_category = '' OR l.category ILIKE '%' || filter_category || '%')
     AND (filter_town IS NULL OR filter_town = '' OR l.town ILIKE '%' || filter_town || '%')
-  ORDER BY 
-    CASE 
-      WHEN l.tier = 'featured' THEN 1
-      WHEN l.tier = 'gold' THEN 2
-      ELSE 3
-    END ASC,
-    distance_miles ASC;
+    ORDER BY 
+      CASE 
+        WHEN l.tier = 'featured' THEN 1
+        WHEN l.tier = 'gold' THEN 2
+        WHEN l.tier = 'claimed' THEN 3
+        ELSE 4
+      END ASC,
+      distance_miles ASC;
 END;
 $$ LANGUAGE plpgsql;
 
