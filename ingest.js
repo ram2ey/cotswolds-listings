@@ -116,61 +116,89 @@ async function runIngestion() {
     // Configure the Google Maps Scraper Actor
     const input = {
       searchStringsArray: [
-        // --- HOTELS & ACCOMMODATION ---
-        "boutique hotels Chipping Campden Cotswolds",
-        "historic hotels Broadway Cotswolds",
-        "luxury hotels Burford Cotswolds",
-        "hotels Stow-on-the-Wold",
-        "hotels Bourton-on-the-Water Cotswolds",
-        "hotels Tetbury Gloucestershire",
-        "hotels Winchcombe Cotswolds",
-        "boutique hotels Cirencester Cotswolds",
-        "hotels Moreton-in-Marsh Cotswolds",
-        "hotels Chipping Norton Oxfordshire Cotswolds",
-        "guest houses and B&B Woodstock Oxfordshire",
-        "bed and breakfast Lacock Wiltshire",
-        
-        // --- RESTAURANTS, CAFES & BAKERIES ---
-        "restaurants Chipping Campden Cotswolds",
-        "restaurants Burford Oxfordshire",
-        "tea rooms Bourton-on-the-Water Cotswolds",
-        "restaurants Broadway Cotswolds",
-        "restaurants Stow-on-the-Wold Gloucestershire",
-        "restaurants Cirencester Gloucestershire",
-        "restaurants Tetbury Gloucestershire",
-        "restaurants Winchcombe Cotswolds",
-        "cafes and tea rooms Chipping Norton",
-        "bakeries and cafes Painswick Gloucestershire",
-        "bakeries and cafes Woodstock Oxfordshire",
-        "cafes and bakeries Lacock Wiltshire",
-        "cafes and coffee shops Cotswolds",
-        
-        // --- SHOPS & RETAIL ---
-        "antique shops Stow-on-the-Wold Cotswolds",
-        "antique shops Tetbury Cotswolds",
-        "independent shops Burford Oxfordshire",
-        "gift shops Bourton-on-the-Water Cotswolds",
-        "farm shops Cotswolds Gloucestershire",
-        "gift shops Broadway Cotswolds",
-        "independent shops Woodstock Oxfordshire",
-        
-        // --- SERVICES (Construction, Auto, Beauty) ---
-        "builders and plumbers Cirencester",
-        "carpenters and building services Tetbury",
-        "builders and maintenance Chipping Campden",
-        "car repair and garages Moreton-in-Marsh",
-        "mechanics and auto repair Cirencester",
-        "hair and beauty salons Winchcombe",
-        "wellness spas and beauty salons Tetbury",
-        "wellness retreats and day spas Cotswolds",
-        
-        // --- ATTRACTIONS & ACTIVITIES ---
-        "visitor attractions Cotswolds UK",
-        "historic gardens and National Trust Cotswolds",
-        "walking tours Cotswolds",
-        "horse riding stables Cotswolds"
+        // --- RETAIL & SHOWROOMS ---
+        "Amanda Hanley Burford",
+        "Barrington Kitchens Burford",
+        "Burford Garden Co Burford",
+        "The Bathroom Showroom Bourton-on-the-Water",
+        "Alain Rouveure Galleries Todenham",
+        "Westminster Stone Burford",
+        "Fosseway Furniture Shipston-on-Stour",
+        "Westcote Design Kingham",
+        "Finesse Shutters Evesham",
+
+        // --- TRADES & MAINTENANCE ---
+        "Acorn Roofing Services Bloxham",
+        "Concept Security gates Gloucester",
+        "AJB Loft Conversions",
+        "The Cotswold Garage Door Company",
+        "Just Carpentry & Locks Cheltenham",
+        "Phil Dadge Carpentry Bourton-on-the-Water",
+        "Calarel Joinery Moreton-in-Marsh",
+        "PW Wheeler Electrical Bourton-on-the-Water",
+        "MPN Plumbing Heating Faringdon",
+        "The Woodentop Restoration Company Cotswolds",
+        "Country Roofing Witney",
+        "RJB Window Repair Moreton-in-Marsh",
+        "Standard Building Ltd Cotswolds",
+        "Heritage Stone Walls Cotswolds",
+        "White Oak Landscaping Witney",
+        "Thomas Contracting Cotswolds",
+        "SDC Roofing Cotswolds",
+        "JG Landscaping",
+        "WGT Fencing Chipping Norton",
+        "Wessex Pumps Witney",
+        "DWG Plans Cotswolds",
+        "Bob Dadge Stow-on-the-Wold",
+        "G&O Engineers Witney",
+        "Greener Ohms Electrical Witney",
+        "Four Shires Exterior Cleaning Moreton-in-Marsh",
+        "TWG Stonework Cotswolds",
+        "The Landscape Centre Witney",
+        "CJ Tout Plumbing Cotswolds",
+        "Associated Blinds Witney",
+        "KB Installations Chipping Norton",
+
+        // --- PROFESSIONAL SERVICES ---
+        "MJD Surveyors Bourton-on-the-Water",
+        "Chase Morgan Solicitors Moreton-in-Marsh",
+        "Dovecote Property Group Cotswolds",
+        "Civic Security Gate Doctors Cotswolds",
+        "Insight Planning Services Witney",
+        "Wise Investment Chipping Norton",
+        "Taylor Made Estate Planning Cotswolds",
+        "TaylorMade Wealth Chipping Norton",
+        "BwD Bookkeeping Kidlington",
+
+        // --- HEALTH, WELLNESS & SERVICES ---
+        "Cotswold Dentures Cirencester",
+        "Tinas Mobile Foot Care Cotswolds",
+        "Bourton Podiatry Upper Slaughter",
+        "Royall Holistics Northleach",
+        "Cotswold Archery Batsford",
+        "Richmond Villages Witney",
+        "Hearing & Mobility Store Bourton-on-the-Water",
+        "The Crock Stow-on-the-Wold",
+        "Lisa Cartlidge Hypnotherapy",
+        "Stow Physio at Bourton",
+        "Cocoon Live-in Care Cotswolds",
+        "Better Swim School Cotswolds",
+        "Sibford School Banbury",
+
+        // --- FUNERAL SERVICES ---
+        "Julie Sullivan Funeral Directors Moreton-in-Marsh",
+        "Allen & Son Funeral Directors Moreton-in-Marsh",
+
+        // --- OTHER SERVICES & ATTRACTIONS ---
+        "Byeways Taxis Stow-on-the-Wold",
+        "Cotswold Petroleum Moreton-in-Marsh",
+        "Oilwell Garage Little Compton",
+        "Mustoes Haulage Northleach",
+        "Tom Negus Tree Care Cotswolds",
+        "Mossinator Bourton-on-the-Water",
+        "Beeson Trees Cotswolds"
       ],
-      maxCrawledPlacesPerSearch: 10,
+      maxCrawledPlacesPerSearch: 1,
       language: "en",
       extractImages: false
     };
