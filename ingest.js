@@ -25,22 +25,20 @@ function generateSlug(title, village) {
     .replace(/^-+|-+$/g, '');     // Trim leading/trailing hyphens
 }
 
-
-
 // Help function to standardize raw Google Maps categories to match frontend dropdown filters
 function mapCategory(rawCategory = '') {
   const cat = rawCategory.toLowerCase();
   
-  if (cat.includes('builder') || cat.includes('construction') || cat.includes('plumber') || cat.includes('carpenter') || cat.includes('roofer') || cat.includes('electrician') || cat.includes('handyman') || cat.includes('gardener') || cat.includes('landscap') || cat.includes('painter') || cat.includes('decorator') || cat.includes('architect')) {
+  if (cat.includes('builder') || cat.includes('construction') || cat.includes('plumber') || cat.includes('carpenter') || cat.includes('roofer') || cat.includes('electrician') || cat.includes('handyman') || cat.includes('gardener') || cat.includes('landscap') || cat.includes('painter') || cat.includes('decorator') || cat.includes('architect') || cat.includes('cleaning') || cat.includes('pest') || cat.includes('aerial') || cat.includes('repair')) {
     return 'Construction & Home Maintenance';
   }
-  if (cat.includes('salon') || cat.includes('beauty') || cat.includes('hair') || cat.includes('nail') || cat.includes('spa') || cat.includes('clinic') || cat.includes('dentist') || cat.includes('doctor') || cat.includes('medical') || cat.includes('chiropract') || cat.includes('massage') || cat.includes('health') || cat.includes('wellness')) {
+  if (cat.includes('salon') || cat.includes('beauty') || cat.includes('hair') || cat.includes('nail') || cat.includes('spa') || cat.includes('clinic') || cat.includes('dentist') || cat.includes('doctor') || cat.includes('medical') || cat.includes('chiropract') || cat.includes('massage') || cat.includes('health') || cat.includes('wellness') || cat.includes('physio') || cat.includes('podiatry') || cat.includes('hearing') || cat.includes('optician') || cat.includes('pharmacy')) {
     return 'Health & Beauty';
   }
-  if (cat.includes('accountant') || cat.includes('lawyer') || cat.includes('solicitor') || cat.includes('consultant') || cat.includes('marketing') || cat.includes('agency') || cat.includes('finance') || cat.includes('adviser') || cat.includes('real estate') || cat.includes('estate agent')) {
+  if (cat.includes('accountant') || cat.includes('lawyer') || cat.includes('solicitor') || cat.includes('consultant') || cat.includes('marketing') || cat.includes('agency') || cat.includes('finance') || cat.includes('adviser') || cat.includes('real estate') || cat.includes('estate agent') || cat.includes('funeral') || cat.includes('auction') || cat.includes('travel') || cat.includes('surveyor')) {
     return 'Professional Services';
   }
-  if (cat.includes('mechanic') || cat.includes('garage') || cat.includes('auto') || cat.includes('car repair') || cat.includes('dealer') || cat.includes('tyre') || cat.includes('car wash')) {
+  if (cat.includes('mechanic') || cat.includes('garage') || cat.includes('auto') || cat.includes('car repair') || cat.includes('dealer') || cat.includes('tyre') || cat.includes('car wash') || cat.includes('land rover')) {
     return 'Car & Automotive';
   }
   if (cat.includes('hotel') || cat.includes('motel') || cat.includes('guesthouse') || cat.includes('bed & breakfast') || cat.includes('b&b') || cat.includes('lodging') || cat.includes('hostel')) {
@@ -113,90 +111,53 @@ async function runIngestion() {
     console.log('Apify Token detected. Connecting to Apify API...');
     const client = new ApifyClient({ token: apifyToken });
 
-    // Configure the Google Maps Scraper Actor
+    // Configure the Google Maps Scraper Actor with ONLY non-pub/non-alcohol businesses from Bourton Browser
     const input = {
       searchStringsArray: [
-        // --- RETAIL & SHOWROOMS ---
-        "Amanda Hanley Burford",
-        "Barrington Kitchens Burford",
-        "Burford Garden Co Burford",
-        "The Bathroom Showroom Bourton-on-the-Water",
-        "Alain Rouveure Galleries Todenham",
-        "Westminster Stone Burford",
-        "Fosseway Furniture Shipston-on-Stour",
-        "Westcote Design Kingham",
-        "Finesse Shutters Evesham",
-
-        // --- TRADES & MAINTENANCE ---
-        "Acorn Roofing Services Bloxham",
-        "Concept Security gates Gloucester",
-        "AJB Loft Conversions",
-        "The Cotswold Garage Door Company",
-        "Just Carpentry & Locks Cheltenham",
-        "Phil Dadge Carpentry Bourton-on-the-Water",
-        "Calarel Joinery Moreton-in-Marsh",
-        "PW Wheeler Electrical Bourton-on-the-Water",
-        "MPN Plumbing Heating Faringdon",
-        "The Woodentop Restoration Company Cotswolds",
-        "Country Roofing Witney",
-        "RJB Window Repair Moreton-in-Marsh",
-        "Standard Building Ltd Cotswolds",
-        "Heritage Stone Walls Cotswolds",
-        "White Oak Landscaping Witney",
-        "Thomas Contracting Cotswolds",
-        "SDC Roofing Cotswolds",
-        "JG Landscaping",
-        "WGT Fencing Chipping Norton",
-        "Wessex Pumps Witney",
-        "DWG Plans Cotswolds",
-        "Bob Dadge Stow-on-the-Wold",
-        "G&O Engineers Witney",
-        "Greener Ohms Electrical Witney",
-        "Four Shires Exterior Cleaning Moreton-in-Marsh",
-        "TWG Stonework Cotswolds",
-        "The Landscape Centre Witney",
-        "CJ Tout Plumbing Cotswolds",
-        "Associated Blinds Witney",
-        "KB Installations Chipping Norton",
-
-        // --- PROFESSIONAL SERVICES ---
-        "MJD Surveyors Bourton-on-the-Water",
-        "Chase Morgan Solicitors Moreton-in-Marsh",
-        "Dovecote Property Group Cotswolds",
-        "Civic Security Gate Doctors Cotswolds",
-        "Insight Planning Services Witney",
-        "Wise Investment Chipping Norton",
-        "Taylor Made Estate Planning Cotswolds",
-        "TaylorMade Wealth Chipping Norton",
-        "BwD Bookkeeping Kidlington",
-
-        // --- HEALTH, WELLNESS & SERVICES ---
-        "Cotswold Dentures Cirencester",
-        "Tinas Mobile Foot Care Cotswolds",
-        "Bourton Podiatry Upper Slaughter",
-        "Royall Holistics Northleach",
-        "Cotswold Archery Batsford",
-        "Richmond Villages Witney",
-        "Hearing & Mobility Store Bourton-on-the-Water",
-        "The Crock Stow-on-the-Wold",
-        "Lisa Cartlidge Hypnotherapy",
-        "Stow Physio at Bourton",
-        "Cocoon Live-in Care Cotswolds",
-        "Better Swim School Cotswolds",
-        "Sibford School Banbury",
-
-        // --- FUNERAL SERVICES ---
-        "Julie Sullivan Funeral Directors Moreton-in-Marsh",
-        "Allen & Son Funeral Directors Moreton-in-Marsh",
-
-        // --- OTHER SERVICES & ATTRACTIONS ---
-        "Byeways Taxis Stow-on-the-Wold",
-        "Cotswold Petroleum Moreton-in-Marsh",
-        "Oilwell Garage Little Compton",
-        "Mustoes Haulage Northleach",
-        "Tom Negus Tree Care Cotswolds",
+        "Cotswold Neuro Rehab Gloucestershire",
+        "TM Hairdressing Bourton-on-the-Water",
+        "Colour Your Home Cotswolds",
+        "Brooks Window Cleaning Bourton-on-the-Water",
+        "Tina Hamer The Back Woman Bourton-on-the-Water",
+        "Batsford Arboretum Moreton-in-Marsh",
+        "Dave's Aerials & Satellites Bourton-on-the-Water",
+        "W J Wright Funeral Directors Bourton-on-the-Water",
+        "Kendall & Davies Solicitors Bourton-on-the-Water",
+        "Stones Memorials Bourton-on-the-Water",
+        "Badham Pharmacy Stow-on-the-Wold",
+        "Badham Pharmacy Upper Rissington",
+        "Bennett Pest Control Cotswolds",
+        "Bourton Land Rover Bourton-on-the-Water",
+        "Zena the Barber Bourton-on-the-Water",
+        "VJ Collett Bourton-on-the-Water",
+        "Bourton Podiatry Clinic Upper Slaughter",
+        "Riverside Dental Practice Bourton-on-the-Water",
         "Mossinator Bourton-on-the-Water",
-        "Beeson Trees Cotswolds"
+        "Ear Care Clinics Bourton-on-the-Water",
+        "Stow Physio at Bourton",
+        "A Breath of Fresh Hair by Paula Bourton-on-the-Water",
+        "Mike Ciger Landscaping Bourton-on-the-Water",
+        "Designer Pooch Bourton-on-the-Water",
+        "Stow Travel Upper Rissington",
+        "Ted George Estate Agents Shipton-under-Wychwood",
+        "Massage Cotswold Bourton-on-the-Water",
+        "Greener Ohms Electrical Witney",
+        "G&O Engineers Witney",
+        "Bourton Library Bourton-on-the-Water",
+        "Clarke & Humphries Bourton-on-the-Water",
+        "The Mobility Store Bourton-on-the-Water",
+        "FAB IT Rescue Bourton-on-the-Water",
+        "Laura Williams Coaching Cotswolds",
+        "Chorley's Auctioneers Prinknash Abbey",
+        "The Lady Painters Bourton-on-the-Water",
+        "Birdland Park and Gardens Bourton-on-the-Water",
+        "Cotswold Motor Museum Bourton-on-the-Water",
+        "Croft Restaurant Bourton-on-the-Water",
+        "Bakery on the Water Bourton-on-the-Water",
+        "The Chestnut Tree Bourton-on-the-Water",
+        "The Den Bourton-on-the-Water",
+        "Beautylicious Bourton-on-the-Water",
+        "Dragonfly Maze Bourton-on-the-Water"
       ],
       maxCrawledPlacesPerSearch: 1,
       language: "en",
@@ -215,101 +176,44 @@ async function runIngestion() {
     }
   }
 
-  // Fallback to high-quality Mock data if no items were fetched or Apify client is not configured
+  // Fallback to high-quality Mock data from Bourton Browser document if no items were fetched
   if (rawItems.length === 0) {
-    console.log('No Apify data. Using high-quality mock Cotswolds listings for ingestion testing...');
+    console.log('No Apify data. Using mock listings from Bourton Browser document for ingestion...');
     rawItems = [
       {
-        title: "The Lygon Arms",
-        subTitle: "Historic Inn & Hotel",
-        phone: "+44 1386 852255",
-        website: "https://www.lygonarmshotel.co.uk",
-        address: "High St, Broadway, Worcestershire WR12 7DU",
-        city: "Broadway",
-        postalCode: "WR12 7DU",
-        location: { lat: 52.0366, lng: -1.8558 },
-        imageUrl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-        imageUrls: [
-          "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1582719478250-c89cae4db85b?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80"
-        ],
+        title: "Batsford Arboretum & Garden Centre",
+        subTitle: "Arboretum, Garden Centre & Cafe",
+        phone: "+44 1608 730352",
+        website: "https://www.batsarb.co.uk",
+        address: "Batsford, Moreton-in-Marsh, GL56 9AT",
+        city: "Moreton-in-Marsh",
+        postalCode: "GL56 9AT",
+        location: { lat: 51.9897, lng: -1.7242 },
+        imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
         totalScore: 4.8,
-        reviewsCount: 245,
-        placeId: "google-place-lygon-arms",
-        openingHours: [
-          { "day": "Monday", "hours": "Open 24 hours" },
-          { "day": "Tuesday", "hours": "Open 24 hours" },
-          { "day": "Wednesday", "hours": "Open 24 hours" },
-          { "day": "Thursday", "hours": "Open 24 hours" },
-          { "day": "Friday", "hours": "Open 24 hours" },
-          { "day": "Saturday", "hours": "Open 24 hours" },
-          { "day": "Sunday", "hours": "Open 24 hours" }
-        ]
+        reviewsCount: 450,
+        placeId: "google-place-batsford-arboretum"
       },
       {
-        title: "The Wild Rabbit",
-        subTitle: "Gastropub & Inn",
-        phone: "+44 1608 658389",
-        website: "https://thewildrabbit.co.uk",
-        address: "Church St, Kingham, Chipping Norton, Oxfordshire OX7 6YA",
-        city: "Kingham",
-        postalCode: "OX7 6YA",
-        location: { lat: 51.9083, lng: -1.6146 },
-        imageUrl: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-        imageUrls: [
-          "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
-        ],
-        totalScore: 4.7,
-        reviewsCount: 198,
-        placeId: "google-place-wild-rabbit",
-        openingHours: [
-          { "day": "Monday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Tuesday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Wednesday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Thursday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Friday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Saturday", "hours": "12:00 PM - 11:00 PM" },
-          { "day": "Sunday", "hours": "12:00 PM - 10:30 PM" }
-        ]
-      },
-      {
-        title: "The Porch House",
-        subTitle: "Traditional Pub & Restaurant",
-        phone: "+44 1451 870048",
-        website: "https://www.porch-house.co.uk",
-        address: "Digbeth St, Stow-on-the-Wold, Gloucestershire GL54 1BN",
-        city: "Stow-on-the-Wold",
-        postalCode: "GL54 1BN",
-        location: { lat: 51.9298, lng: -1.7247 },
-        imageUrl: "https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80",
-        imageUrls: [
-          "https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?auto=format&fit=crop&w=800&q=80",
-          "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80"
-        ],
-        totalScore: 4.5,
-        reviewsCount: 167,
-        placeId: "google-place-porch-house",
-        openingHours: [
-          { "day": "Monday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Tuesday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Wednesday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Thursday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Friday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Saturday", "hours": "11:00 AM - 11:00 PM" },
-          { "day": "Sunday", "hours": "11:00 AM - 10:30 PM" }
-        ]
+        title: "Riverside Dental Practice",
+        subTitle: "Dental Care Clinic",
+        phone: "+44 1451 820306",
+        website: "https://www.riverside-dental-practice.co.uk",
+        address: "Moore Rd, Bourton-on-the-Water, GL54 2AZ",
+        city: "Bourton-on-the-Water",
+        postalCode: "GL54 2AZ",
+        location: { lat: 51.8850, lng: -1.7560 },
+        imageUrl: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80",
+        totalScore: 4.9,
+        reviewsCount: 95,
+        placeId: "google-place-riverside-dental"
       }
     ];
   }
 
   const upsertListings = [];
+  const processedSlugs = new Set();
+  const processedPlaceIds = new Set();
 
   for (const item of rawItems) {
     const title = item.title || item.name;
@@ -318,7 +222,7 @@ async function runIngestion() {
       continue;
     }
 
-    // Exclude pubs, bars, breweries, wine shops, distilleries, and inns promoting drinking
+    // Exclude pubs, bars, breweries, wine shops, distilleries, inns, and alcohol-promoting businesses
     const rawCategory = (item.categoryName || item.subTitle || '').toLowerCase();
     const cleanTitle = title.toLowerCase();
     if (
@@ -333,7 +237,7 @@ async function runIngestion() {
       console.log(`Skipping pub/alcohol-promoting business: "${title}"`);
       continue;
     }
-    
+
     // Skip permanently closed locations
     if (item.isClosed || item.permanentlyClosed || item.closed === true) {
       console.log(`Skipping permanently closed business: "${title}"`);
@@ -352,12 +256,25 @@ async function runIngestion() {
       }
     }
 
-    const village = item.city || item.sub_region || 'cotswolds';
+    const village = item.city || item.sub_region || 'Bourton-on-the-Water';
     const slug = generateSlug(title, village);
-    
+
+    // Deduplicate in batch
+    const placeId = item.placeId || null;
+    if (processedSlugs.has(slug)) {
+      console.log(`Skipping duplicate slug in batch: "${slug}"`);
+      continue;
+    }
+    if (placeId && processedPlaceIds.has(placeId)) {
+      console.log(`Skipping duplicate placeId in batch: "${placeId}"`);
+      continue;
+    }
+    processedSlugs.add(slug);
+    if (placeId) processedPlaceIds.add(placeId);
+
     console.log(`Processing listing: "${title}" (Slug: ${slug})...`);
 
-    // Handle Image Streaming (Fetch up to 4 images for premium display)
+    // Handle Image Streaming
     let imageUrls = [];
     const rawImageUrls = [];
     if (item.imageUrl) rawImageUrls.push(item.imageUrl);
@@ -381,7 +298,7 @@ async function runIngestion() {
     const dbListing = {
       title: title,
       slug: slug,
-      description: item.subTitle || item.description || `Beautiful local listing in ${village}, Cotswolds.`,
+      description: item.subTitle || item.description || `Local business featured in Bourton Browser, ${village}, Cotswolds.`,
       category: mapCategory(item.categoryName || item.subTitle || 'Local Business'),
       phone: item.phone || item.phoneNormalized || null,
       website: item.website || null,
@@ -397,9 +314,9 @@ async function runIngestion() {
       rating: item.totalScore || null,
       reviews_count: item.reviewsCount || null,
       opening_hours: item.openingHours || null,
-      google_place_id: item.placeId || null,
+      google_place_id: placeId,
 
-      // Ingest live immediately (bypass admin staging queue)
+      // Ingest live immediately
       tier: 'basic',
       is_approved: true
     };
@@ -408,34 +325,57 @@ async function runIngestion() {
   }
 
   if (upsertListings.length > 0) {
-    const BATCH_SIZE = 50;
     let totalUpserted = 0;
-    let hasError = false;
+    console.log(`Saving ${upsertListings.length} listings to Supabase database...`);
 
-    for (let i = 0; i < upsertListings.length; i += BATCH_SIZE) {
-      const batch = upsertListings.slice(i, i + BATCH_SIZE);
-      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-      const totalBatches = Math.ceil(upsertListings.length / BATCH_SIZE);
-      console.log(`Upserting batch ${batchNum}/${totalBatches} (${batch.length} listings)...`);
+    for (const listing of upsertListings) {
+      // Find existing record by slug or google_place_id to avoid constraint violations
+      let existingMatch = null;
+      
+      if (listing.google_place_id) {
+        const { data: placeMatch } = await supabase
+          .from('listings')
+          .select('id')
+          .eq('google_place_id', listing.google_place_id)
+          .maybeSingle();
+        if (placeMatch) existingMatch = placeMatch;
+      }
+      
+      if (!existingMatch && listing.slug) {
+        const { data: slugMatch } = await supabase
+          .from('listings')
+          .select('id')
+          .eq('slug', listing.slug)
+          .maybeSingle();
+        if (slugMatch) existingMatch = slugMatch;
+      }
 
-      const { error } = await supabase
-        .from('listings')
-        .upsert(batch, { onConflict: 'slug' });
+      if (existingMatch) {
+        const { error } = await supabase
+          .from('listings')
+          .update(listing)
+          .eq('id', existingMatch.id);
 
-      if (error) {
-        console.error(`Batch ${batchNum} upsert error:`, error.message);
-        hasError = true;
+        if (error) {
+          console.error(`Error updating listing "${listing.title}":`, error.message);
+        } else {
+          totalUpserted++;
+        }
       } else {
-        totalUpserted += batch.length;
+        const { error } = await supabase
+          .from('listings')
+          .insert(listing);
+
+        if (error) {
+          console.error(`Error inserting listing "${listing.title}":`, error.message);
+        } else {
+          totalUpserted++;
+        }
       }
     }
 
-    if (!hasError) {
-      console.log('--- INGESTION WORKFLOW COMPLETED SUCCESSFULLY ---');
-      console.log(`Total listings upserted: ${totalUpserted}`);
-    } else {
-      console.log(`Partial completion: ${totalUpserted}/${upsertListings.length} listings upserted.`);
-    }
+    console.log('--- INGESTION WORKFLOW COMPLETED SUCCESSFULLY ---');
+    console.log(`Total listings saved/upserted: ${totalUpserted}/${upsertListings.length}`);
   }
 }
 

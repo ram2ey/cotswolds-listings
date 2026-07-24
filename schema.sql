@@ -189,3 +189,9 @@ CREATE POLICY listings_anonymous_insert_policy
 ON listings
 FOR INSERT
 WITH CHECK (is_approved = false AND tier = 'basic');
+
+-- Optional: Supabase pg_cron extension snippet to keep database active internally
+-- Run the following in Supabase SQL Editor if pg_cron is enabled on your project:
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- SELECT cron.schedule('supabase-keep-alive-job', '0 0 */3 * *', $$ SELECT count(*) FROM listings; $$);
+

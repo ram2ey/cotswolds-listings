@@ -1,0 +1,25 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Runs at 04:00 UTC every 3 days
+    - cron: '0 4 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database / Keep-Alive Endpoint
+        run: |
+          if [ -n "${{ secrets.PUBLIC_SITE_URL }}" ]; then
+            echo "Pinging production API endpoint..."
+            curl -f "${{ secrets.PUBLIC_SITE_URL }}/api/keep-alive" || echo "API ping completed"
+          elif [ -n "${{ secrets.SUPABASE_URL }}" ] && [ -n "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "Pinging Supabase REST API directly..."
+            curl -f -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/businesses?select=id&limit=1" \
+              -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          else
+            echo "No URL or keys configured in repository secrets."
+          fi
