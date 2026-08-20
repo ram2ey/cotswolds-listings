@@ -234,6 +234,58 @@ const MOCK_LISTINGS: Listing[] = [
   }
 ];
 
+interface SubscriptionPlan {
+  id: 'claim' | 'gold' | 'gold_social' | 'featured' | 'featured_social';
+  name: string;
+  description: string;
+  price_monthly_gbp: number;
+  features: string[];
+  is_active: boolean;
+}
+
+const DEFAULT_CLAIM_PLANS: SubscriptionPlan[] = [
+  {
+    id: 'claim',
+    name: 'Claim Listing',
+    description: 'Verify ownership, link your website, and display reviews.',
+    price_monthly_gbp: 20,
+    features: ['✓ Verify Ownership', '✓ Link Official Website', '✓ Rating Stars & Reviews'],
+    is_active: true
+  },
+  {
+    id: 'gold',
+    name: 'Gold Partner',
+    description: 'The complete premium listing experience.',
+    price_monthly_gbp: 50,
+    features: ['✓ Gold Partner Badge', '✓ Priority Search Ranking', '✓ Full Photo Gallery', '✓ AI-Generated Details'],
+    is_active: true
+  },
+  {
+    id: 'gold_social',
+    name: 'Gold & Social Package',
+    description: 'All Gold features + dedicated social media promotion.',
+    price_monthly_gbp: 150,
+    features: ['✓ Gold Partner Badge', '✓ Priority Search Ranking', '✓ Social Media Promotion', '✓ AI-Generated Details'],
+    is_active: true
+  },
+  {
+    id: 'featured',
+    name: 'Featured Partner',
+    description: 'Absolute maximum visibility across Cotswolds Pages.',
+    price_monthly_gbp: 100,
+    features: ['✓ Featured Standout Badge', '✓ Absolute Top Ranking', '✓ Full Photo Gallery', '✓ AI-Generated Details'],
+    is_active: true
+  },
+  {
+    id: 'featured_social',
+    name: 'Featured & Social Promotion',
+    description: 'Absolute max visibility + premium campaigns.',
+    price_monthly_gbp: 200,
+    features: ['✓ Featured Standout Badge', '✓ Absolute Top Ranking', '✓ Premium Social Campaigns', '✓ AI-Generated Details'],
+    is_active: true
+  }
+];
+
 export default function ListingProfile() {
   const params = useParams();
   const router = useRouter();
@@ -243,6 +295,27 @@ export default function ListingProfile() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Dynamic pricing plans
+  const [pricingPlans, setPricingPlans] = useState<SubscriptionPlan[]>(DEFAULT_CLAIM_PLANS);
+
+  // Fetch live pricing plans
+  useEffect(() => {
+    async function fetchPricing() {
+      try {
+        const res = await fetch('/api/pricing');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setPricingPlans(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Using default pricing plans:', err);
+      }
+    }
+    fetchPricing();
+  }, []);
+
   // Claim listing flow states
   const [isClaimModalOpen, setIsClaimModalOpen] = useState<boolean>(false);
   const [claimStep, setClaimStep] = useState<number>(1);
@@ -250,6 +323,9 @@ export default function ListingProfile() {
   const [websiteInput, setWebsiteInput] = useState<string>('');
   const [claimError, setClaimError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState<boolean>(false);
+
+  // Helper to find selected plan object
+  const activePlanObj = pricingPlans.find(p => p.id === selectedPlan) || DEFAULT_CLAIM_PLANS.find(p => p.id === selectedPlan)!;
 
   // Handles redirecting the user to Stripe Checkout Session
   const handleStripeCheckout = async () => {
@@ -839,151 +915,59 @@ export default function ListingProfile() {
                     Verify your ownership and unlock the premium partner experience. Choose a subscription tier to start:
                   </p>
 
-                  {/* Claim Listing Card */}
-                  <div 
-                    onClick={() => setSelectedPlan('claim')}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                      selectedPlan === 'claim' 
-                        ? 'border-emerald-500 bg-emerald-500/5 shadow-sm' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="text-sm font-extrabold text-emerald-700">Claim Listing</span>
-                        <p className="text-[10px] text-stone-500 mt-0.5">Verify ownership, link your website, and display reviews.</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-stone-900">£20</span>
-                        <span className="text-[10px] font-normal text-stone-455">/mo</span>
-                      </div>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                      <li>✓ Verify Ownership</li>
-                      <li>✓ Link Official Website</li>
-                      <li>✓ Rating Stars & Reviews</li>
-                    </ul>
-                  </div>
+                  {/* Dynamic Pricing Cards */}
+                  {pricingPlans.filter(p => p.is_active).map((plan) => {
+                    const isSelected = selectedPlan === plan.id;
+                    const isGold = plan.id === 'gold' || plan.id === 'gold_social';
+                    const isFeatured = plan.id === 'featured' || plan.id === 'featured_social';
+                    const isClaim = plan.id === 'claim';
 
-                  {/* Gold Card */}
-                  <div 
-                    onClick={() => setSelectedPlan('gold')}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                      selectedPlan === 'gold' 
-                        ? 'border-amber-500 bg-amber-500/5 shadow-sm' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="text-sm font-extrabold text-amber-700">Gold Partner</span>
-                        <p className="text-[10px] text-stone-500 mt-0.5">The complete premium listing experience.</p>
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => setSelectedPlan(plan.id)}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
+                          isSelected
+                            ? isFeatured
+                              ? 'border-indigo-600 bg-indigo-500/5 shadow-sm'
+                              : isGold
+                              ? 'border-amber-500 bg-amber-500/5 shadow-sm'
+                              : 'border-emerald-500 bg-emerald-500/5 shadow-sm'
+                            : 'border-stone-200 hover:border-stone-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <span className={`text-sm font-extrabold ${
+                              isFeatured ? 'text-indigo-700' : isGold ? 'text-amber-700' : 'text-emerald-700'
+                            }`}>
+                              {plan.name}
+                            </span>
+                            <p className="text-[10px] text-stone-500 mt-0.5">{plan.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`text-lg font-black ${isFeatured ? 'text-indigo-900' : 'text-stone-900'}`}>
+                              £{plan.price_monthly_gbp}
+                            </span>
+                            <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                          </div>
+                        </div>
+                        <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
+                          {plan.features.map((feat, i) => (
+                            <li key={i} className={feat.includes('Social') || feat.includes('Featured') ? 'font-bold text-stone-900' : ''}>
+                              {feat}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-stone-900">£50</span>
-                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
-                      </div>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                      <li>✓ Gold Partner Badge</li>
-                      <li>✓ Priority Search Ranking</li>
-                      <li>✓ Full Photo Gallery</li>
-                      <li>✓ AI-Generated Details</li>
-                    </ul>
-                  </div>
-
-                  {/* Gold Card with Social */}
-                  <div 
-                    onClick={() => setSelectedPlan('gold_social')}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                      selectedPlan === 'gold_social' 
-                        ? 'border-amber-500 bg-amber-500/5 shadow-sm' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="text-sm font-extrabold text-amber-700">Gold & Social Package</span>
-                        <p className="text-[10px] text-stone-500 mt-0.5">All Gold features + dedicated social media promotion.</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-stone-900">£150</span>
-                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
-                      </div>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                      <li>✓ Gold Partner Badge</li>
-                      <li>✓ Priority Search Ranking</li>
-                      <li className="font-bold text-amber-750">✓ Social Media Promotion</li>
-                      <li>✓ AI-Generated Details</li>
-                    </ul>
-                  </div>
-
-                  {/* Featured Card */}
-                  <div 
-                    onClick={() => setSelectedPlan('featured')}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                      selectedPlan === 'featured' 
-                        ? 'border-indigo-650 bg-indigo-500/5 shadow-sm' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="text-sm font-extrabold text-indigo-700">Featured Partner</span>
-                        <p className="text-[10px] text-stone-500 mt-0.5">Absolute maximum visibility across Cotswolds Pages.</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-indigo-900">£100</span>
-                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
-                      </div>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                      <li className="font-bold text-indigo-750">✓ Featured Standout Badge</li>
-                      <li className="font-bold text-indigo-750">✓ Absolute Top Ranking</li>
-                      <li>✓ Full Photo Gallery</li>
-                      <li>✓ AI-Generated Details</li>
-                    </ul>
-                  </div>
-
-                  {/* Featured Card with Social */}
-                  <div 
-                    onClick={() => setSelectedPlan('featured_social')}
-                    className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                      selectedPlan === 'featured_social' 
-                        ? 'border-indigo-600 bg-indigo-500/5 shadow-sm' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="text-sm font-extrabold text-indigo-700">Featured & Social Promotion</span>
-                        <p className="text-[10px] text-stone-500 mt-0.5">Absolute max visibility + premium campaigns.</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-indigo-900">£200</span>
-                        <span className="text-[10px] font-normal text-stone-450">/mo</span>
-                      </div>
-                    </div>
-                    <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                      <li className="font-bold text-indigo-750">✓ Featured Standout Badge</li>
-                      <li className="font-bold text-indigo-750">✓ Absolute Top Ranking</li>
-                      <li className="font-bold text-indigo-750">✓ Premium Social Campaigns</li>
-                      <li>✓ AI-Generated Details</li>
-                    </ul>
-                  </div>
+                    );
+                  })}
 
                   <button
                     onClick={() => setClaimStep(2)}
                     className="w-full py-3 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
                   >
-                    Continue with {
-                      selectedPlan === 'claim' ? 'Claim Listing' : 
-                      selectedPlan === 'gold' ? 'Gold Partner' : 
-                      selectedPlan === 'gold_social' ? 'Gold & Social Package' : 
-                      selectedPlan === 'featured' ? 'Featured Partner' : 
-                      'Featured & Social Promotion'
-                    }
+                    Continue with {activePlanObj?.name || 'Selected Plan'}
                   </button>
                 </div>
               )}
@@ -1055,13 +1039,7 @@ export default function ListingProfile() {
                             ? 'text-amber-605 bg-amber-50 border-amber-100'
                             : 'text-emerald-605 bg-emerald-50 border-emerald-100'
                         }`}>
-                          {
-                            selectedPlan === 'claim' ? 'Claim Listing' : 
-                            selectedPlan === 'gold' ? 'Gold Partner' : 
-                            selectedPlan === 'gold_social' ? 'Gold & Social' : 
-                            selectedPlan === 'featured' ? 'Featured Partner' : 
-                            'Featured & Social'
-                          }
+                          {activePlanObj?.name || selectedPlan}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
@@ -1071,13 +1049,7 @@ export default function ListingProfile() {
                       <div className="border-t border-stone-150 pt-2.5 flex justify-between items-center">
                         <span className="text-xs font-bold text-stone-900">Total Price</span>
                         <div className="text-right">
-                          <span className="text-base font-black text-stone-900">£{
-                            selectedPlan === 'claim' ? '20' : 
-                            selectedPlan === 'gold' ? '50' : 
-                            selectedPlan === 'gold_social' ? '150' : 
-                            selectedPlan === 'featured' ? '100' : 
-                            '200'
-                          }</span>
+                          <span className="text-base font-black text-stone-900">£{activePlanObj?.price_monthly_gbp ?? 0}</span>
                           <span className="text-[10px] font-bold text-stone-450">/month</span>
                         </div>
                       </div>

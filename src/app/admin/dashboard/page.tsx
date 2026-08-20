@@ -13,8 +13,14 @@ import {
   Loader2, 
   AlertTriangle,
   Inbox,
-  Lock
+  Lock,
+  CreditCard,
+  Save,
+  RotateCcw,
+  Sparkles,
+  Check
 } from 'lucide-react';
+import type { SubscriptionPlan } from '@/lib/plans';
 
 interface Listing {
   id: string;
@@ -39,7 +45,7 @@ export default function AdminDashboard() {
   const [authError, setAuthError] = useState<string | null>(null);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'staging' | 'live'>('staging');
+  const [activeTab, setActiveTab] = useState<'staging' | 'live' | 'pricing'>('staging');
 
   // Filter states
   const [filterTier, setFilterTier] = useState<string>('all');
@@ -50,6 +56,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string; isError: boolean } | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+
+  // Pricing Plans state
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = useState<boolean>(false);
+  const [planDrafts, setPlanDrafts] = useState<Record<string, { name: string; price_monthly_gbp: number | string; description: string; is_active: boolean }>>({});
+  const [savingPlanId, setSavingPlanId] = useState<string | null>(null);
 
   // Check saved authentication state
   useEffect(() => {
@@ -81,6 +93,8 @@ export default function AdminDashboard() {
 
   // Fetch listings from the API based on active tab
   useEffect(() => {
+    if (activeTab === 'pricing') return;
+
     async function fetchListings() {
       try {
         setLoading(true);
@@ -101,12 +115,114 @@ export default function AdminDashboard() {
     fetchListings();
   }, [activeTab]);
 
+  // Fetch subscription plans
+  const fetchPlans = async () => {
+    try {
+      setLoadingPlans(true);
+      const res = await fetch('/api/admin/pricing');
+      if (!res.ok) throw new Error('Failed to load subscription plans');
+      const data: SubscriptionPlan[] = await res.json();
+      setPlans(data);
+      
+      const drafts: Record<string, any> = {};
+      data.forEach(p => {
+        drafts[p.id] = {
+          name: p.name,
+          price_monthly_gbp: p.price_monthly_gbp,
+          description: p.description,
+          is_active: p.is_active,
+        };
+      });
+      setPlanDrafts(drafts);
+    } catch (err: any) {
+      showNotification('Could not load subscription pricing: ' + err.message, true);
+    } finally {
+      setLoadingPlans(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'pricing' && isAuthenticated) {
+      fetchPlans();
+    }
+  }, [activeTab, isAuthenticated]);
+
   // Display a auto-fading notification message
   const showNotification = (message: string, isError = false) => {
     setNotification({ message, isError });
     setTimeout(() => {
       setNotification(null);
     }, 5000);
+  };
+
+  // Save changes to a specific subscription plan
+  const handleSavePlan = async (id: string) => {
+    const draft = planDrafts[id];
+    if (!draft) return;
+
+    if (draft.price_monthly_gbp === '' || isNaN(Number(draft.price_monthly_gbp)) || Number(draft.price_monthly_gbp) < 0) {
+      showNotification('Please enter a valid positive price amount in GBP.', true);
+      return;
+    }
+
+    try {
+      setSavingPlanId(id);
+      const res = await fetch('/api/admin/pricing', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          name: draft.name,
+          price_monthly_gbp: Number(draft.price_monthly_gbp),
+          description: draft.description,
+          is_active: draft.is_active,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update plan');
+      }
+
+      const result = await res.json();
+      showNotification(result.message || `Pricing updated successfully!`);
+      
+      // Update local plans state
+      setPlans(prev => prev.map(p => p.id === id ? {
+        ...p,
+        name: draft.name,
+        price_monthly_gbp: Number(draft.price_monthly_gbp),
+        description: draft.description,
+        is_active: draft.is_active,
+      } : p));
+    } catch (err: any) {
+      showNotification(err.message || 'Error updating pricing plan', true);
+    } finally {
+      setSavingPlanId(null);
+    }
+  };
+
+  // Reset all plans to defaults
+  const handleResetAllPlans = async () => {
+    const confirmReset = window.confirm('Are you sure you want to restore all subscription plan prices to their standard system defaults?');
+    if (!confirmReset) return;
+
+    try {
+      setSavingPlanId('all');
+      const res = await fetch('/api/admin/pricing', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reset_all: true }),
+      });
+
+      if (!res.ok) throw new Error('Failed to reset plans');
+      showNotification('All subscription plans have been reset to system defaults.');
+      await fetchPlans();
+    } catch (err: any) {
+      showNotification(err.message || 'Error resetting pricing plans', true);
+    } finally {
+      setSavingPlanId(null);
+    }
   };
 
   // Change listing tier (PUT)
@@ -315,7 +431,11 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4 text-xs">
             <span className="px-3 py-1 bg-stone-100 rounded-full font-medium text-stone-600">
-              Active View: {activeTab === 'live' ? 'Live Directory' : 'Staging Queue'}
+              Active View: {
+                activeTab === 'live' ? 'Live Directory' : 
+                activeTab === 'pricing' ? 'Subscription Pricing' : 
+                'Staging Queue'
+              }
             </span>
           </div>
         </div>
@@ -344,6 +464,17 @@ export default function AdminDashboard() {
               }`}
             >
               Live Directory (Approved)
+            </button>
+            <button
+              onClick={() => setActiveTab('pricing')}
+              className={`py-4 px-1 border-b-2 font-semibold text-sm transition cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'pricing'
+                  ? 'border-amber-500 text-stone-950'
+                  : 'border-transparent text-stone-500 hover:text-stone-700'
+              }`}
+            >
+              <CreditCard className="h-4 w-4" />
+              Subscription Pricing
             </button>
           </div>
         </div>
@@ -377,286 +508,482 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Global Loading State */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
-            <p className="text-sm text-stone-500 font-medium">
-              Loading {activeTab === 'live' ? 'live' : 'staging queue'} listings...
-            </p>
-          </div>
-        )}
-
-        {/* Global Error State */}
-        {error && !loading && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-900 rounded-xl p-6 max-w-2xl mx-auto flex gap-4 items-start shadow-xs">
-            <AlertTriangle className="h-6 w-6 text-rose-600 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-lg">Failed to Retrieve Listings</h3>
-              <p className="text-sm text-rose-700 mt-1">{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition"
-              >
-                Reload Panel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Empty Queue State */}
-        {!loading && !error && listings.length === 0 && (
-          <div className="bg-white border border-stone-200 rounded-2xl p-16 max-w-xl mx-auto text-center flex flex-col items-center shadow-xs">
-            <div className="h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center border border-stone-100 mb-4">
-              <Inbox className="h-8 w-8 text-stone-400" />
-            </div>
-            <h3 className="font-serif text-xl font-semibold text-stone-900">
-              {activeTab === 'live' ? 'No Live Listings Found' : 'Queue is Clear'}
-            </h3>
-            <p className="text-sm text-stone-500 mt-2 max-w-xs">
-              {activeTab === 'live' 
-                ? 'There are no active approved directory listings in the database yet.' 
-                : 'Excellent! There are no new listings awaiting verification at this time.'}
-            </p>
-          </div>
-        )}
-
-        {/* Listings Grid */}
-        {!loading && !error && listings.length > 0 && (() => {
-          // Filter listings based on selected filters
-          const displayedListings = listings.filter((item) => {
-            if (activeTab === 'live') {
-              if (filterTier !== 'all' && (item.tier || 'basic') !== filterTier) {
-                return false;
-              }
-              if (filterPromo && !item.premium_metadata?.has_social_addon) {
-                return false;
-              }
-            }
-            return true;
-          });
-
-          return (
-            <div>
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-sm font-semibold tracking-wider text-stone-400 uppercase">
-                    {activeTab === 'live' ? 'Active Directory Listings' : 'Awaiting Business Verification'} ({displayedListings.length})
-                  </h2>
-                  <p className="text-xs text-stone-500 mt-1">
-                    {activeTab === 'live'
-                      ? 'Manage membership levels, add websites, and trigger deep crawls for claimed listings.'
-                      : 'Please verify details carefully. Approvals are pushed live immediately. Rejections permanently purge records.'}
-                  </p>
-                </div>
-
-                {activeTab === 'live' && (
-                  <div className="flex flex-wrap items-center gap-3 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="text-stone-500 font-medium">Filter Tier:</span>
-                      <select
-                        value={filterTier}
-                        onChange={(e) => setFilterTier(e.target.value)}
-                        className="bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 outline-hidden text-stone-850 font-semibold cursor-pointer"
-                      >
-                        <option value="all">All Tiers</option>
-                        <option value="basic">Basic (Standard)</option>
-                        <option value="claimed">Claimed Partner</option>
-                        <option value="gold">Gold Partner</option>
-                        <option value="featured">Featured Partner</option>
-                      </select>
-                    </div>
-
-                    <label className="flex items-center gap-2 font-medium text-stone-600 bg-white border border-stone-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-stone-50/50">
-                      <input
-                        type="checkbox"
-                        checked={filterPromo}
-                        onChange={(e) => setFilterPromo(e.target.checked)}
-                        className="rounded text-amber-500 focus:ring-amber-500/20"
-                      />
-                      <span>Social Promo Only</span>
-                    </label>
-                  </div>
-                )}
+        {/* PRICING TAB CONTENT */}
+        {activeTab === 'pricing' && (
+          <div>
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-sm font-semibold tracking-wider text-stone-400 uppercase">
+                  Subscription Plans & Monthly Pricing
+                </h2>
+                <p className="text-xs text-stone-500 mt-1">
+                  Adjust live monthly membership fees, edit tier titles, and toggle plan visibility. Changes apply immediately to new checkouts.
+                </p>
               </div>
 
-              {displayedListings.length === 0 ? (
-                <div className="bg-white border border-stone-200 rounded-2xl p-16 text-center max-w-md mx-auto shadow-xs">
-                  <p className="text-sm text-stone-500 font-semibold">No listings match the selected filters.</p>
-                  <button
-                    onClick={() => {
-                      setFilterTier('all');
-                      setFilterPromo(false);
-                    }}
-                    className="mt-4 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition cursor-pointer"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayedListings.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className={`bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
-                        actionInProgress === item.id ? 'opacity-50 pointer-events-none scale-95' : 'scale-100'
+              <button
+                onClick={handleResetAllPlans}
+                disabled={savingPlanId !== null}
+                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 bg-white border border-stone-200 rounded-xl hover:bg-stone-50 shadow-xs transition cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5 text-stone-400" />
+                Reset All to Defaults
+              </button>
+            </div>
+
+            {loadingPlans ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
+                <p className="text-sm text-stone-500 font-medium">Loading subscription plans...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {plans.map((plan) => {
+                  const draft = planDrafts[plan.id] || {
+                    name: plan.name,
+                    price_monthly_gbp: plan.price_monthly_gbp,
+                    description: plan.description,
+                    is_active: plan.is_active,
+                  };
+                  const isSaving = savingPlanId === plan.id;
+                  const isGold = plan.id === 'gold' || plan.id === 'gold_social';
+                  const isFeatured = plan.id === 'featured' || plan.id === 'featured_social';
+                  const isSocial = plan.id.includes('social');
+
+                  return (
+                    <div
+                      key={plan.id}
+                      className={`bg-white border rounded-2xl p-6 shadow-xs flex flex-col justify-between transition-all duration-200 ${
+                        isFeatured 
+                          ? 'border-indigo-200 hover:border-indigo-300' 
+                          : isGold 
+                          ? 'border-amber-200 hover:border-amber-300' 
+                          : 'border-emerald-200 hover:border-emerald-300'
                       }`}
                     >
-                      {/* Card Content */}
-                      <div className="p-6">
-                        <div className="flex justify-between items-start gap-2 mb-3">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100">
-                            <Layers className="h-3.5 w-3.5" />
-                            {item.category}
+                      <div className="space-y-4">
+                        {/* Header & Badges */}
+                        <div className="flex items-center justify-between">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                            isFeatured
+                              ? 'bg-indigo-50 text-indigo-850 border border-indigo-200'
+                              : isGold
+                              ? 'bg-amber-50 text-amber-850 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-850 border border-emerald-200'
+                          }`}>
+                            {isSocial ? '🚀 Growth Package' : 'Standard Tier'}
                           </span>
-                          {activeTab === 'live' && (
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
-                              item.tier === 'featured' 
-                                ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' 
-                                : item.tier === 'gold' 
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200' 
-                                : item.tier === 'claimed'
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                                : 'bg-stone-100 text-stone-600 border border-stone-200'
-                            }`}>
-                              {item.tier || 'basic'}
-                            </span>
-                          )}
+
+                          <label className="flex items-center gap-1.5 text-xs text-stone-500 cursor-pointer font-medium">
+                            <input
+                              type="checkbox"
+                              checked={draft.is_active}
+                              onChange={(e) => {
+                                setPlanDrafts(prev => ({
+                                  ...prev,
+                                  [plan.id]: { ...prev[plan.id], is_active: e.target.checked }
+                                }));
+                              }}
+                              className="rounded text-amber-500 focus:ring-amber-500/20 cursor-pointer"
+                            />
+                            <span>{draft.is_active ? 'Active' : 'Disabled'}</span>
+                          </label>
                         </div>
 
-                        <h3 className="font-serif font-bold text-lg text-stone-950 leading-tight mb-2">
-                          {item.title}
-                        </h3>
+                        {/* Title Input */}
+                        <div>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                            Plan Title
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.name}
+                            onChange={(e) => {
+                              setPlanDrafts(prev => ({
+                                ...prev,
+                                [plan.id]: { ...prev[plan.id], name: e.target.value }
+                              }));
+                            }}
+                            className="w-full text-base font-bold text-stone-900 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                          />
+                        </div>
 
-                        <div className="space-y-2 mt-4 text-xs text-stone-600">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
-                            <span className="truncate">{item.address}</span>
+                        {/* Price Input */}
+                        <div>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                            Monthly Subscription Price (£ GBP)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 font-bold text-sm">
+                              £
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={draft.price_monthly_gbp}
+                              onChange={(e) => {
+                                setPlanDrafts(prev => ({
+                                  ...prev,
+                                  [plan.id]: { ...prev[plan.id], price_monthly_gbp: e.target.value }
+                                }));
+                              }}
+                              className="w-full pl-8 pr-16 text-lg font-black text-stone-900 bg-stone-50 border border-stone-200 rounded-xl py-2 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+                            />
+                            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-xs font-semibold">
+                              / month
+                            </span>
                           </div>
-                          
-                          {item.phone && (
-                            <div className="flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-stone-400 shrink-0" />
-                              <span>{item.phone}</span>
-                            </div>
-                          )}
-                          
-                          <div className="flex items-center gap-2">
-                            <Globe className="h-4 w-4 text-stone-400 shrink-0" />
-                            {activeTab === 'live' ? (
-                              <input
-                                type="text"
-                                placeholder="Add website URL..."
-                                defaultValue={item.website || ''}
-                                onBlur={(e) => handleWebsiteUpdate(item.id, e.target.value)}
-                                className="bg-stone-50 hover:bg-stone-100 focus:bg-white px-2 py-1 rounded border border-stone-200 text-xs w-full outline-hidden text-stone-800"
-                              />
-                            ) : (
-                              <span className="truncate">{item.website || 'No website listed'}</span>
-                            )}
-                          </div>
+                        </div>
+
+                        {/* Description Input */}
+                        <div>
+                          <label className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1">
+                            Subtitle / Description
+                          </label>
+                          <textarea
+                            rows={2}
+                            value={draft.description}
+                            onChange={(e) => {
+                              setPlanDrafts(prev => ({
+                                ...prev,
+                                [plan.id]: { ...prev[plan.id], description: e.target.value }
+                              }));
+                            }}
+                            className="w-full text-xs text-stone-700 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none"
+                          />
+                        </div>
+
+                        {/* Included Perks List (read-only preview) */}
+                        <div className="pt-2 border-t border-stone-100">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-1.5">
+                            Included Perks
+                          </span>
+                          <ul className="space-y-1 text-xs text-stone-600">
+                            {plan.features.map((feature, i) => (
+                              <li key={i} className="flex items-center gap-1.5 text-[11px]">
+                                <Check className="h-3 w-3 text-emerald-600 shrink-0" />
+                                <span>{feature.replace('✓ ', '')}</span>
+                              </li>
+                            ))}
+                          </ul>
                         </div>
                       </div>
 
-                      {/* Actions Bar */}
-                      <div className="border-t border-stone-100 bg-stone-50 px-6 py-4 flex flex-col gap-3">
-                        {activeTab === 'staging' ? (
-                          <div className="flex gap-4">
-                            {/* Reject Button (Red) */}
-                            <button
-                              onClick={() => handleReject(item.id)}
-                              disabled={actionInProgress === item.id}
-                              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-rose-200 hover:border-rose-300 text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 rounded-lg text-xs font-semibold transition cursor-pointer"
-                              title="Reject and permanently delete listing record"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Reject & Delete
-                            </button>
-                            
-                            {/* Approve Button (Green) */}
-                            <button
-                              onClick={() => handleApprove(item.id)}
-                              disabled={actionInProgress === item.id}
-                              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-xs transition hover:shadow-md cursor-pointer"
-                              title="Approve and publish listing to live directory"
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                              Approve Listing
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between text-xs text-stone-800">
-                              <span className="font-semibold text-stone-600">Membership Tier:</span>
-                              <select
-                                value={item.tier || 'basic'}
-                                onChange={(e) => handleTierChange(item.id, e.target.value as any)}
-                                className="bg-white border border-stone-200 rounded-md px-2 py-1 text-xs outline-hidden text-stone-800 cursor-pointer"
-                              >
-                                <option value="basic">Basic (Standard)</option>
-                                <option value="claimed">Claimed Partner</option>
-                                <option value="gold">Gold Partner</option>
-                                <option value="featured">Featured Partner</option>
-                              </select>
-                            </div>
-
-                            {item.premium_metadata?.package_name && (
-                              <div className="flex justify-between items-center text-xs text-stone-850 border-t border-stone-100 pt-2">
-                                <span className="font-semibold text-stone-600">Active Package:</span>
-                                <span className="font-bold text-stone-900 capitalize">
-                                  {item.premium_metadata.package_name.replace('_', ' ')}
-                                </span>
-                              </div>
-                            )}
-
-                            {item.premium_metadata?.has_social_addon && (
-                              <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-2.5 flex items-center justify-between text-xs mt-1">
-                                <span className="text-indigo-850 font-extrabold flex items-center gap-1.5">
-                                  📢 Social Media Promo Active
-                                </span>
-                                <span className="text-[9px] bg-indigo-200 text-indigo-800 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
-                                  Pending Post
-                                </span>
-                              </div>
-                            )}
-                            
-                            {(item.tier === 'gold' || item.tier === 'featured') && (
-                              <button
-                                onClick={() => handleDeepScrape(item.id)}
-                                disabled={actionInProgress === item.id || !item.website}
-                                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer ${
-                                  actionInProgress === item.id 
-                                    ? 'bg-stone-100 text-stone-400 border border-stone-200' 
-                                    : !item.website 
-                                    ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed' 
-                                    : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
-                                }`}
-                                title={item.website ? "Scrape website content and generate premium AI metadata" : "Add website URL before scraping"}
-                              >
-                                {actionInProgress === item.id ? (
-                                  <>
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                    Scraping & Formatting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Layers className="h-3.5 w-3.5" />
-                                    Deep Scrape Web info
-                                  </>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        )}
+                      {/* Save Action */}
+                      <div className="mt-6 pt-4 border-t border-stone-100">
+                        <button
+                          onClick={() => handleSavePlan(plan.id)}
+                          disabled={isSaving}
+                          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
+                        >
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              Saving Changes...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="h-3.5 w-3.5 text-amber-400" />
+                              Save Plan Pricing
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* STAGING / LIVE DIRECTORY CONTENT */}
+        {activeTab !== 'pricing' && (
+          <div>
+            {/* Global Loading State */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
+                <p className="text-sm text-stone-500 font-medium">
+                  Loading {activeTab === 'live' ? 'live' : 'staging queue'} listings...
+                </p>
+              </div>
+            )}
+
+            {/* Global Error State */}
+            {error && !loading && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-900 rounded-xl p-6 max-w-2xl mx-auto flex gap-4 items-start shadow-xs">
+                <AlertTriangle className="h-6 w-6 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-lg">Failed to Retrieve Listings</h3>
+                  <p className="text-sm text-rose-700 mt-1">{error}</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-4 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                  >
+                    Reload Panel
+                  </button>
                 </div>
-              )}
-            </div>
-          );
-        })()}
+              </div>
+            )}
+
+            {/* Empty Queue State */}
+            {!loading && !error && listings.length === 0 && (
+              <div className="bg-white border border-stone-200 rounded-2xl p-16 max-w-xl mx-auto text-center flex flex-col items-center shadow-xs">
+                <div className="h-16 w-16 bg-stone-50 rounded-full flex items-center justify-center border border-stone-100 mb-4">
+                  <Inbox className="h-8 w-8 text-stone-400" />
+                </div>
+                <h3 className="font-serif text-xl font-semibold text-stone-900">
+                  {activeTab === 'live' ? 'No Live Listings Found' : 'Queue is Clear'}
+                </h3>
+                <p className="text-sm text-stone-500 mt-2 max-w-xs">
+                  {activeTab === 'live' 
+                    ? 'There are no active approved directory listings in the database yet.' 
+                    : 'Excellent! There are no new listings awaiting verification at this time.'}
+                </p>
+              </div>
+            )}
+
+            {/* Listings Grid */}
+            {!loading && !error && listings.length > 0 && (() => {
+              // Filter listings based on selected filters
+              const displayedListings = listings.filter((item) => {
+                if (activeTab === 'live') {
+                  if (filterTier !== 'all' && (item.tier || 'basic') !== filterTier) {
+                    return false;
+                  }
+                  if (filterPromo && !item.premium_metadata?.has_social_addon) {
+                    return false;
+                  }
+                }
+                return true;
+              });
+
+              return (
+                <div>
+                  <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-sm font-semibold tracking-wider text-stone-400 uppercase">
+                        {activeTab === 'live' ? 'Active Directory Listings' : 'Awaiting Business Verification'} ({displayedListings.length})
+                      </h2>
+                      <p className="text-xs text-stone-500 mt-1">
+                        {activeTab === 'live'
+                          ? 'Manage membership levels, add websites, and trigger deep crawls for claimed listings.'
+                          : 'Please verify details carefully. Approvals are pushed live immediately. Rejections permanently purge records.'}
+                      </p>
+                    </div>
+
+                    {activeTab === 'live' && (
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-stone-500 font-medium">Filter Tier:</span>
+                          <select
+                            value={filterTier}
+                            onChange={(e) => setFilterTier(e.target.value)}
+                            className="bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 outline-hidden text-stone-850 font-semibold cursor-pointer"
+                          >
+                            <option value="all">All Tiers</option>
+                            <option value="basic">Basic (Standard)</option>
+                            <option value="claimed">Claimed Partner</option>
+                            <option value="gold">Gold Partner</option>
+                            <option value="featured">Featured Partner</option>
+                          </select>
+                        </div>
+
+                        <label className="flex items-center gap-2 font-medium text-stone-600 bg-white border border-stone-200 rounded-lg px-3 py-1.5 cursor-pointer hover:bg-stone-50/50">
+                          <input
+                            type="checkbox"
+                            checked={filterPromo}
+                            onChange={(e) => setFilterPromo(e.target.checked)}
+                            className="rounded text-amber-500 focus:ring-amber-500/20"
+                          />
+                          <span>Social Promo Only</span>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
+                  {displayedListings.length === 0 ? (
+                    <div className="bg-white border border-stone-200 rounded-2xl p-16 text-center max-w-md mx-auto shadow-xs">
+                      <p className="text-sm text-stone-500 font-semibold">No listings match the selected filters.</p>
+                      <button
+                        onClick={() => {
+                          setFilterTier('all');
+                          setFilterPromo(false);
+                        }}
+                        className="mt-4 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition cursor-pointer"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {displayedListings.map((item) => (
+                        <div 
+                          key={item.id} 
+                          className={`bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
+                            actionInProgress === item.id ? 'opacity-50 pointer-events-none scale-95' : 'scale-100'
+                          }`}
+                        >
+                          {/* Card Content */}
+                          <div className="p-6">
+                            <div className="flex justify-between items-start gap-2 mb-3">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-100">
+                                <Layers className="h-3.5 w-3.5" />
+                                {item.category}
+                              </span>
+                              {activeTab === 'live' && (
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                                  item.tier === 'featured' 
+                                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-200' 
+                                    : item.tier === 'gold' 
+                                    ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                                    : item.tier === 'claimed'
+                                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                    : 'bg-stone-100 text-stone-600 border border-stone-200'
+                                }`}>
+                                  {item.tier || 'basic'}
+                                </span>
+                              )}
+                            </div>
+
+                            <h3 className="font-serif font-bold text-lg text-stone-950 leading-tight mb-2">
+                              {item.title}
+                            </h3>
+
+                            <div className="space-y-2 mt-4 text-xs text-stone-600">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-stone-400 shrink-0" />
+                                <span className="truncate">{item.address}</span>
+                              </div>
+                              
+                              {item.phone && (
+                                <div className="flex items-center gap-2">
+                                  <Phone className="h-4 w-4 text-stone-400 shrink-0" />
+                                  <span>{item.phone}</span>
+                                </div>
+                              )}
+                              
+                              <div className="flex items-center gap-2">
+                                <Globe className="h-4 w-4 text-stone-400 shrink-0" />
+                                {activeTab === 'live' ? (
+                                  <input
+                                    type="text"
+                                    placeholder="Add website URL..."
+                                    defaultValue={item.website || ''}
+                                    onBlur={(e) => handleWebsiteUpdate(item.id, e.target.value)}
+                                    className="bg-stone-50 hover:bg-stone-100 focus:bg-white px-2 py-1 rounded border border-stone-200 text-xs w-full outline-hidden text-stone-800"
+                                  />
+                                ) : (
+                                  <span className="truncate">{item.website || 'No website listed'}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Actions Bar */}
+                          <div className="border-t border-stone-100 bg-stone-50 px-6 py-4 flex flex-col gap-3">
+                            {activeTab === 'staging' ? (
+                              <div className="flex gap-4">
+                                {/* Reject Button (Red) */}
+                                <button
+                                  onClick={() => handleReject(item.id)}
+                                  disabled={actionInProgress === item.id}
+                                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 border border-rose-200 hover:border-rose-300 text-rose-700 bg-white hover:bg-rose-50 active:bg-rose-100 rounded-lg text-xs font-semibold transition cursor-pointer"
+                                  title="Reject and permanently delete listing record"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                  Reject & Delete
+                                </button>
+                                
+                                {/* Approve Button (Green) */}
+                                <button
+                                  onClick={() => handleApprove(item.id)}
+                                  disabled={actionInProgress === item.id}
+                                  className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-xs transition hover:shadow-md cursor-pointer"
+                                  title="Approve and publish listing to live directory"
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                  Approve Listing
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between text-xs text-stone-800">
+                                  <span className="font-semibold text-stone-600">Membership Tier:</span>
+                                  <select
+                                    value={item.tier || 'basic'}
+                                    onChange={(e) => handleTierChange(item.id, e.target.value as any)}
+                                    className="bg-white border border-stone-200 rounded-md px-2 py-1 text-xs outline-hidden text-stone-800 cursor-pointer"
+                                  >
+                                    <option value="basic">Basic (Standard)</option>
+                                    <option value="claimed">Claimed Partner</option>
+                                    <option value="gold">Gold Partner</option>
+                                    <option value="featured">Featured Partner</option>
+                                  </select>
+                                </div>
+
+                                {item.premium_metadata?.package_name && (
+                                  <div className="flex justify-between items-center text-xs text-stone-850 border-t border-stone-100 pt-2">
+                                    <span className="font-semibold text-stone-600">Active Package:</span>
+                                    <span className="font-bold text-stone-900 capitalize">
+                                      {item.premium_metadata.package_name.replace('_', ' ')}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {item.premium_metadata?.has_social_addon && (
+                                  <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-2.5 flex items-center justify-between text-xs mt-1">
+                                    <span className="text-indigo-850 font-extrabold flex items-center gap-1.5">
+                                      📢 Social Media Promo Active
+                                    </span>
+                                    <span className="text-[9px] bg-indigo-200 text-indigo-800 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
+                                      Pending Post
+                                    </span>
+                                  </div>
+                                )}
+                                
+                                {(item.tier === 'gold' || item.tier === 'featured') && (
+                                  <button
+                                    onClick={() => handleDeepScrape(item.id)}
+                                    disabled={actionInProgress === item.id || !item.website}
+                                    className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer ${
+                                      actionInProgress === item.id 
+                                        ? 'bg-stone-100 text-stone-400 border border-stone-200' 
+                                        : !item.website 
+                                        ? 'bg-stone-100 text-stone-400 border border-stone-200 cursor-not-allowed' 
+                                        : 'bg-amber-500 hover:bg-amber-600 text-white hover:shadow-md'
+                                    }`}
+                                    title={item.website ? "Scrape website content and generate premium AI metadata" : "Add website URL before scraping"}
+                                  >
+                                    {actionInProgress === item.id ? (
+                                      <>
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        Scraping & Formatting...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Layers className="h-3.5 w-3.5" />
+                                        Deep Scrape Web info
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </main>
     </div>
   );
 }
+

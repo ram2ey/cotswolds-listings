@@ -195,3 +195,37 @@ WITH CHECK (is_approved = false AND tier = 'basic');
 -- CREATE EXTENSION IF NOT EXISTS pg_cron;
 -- SELECT cron.schedule('supabase-keep-alive-job', '0 0 */3 * *', $$ SELECT count(*) FROM listings; $$);
 
+-- ==============================================================================
+-- Subscription Plans Table for Dynamic Pricing
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS subscription_plans (
+  id TEXT PRIMARY KEY, -- e.g. 'claim', 'gold', 'gold_social', 'featured', 'featured_social'
+  name TEXT NOT NULL,
+  description TEXT,
+  price_monthly_gbp NUMERIC(8, 2) NOT NULL,
+  features TEXT[] DEFAULT '{}'::TEXT[],
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable RLS on subscription_plans
+ALTER TABLE subscription_plans ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access to active subscription plans
+CREATE POLICY subscription_plans_public_read
+ON subscription_plans
+FOR SELECT
+USING (is_active = true);
+
+-- Seed initial subscription plans
+INSERT INTO subscription_plans (id, name, description, price_monthly_gbp, features, is_active)
+VALUES
+  ('claim', 'Claim Listing', 'Verify ownership, link your website, and display reviews.', 20.00, ARRAY['✓ Verify Ownership', '✓ Link Official Website', '✓ Rating Stars & Reviews'], true),
+  ('gold', 'Gold Partner', 'The complete premium listing experience.', 50.00, ARRAY['✓ Gold Partner Badge', '✓ Priority Search Ranking', '✓ Full Photo Gallery', '✓ AI-Generated Details'], true),
+  ('gold_social', 'Gold & Social Package', 'All Gold features + dedicated social media promotion.', 150.00, ARRAY['✓ Gold Partner Badge', '✓ Priority Search Ranking', '✓ Social Media Promotion', '✓ AI-Generated Details'], true),
+  ('featured', 'Featured Partner', 'Absolute maximum visibility across Cotswolds Pages.', 100.00, ARRAY['✓ Featured Standout Badge', '✓ Absolute Top Ranking', '✓ Full Photo Gallery', '✓ AI-Generated Details'], true),
+  ('featured_social', 'Featured & Social Promotion', 'Absolute max visibility + premium campaigns.', 200.00, ARRAY['✓ Featured Standout Badge', '✓ Absolute Top Ranking', '✓ Premium Social Campaigns', '✓ AI-Generated Details'], true)
+ON CONFLICT (id) DO NOTHING;
+
+

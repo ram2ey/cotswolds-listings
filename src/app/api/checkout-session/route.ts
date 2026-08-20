@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { stripe, isStripeMock } from '@/lib/stripe';
 import { claimAndScrapeListing } from '@/lib/claim-helper';
+import { getSubscriptionPlan } from '@/lib/plans';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,6 +19,14 @@ export async function POST(request: NextRequest) {
     if (!validPlans.includes(tier)) {
       return NextResponse.json(
         { error: 'Invalid plan selected. Must be claim, gold, gold_social, featured, or featured_social.' },
+        { status: 400 }
+      );
+    }
+
+    const plan = await getSubscriptionPlan(tier);
+    if (!plan || !plan.is_active) {
+      return NextResponse.json(
+        { error: 'Selected subscription plan is not available.' },
         { status: 400 }
       );
     }
@@ -47,22 +56,8 @@ export async function POST(request: NextRequest) {
 
     const origin = request.headers.get('origin') || 'http://localhost:3000';
 
-    // Check if we are running in Mock Checkout mode
-    const claimPriceId = process.env.STRIPE_CLAIM_PRICE_ID;
-    const goldPriceId = process.env.STRIPE_GOLD_PRICE_ID;
-    const goldSocialPriceId = process.env.STRIPE_GOLD_SOCIAL_PRICE_ID;
-    const featuredPriceId = process.env.STRIPE_FEATURED_PRICE_ID;
-    const featuredSocialPriceId = process.env.STRIPE_FEATURED_SOCIAL_PRICE_ID;
-
-    const hasPriceIds = claimPriceId && goldPriceId && goldSocialPriceId && featuredPriceId && featuredSocialPriceId &&
-                       !claimPriceId.includes('your-stripe-') &&
-                       !goldPriceId.includes('your-stripe-') &&
-                       !goldSocialPriceId.includes('your-stripe-') &&
-                       !featuredPriceId.includes('your-stripe-') &&
-                       !featuredSocialPriceId.includes('your-stripe-');
-
-    if (isStripeMock() || !hasPriceIds) {
-      console.log(`[checkout-session] Running in MOCK mode. Tier: ${tier}, Website: ${website}`);
+    if (isStripeMock()) {
+      console.log(`[checkout-session] Running in MOCK mode. Plan: ${plan.name} (£${plan.price_monthly_gbp}/mo), Website: ${website}`);
       
       // For mock mode, run the claim/enrich scrape immediately in the background
       // so the local DB is updated when they redirect to the success screen
@@ -79,34 +74,26 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Real Stripe Flow
-    let priceId = '';
-    switch (tier) {
-      case 'claim':
-        priceId = claimPriceId;
-        break;
-      case 'gold':
-        priceId = goldPriceId;
-        break;
-      case 'gold_social':
-        priceId = goldSocialPriceId;
-        break;
-      case 'featured':
-        priceId = featuredPriceId;
-        break;
-      case 'featured_social':
-        priceId = featuredSocialPriceId;
-        break;
-    }
-
-    console.log(`[checkout-session] Creating Stripe Checkout session for listing: ${listingId}, priceId: ${priceId}`);
+    // Real Stripe Flow with dynamic price_data
+    const unitAmountPence = Math.round(plan.price_monthly_gbp * 100);
+    console.log(`[checkout-session] Creating Stripe Checkout session for listing: ${listingId}, plan: ${plan.name}, price: £${plan.price_monthly_gbp}/mo (${unitAmountPence}p)`);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: `Cotswolds Pages - ${plan.name}`,
+              description: plan.description,
+            },
+            unit_amount: unitAmountPence,
+            recurring: {
+              interval: 'month',
+            },
+          },
           quantity: 1,
         },
       ],
@@ -131,3 +118,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
