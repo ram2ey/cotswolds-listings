@@ -358,7 +358,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
           {/* Search Trigger Button */}
           <button
             onClick={handleSearchSubmit}
-            className="px-5 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-full text-xs font-bold shadow-md transition shrink-0 cursor-pointer flex items-center gap-1.5"
+            className="pressable px-5 py-2 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-full text-xs font-bold shadow-md transition shrink-0 cursor-pointer flex items-center gap-1.5"
           >
             <Search className="h-3.5 w-3.5" />
             Search
@@ -366,9 +366,42 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
         </div>
       </div>
 
+      {/* 1.1 Quick Town Filter Chips */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 shrink-0 mr-1">
+          Popular Hubs:
+        </span>
+        {["All Towns", "Broadway", "Bourton-on-the-Water", "Stow-on-the-Wold", "Chipping Campden", "Burford", "Cirencester"].map((town) => {
+          const isSelected = (town === "All Towns" && selectedRegion === "Select Town") || selectedRegion === town;
+          return (
+            <button
+              key={town}
+              onClick={() => {
+                const target = town === "All Towns" ? "Select Town" : town;
+                setSelectedRegion(target);
+                const params = new URLSearchParams(searchParams.toString());
+                if (target !== "Select Town") {
+                  params.set('town', target);
+                } else {
+                  params.delete('town');
+                }
+                router.push(`/search?${params.toString()}`);
+              }}
+              className={`pressable px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
+                isSelected
+                  ? 'bg-amber-600 border-amber-600 text-white shadow-xs'
+                  : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50 hover:border-stone-300'
+              }`}
+            >
+              {town}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Advanced Filters Expandable Drawer (Slide Down) */}
       {showFilters && (
-        <div className="bg-stone-900 text-stone-100 rounded-2xl p-6 sm:p-8 mb-10 shadow-lg border border-stone-800">
+        <div className="bg-stone-900 text-stone-100 rounded-2xl p-6 sm:p-8 mb-10 shadow-xl border border-stone-800 animate-scale-in">
           <div className="flex items-center justify-between border-b border-stone-800 pb-4 mb-6">
             <h4 className="text-xs font-extrabold text-white uppercase tracking-widest">Advanced Filters & Settings</h4>
             

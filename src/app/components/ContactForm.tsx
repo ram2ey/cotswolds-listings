@@ -26,15 +26,28 @@ export default function ContactForm() {
     setError("");
     setSubmitting(true);
 
-    // Simulated network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message })
+      });
 
-    setSubmitting(false);
-    setSuccess(true);
-    setName("");
-    setEmail("");
-    setSubject("");
-    setMessage("");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to deliver message. Please try again.');
+      }
+
+      setSuccess(true);
+      setName("");
+      setEmail("");
+      setSubject("");
+      setMessage("");
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while sending your message.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (success) {

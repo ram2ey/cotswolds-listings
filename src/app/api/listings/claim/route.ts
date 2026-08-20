@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { claimAndScrapeListing } from '@/lib/claim-helper';
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
+  // Direct listing claiming bypass without payment is restricted to administrators only.
+  // Public users must complete checkout via /api/checkout-session and /api/webhooks/stripe.
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json(
+      { error: 'Direct claiming requires administrative authorization. Please complete Stripe checkout.' }, 
+      { status: 401 }
+    );
+  }
+
   try {
     const { id, tier, website } = await request.json();
     if (!id || !tier || !website) {
@@ -20,3 +30,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+

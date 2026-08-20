@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSubscriptionPlans, updateSubscriptionPlan, DEFAULT_PLANS } from '@/lib/plans';
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const plans = await getSubscriptionPlans(true);
     return NextResponse.json(plans);
@@ -16,6 +21,10 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { id, price_monthly_gbp, name, description, is_active, reset_all } = body;
@@ -68,3 +77,4 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
+

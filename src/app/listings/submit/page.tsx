@@ -14,10 +14,12 @@ import {
   Image as ImageIcon,
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  Eye,
+  Trash2,
+  Layers,
+  Sparkles
 } from 'lucide-react';
-
-
 
 const CATEGORIES = [
   "Construction & Home Maintenance",
@@ -56,7 +58,6 @@ const resizeImage = (file: File, maxWidth: number): Promise<{ base64: string; ty
         }
 
         ctx.drawImage(img, 0, 0, width, height);
-        // Export resized image with 85% compression quality
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         resolve({
           base64: dataUrl,
@@ -92,12 +93,13 @@ export default function SubmitListing() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [postcodeSuccess, setPostcodeSuccess] = useState<string | null>(null);
   
   // Subscription plans state
   const [selectedTier, setSelectedTier] = useState<'basic' | 'claim' | 'gold' | 'gold_social' | 'featured' | 'featured_social'>('basic');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  // Convert and resize uploaded image on client side (max 1200px width)
+  // Convert and resize uploaded image on client side
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -136,8 +138,14 @@ export default function SubmitListing() {
 
   const handlePostcodeBlur = async () => {
     const pc = postcode.trim();
-    if (!pc) return;
-    if (!validatePostcode(pc)) return;
+    if (!pc) {
+      setPostcodeSuccess(null);
+      return;
+    }
+    if (!validatePostcode(pc)) {
+      setPostcodeSuccess(null);
+      return;
+    }
 
     try {
       const res = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(pc)}`);
@@ -146,6 +154,11 @@ export default function SubmitListing() {
         if (data.status === 200 && data.result) {
           setLatitude(data.result.latitude.toString());
           setLongitude(data.result.longitude.toString());
+          const detectedTown = data.result.admin_district || data.result.parish || 'Cotswolds';
+          setPostcodeSuccess(`Verified location: ${detectedTown} (Coordinates mapped)`);
+          if (!town) {
+            setTown(detectedTown);
+          }
           setError(null);
         }
       }
@@ -183,8 +196,6 @@ export default function SubmitListing() {
       setError('Invalid phone number. Please enter a valid telephone number.');
       return;
     }
-
-
 
     if (selectedTier !== 'basic' && (!website.trim() || !/^https?:\/\//i.test(website))) {
       setError('A valid website URL starting with http:// or https:// is required for premium plans so we can enrich your profile.');
@@ -260,32 +271,58 @@ export default function SubmitListing() {
       setError(err.message || 'We could not save your submission. Please verify your details, check your network, and try again.');
     } finally {
       setSubmitting(false);
-      setCheckoutLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 font-sans pb-16">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans pb-20 selection:bg-amber-100 selection:text-amber-900">
+      
+      {/* Navigation Header */}
       <Navbar />
 
+      {/* Top Banner */}
+      <div className="bg-stone-900 text-stone-100 py-12 px-4 shadow-inner">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <Link 
+              href="/" 
+              className="pressable inline-flex items-center gap-1.5 text-xs text-stone-400 hover:text-white mb-2 transition"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to Directory
+            </Link>
+            <h1 className="text-2xl sm:text-3xl font-serif font-black tracking-tight text-white">
+              Add Your Cotswolds Business
+            </h1>
+            <p className="text-stone-400 text-xs mt-1">
+              Join the official curated business network of the Cotswolds.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 bg-stone-800/80 border border-stone-700 px-4 py-2 rounded-2xl">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-semibold text-stone-300">Reviewed by Local Curators</span>
+          </div>
+        </div>
+      </div>
+
       {/* Main Container */}
-      <main className="max-w-2xl mx-auto px-4 mt-8">
+      <main className="max-w-6xl mx-auto px-4 mt-8">
         
         {submitted ? (
           /* Success Screen */
-          <div className="bg-white border border-stone-200 rounded-2xl p-12 text-center shadow-md animate-fade-in">
+          <div className="bg-white border border-stone-200 rounded-3xl p-12 text-center shadow-lg animate-scale-in max-w-xl mx-auto">
             <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100 mx-auto mb-6">
-              <CheckCircle className="h-8 w-8 text-emerald-500" />
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
             <h2 className="font-serif text-2xl font-bold text-stone-900">Submission Received</h2>
-            <p className="text-stone-500 text-sm mt-3 max-w-md mx-auto leading-relaxed">
-              Thank you! Your business registration details have been submitted directly into our staging verification queue. 
-              Our administrative validation team will review the details. Once approved, your listing will go live automatically.
+            <p className="text-stone-600 text-xs mt-3 max-w-md mx-auto leading-relaxed">
+              Thank you! Your business registration details have been submitted into our staging verification queue. 
+              Our curators will review the details. Once approved, your listing will go live automatically.
             </p>
-            <div className="mt-8 flex justify-center gap-4">
+            <div className="mt-8 flex justify-center gap-3">
               <Link
                 href="/"
-                className="px-6 py-2.5 bg-stone-900 hover:bg-stone-850 active:bg-stone-900 text-white font-semibold rounded-xl text-xs transition"
+                className="pressable px-6 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-xl text-xs transition shadow-xs"
               >
                 Return to Directory
               </Link>
@@ -297,7 +334,6 @@ export default function SubmitListing() {
                   setPhone('');
                   setWebsite('');
                   setEmail('');
-
                   setAddress('');
                   setPostcode('');
                   setTown('');
@@ -305,393 +341,414 @@ export default function SubmitListing() {
                   setLongitude('');
                   setImageBase64(null);
                   setImageName('');
+                  setPostcodeSuccess(null);
                 }}
-                className="px-6 py-2.5 border border-stone-200 hover:bg-stone-50 text-stone-700 font-semibold rounded-xl text-xs transition"
+                className="pressable px-6 py-2.5 border border-stone-200 hover:bg-stone-50 text-stone-700 font-bold rounded-xl text-xs transition"
               >
                 Submit Another Business
               </button>
             </div>
           </div>
         ) : (
-          /* Form Screen */
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-10 shadow-xs">
+          /* Split Form & Live Preview Layout */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <div className="border-b border-stone-100 pb-5 mb-6">
-              <h2 className="font-serif text-xl font-bold text-stone-950">Local Business Registration</h2>
-              <p className="text-xs text-stone-500 mt-1">
-                Your listing will enter a staging validation queue where details are reviewed before appearing publicly.
-              </p>
-            </div>
-
-            {error && (
-              <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 mb-6 flex gap-3 items-center text-xs">
-                <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
-                <span className="font-medium">{error}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              {/* Block 1: Basic Info */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
-                  1. Core Business Information
-                </h3>
-                
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Business Name <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. The Cotswolds Bakery"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Category <span className="text-rose-500">*</span></label>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer bg-white"
-                    >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Description</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Briefly describe your business, history, services, and specialties..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500 resize-y"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Block 2: Location */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
-                  2. Geolocation & Address
-                </h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Town / Village <span className="text-rose-500">*</span></label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Bourton-on-the-Water"
-                      value={town}
-                      onChange={(e) => setTown(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Postcode</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. GL54 2EN"
-                      value={postcode}
-                      onChange={(e) => setPostcode(e.target.value)}
-                      onBlur={handlePostcodeBlur}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5 mt-4">
-                  <label className="text-xs font-bold text-stone-700">Street Address</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. High Street, Bourton-on-the-Water"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Latitude (Optional)</label>
-                    <input
-                      type="number"
-                      step="any"
-                      placeholder="e.g. 51.8862"
-                      value={latitude}
-                      onChange={(e) => setLatitude(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700">Longitude (Optional)</label>
-                    <input
-                      type="number"
-                      step="any"
-                      placeholder="e.g. -1.7588"
-                      value={longitude}
-                      onChange={(e) => setLongitude(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                </div>
-                <p className="text-[10px] text-stone-400 mt-2">
-                  Providing latitude and longitude enables users to search for your business by proximity distance.
+            {/* LEFT COLUMN: Submission Form */}
+            <div className="lg:col-span-7 bg-white border border-stone-200/80 rounded-3xl p-6 sm:p-8 shadow-xs">
+              <div className="border-b border-stone-100 pb-4 mb-6">
+                <h2 className="font-serif text-xl font-bold text-stone-950">Business Details Form</h2>
+                <p className="text-xs text-stone-500 mt-1">
+                  Fill in your official business information below. Preview updates in real time.
                 </p>
               </div>
 
-              {/* Block 3: Contacts */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
-                  3. Contact Information
-                </h3>
+              {error && (
+                <div className="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 mb-6 flex gap-3 items-center text-xs animate-fade-in">
+                  <AlertCircle className="h-5 w-5 text-rose-500 shrink-0" />
+                  <span className="font-medium">{error}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
-                      <Phone className="h-3.5 w-3.5 text-stone-450" /> Phone
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="e.g. +44 1451 820000"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
-                      <Globe className="h-3.5 w-3.5 text-stone-450" /> Website
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="e.g. https://yoursite.com"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      onBlur={handleWebsiteBlur}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
-                      <Mail className="h-3.5 w-3.5 text-stone-450" /> Public Email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="e.g. info@yoursite.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="border border-stone-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  </div>
-              </div>
-
-              {/* Block 4: Image Asset */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
-                  4. Business Cover Image
-                </h3>
-                
-                <div className="border-2 border-dashed border-stone-200 rounded-xl p-6 text-center hover:bg-stone-50 transition relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="cover-image-upload"
-                    onChange={handleImageChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  />
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-3 bg-stone-100 rounded-full text-stone-400">
-                      <ImageIcon className="h-6 w-6" />
+                {/* Block 1: Basic Info */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                    1. Core Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">Business Name <span className="text-rose-500">*</span></label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. The Cotswolds Bakery & Tearoom"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
                     </div>
-                    {imageName ? (
-                      <span className="text-xs font-semibold text-amber-600 truncate max-w-[300px]">
-                        Selected: {imageName}
-                      </span>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">Category <span className="text-rose-500">*</span></label>
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 cursor-pointer bg-white transition"
+                      >
+                        {CATEGORIES.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">Description</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Describe your history, hospitality, specialties, or services..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none transition leading-relaxed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Block 2: Location */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                    2. Location & Address
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">Town / Village <span className="text-rose-500">*</span></label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Stow-on-the-Wold"
+                        value={town}
+                        onChange={(e) => setTown(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">UK Postcode</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. GL54 1BN"
+                        value={postcode}
+                        onChange={(e) => setPostcode(e.target.value.toUpperCase())}
+                        onBlur={handlePostcodeBlur}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 uppercase transition"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700">Street Address</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. The Square, High Street"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
+                    </div>
+                  </div>
+
+                  {postcodeSuccess && (
+                    <div className="mt-2.5 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] font-bold text-emerald-800 flex items-center gap-2 animate-fade-in">
+                      <CheckCircle className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <span>{postcodeSuccess}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Block 3: Contact */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                    3. Contact Details
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
+                        <Phone className="h-3 w-3 text-stone-400" /> Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="e.g. +44 1451 820000"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
+                        <Globe className="h-3 w-3 text-stone-400" /> Official Website
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="e.g. https://yoursite.com"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        onBlur={handleWebsiteBlur}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 flex flex-col gap-1.5">
+                      <label className="text-xs font-bold text-stone-700 flex items-center gap-1">
+                        <Mail className="h-3 w-3 text-stone-400" /> Public Contact Email
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="e.g. info@yoursite.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="border border-stone-200 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Block 4: Cover Image Asset */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                    4. Cover Image Asset
+                  </h3>
+                  
+                  {imageBase64 ? (
+                    <div className="p-3 bg-stone-50 border border-stone-200 rounded-2xl flex items-center justify-between gap-4 animate-scale-in">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={imageBase64} 
+                          alt="Cover preview" 
+                          className="h-14 w-14 object-cover rounded-xl border border-stone-200"
+                        />
+                        <div>
+                          <p className="text-xs font-bold text-stone-900 truncate max-w-xs">{imageName || 'Cover image uploaded'}</p>
+                          <span className="text-[10px] text-emerald-700 font-semibold">✓ Resized & optimized for web</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageBase64(null);
+                          setImageName('');
+                          setImageType('');
+                        }}
+                        className="pressable p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                        title="Remove image"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-stone-200 hover:border-amber-400 rounded-2xl p-6 text-center hover:bg-stone-50/50 transition relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        id="cover-image-upload"
+                        onChange={handleImageChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="p-3 bg-stone-100 rounded-full text-stone-400">
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs font-bold text-stone-700">Click to Upload Cover Image</span>
+                        <span className="text-[10px] text-stone-400">JPEG, PNG, or WebP (max 4MB)</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Block 5: Tier Selection */}
+                <div>
+                  <h3 className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
+                    5. Membership Tier & Placement
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div 
+                      onClick={() => setSelectedTier('basic')}
+                      className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                        selectedTier === 'basic' 
+                          ? 'border-stone-800 bg-stone-100' 
+                          : 'border-stone-200 hover:border-stone-300 bg-white'
+                      }`}
+                    >
+                      <div>
+                        <span className="text-xs font-bold text-stone-900 block">Free Listing</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5 leading-tight">Standard directory inclusion.</p>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-stone-200/60 font-black text-xs text-stone-900">
+                        £0 <span className="text-[9px] font-normal text-stone-400">/mo</span>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => setSelectedTier('gold')}
+                      className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                        selectedTier === 'gold' 
+                          ? 'border-amber-500 bg-amber-500/5 shadow-xs' 
+                          : 'border-stone-200 hover:border-stone-300 bg-white'
+                      }`}
+                    >
+                      <div>
+                        <span className="text-xs font-bold text-amber-900 block">Gold Partner</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5 leading-tight">Verified badge & AI highlights.</p>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-stone-200/60 font-black text-xs text-amber-900">
+                        £50 <span className="text-[9px] font-normal text-stone-400">/mo</span>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => setSelectedTier('featured')}
+                      className={`p-3.5 rounded-2xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                        selectedTier === 'featured' 
+                          ? 'border-indigo-600 bg-indigo-500/5 shadow-xs' 
+                          : 'border-stone-200 hover:border-stone-300 bg-white'
+                      }`}
+                    >
+                      <div>
+                        <span className="text-xs font-bold text-indigo-950 block">Featured Partner</span>
+                        <p className="text-[10px] text-stone-500 mt-0.5 leading-tight">Top search & VIP spotlight.</p>
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-stone-200/60 font-black text-xs text-indigo-950">
+                        £100 <span className="text-[9px] font-normal text-stone-400">/mo</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Action */}
+                <div className="border-t border-stone-100 pt-6 flex gap-3">
+                  <Link
+                    href="/"
+                    className="pressable flex-1 py-3 border border-stone-200 hover:bg-stone-50 text-stone-700 font-bold rounded-xl text-xs transition text-center"
+                  >
+                    Cancel
+                  </Link>
+                  
+                  <button
+                    type="submit"
+                    disabled={submitting || checkoutLoading}
+                    className="pressable flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white font-bold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+                        Submitting...
+                      </>
+                    ) : checkoutLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+                        Redirecting to checkout...
+                      </>
+                    ) : selectedTier === 'basic' ? (
+                      <>
+                        <Store className="h-4 w-4" />
+                        Submit for Verification
+                      </>
                     ) : (
                       <>
-                        <span className="text-xs font-bold text-stone-700">Click to Upload Cover Image</span>
-                        <span className="text-[10px] text-stone-400">Supports JPEG, PNG, or WebP (max 2MB)</span>
+                        <Sparkles className="h-4 w-4 text-amber-400" />
+                        Proceed to Payment
                       </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* RIGHT COLUMN: Live Interactive Directory Card Preview */}
+            <div className="lg:col-span-5 sticky top-24 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 flex items-center gap-1.5">
+                  <Eye className="h-3.5 w-3.5 text-amber-600" />
+                  Live Directory Card Preview
+                </span>
+                <span className="text-[9px] font-bold px-2 py-0.5 bg-stone-200/70 text-stone-600 rounded-full">
+                  Real-time
+                </span>
+              </div>
+
+              {/* Rendered Preview Card */}
+              <div className="cotswolds-card bg-white border border-stone-200/80 rounded-3xl overflow-hidden shadow-md">
+                <div className="h-44 bg-stone-200 relative overflow-hidden">
+                  {imageBase64 ? (
+                    <img 
+                      src={imageBase64} 
+                      alt="Business Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-stone-800 to-stone-950 text-stone-400 p-6 text-center">
+                      <Store className="h-8 w-8 text-amber-500 mb-2 opacity-80" />
+                      <span className="text-xs font-bold text-stone-300">Cover photo will appear here</span>
+                      <span className="text-[10px] text-stone-500 mt-0.5">Upload an image in section 4</span>
+                    </div>
+                  )}
+
+                  {/* Tier Badge Overlay */}
+                  <div className="absolute top-3 right-3">
+                    <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider shadow-md ${
+                      selectedTier.includes('featured')
+                        ? 'bg-indigo-600 text-white'
+                        : selectedTier.includes('gold')
+                        ? 'bg-amber-500 text-white'
+                        : 'bg-stone-900/80 text-white backdrop-blur-xs'
+                    }`}>
+                      {selectedTier.includes('featured') ? '👑 Featured' : selectedTier.includes('gold') ? '⭐ Gold' : 'Standard'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-5 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100 flex items-center gap-1">
+                      <Layers className="h-2.5 w-2.5" />
+                      {category}
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif font-bold text-lg text-stone-950 leading-snug">
+                    {title || 'Your Business Name'}
+                  </h3>
+
+                  <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
+                    {description || 'Your business description and specialties will be showcased here for residents and tourists.'}
+                  </p>
+
+                  <div className="pt-2 border-t border-stone-100 space-y-1.5 text-xs text-stone-600">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                      <span className="truncate">{address ? `${address}, ` : ''}{town || 'Cotswolds Town'}</span>
+                    </div>
+                    {phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                        <span>{phone}</span>
+                      </div>
+                    )}
+                    {website && (
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-3.5 w-3.5 text-stone-400 shrink-0" />
+                        <span className="truncate text-amber-700 font-semibold">{website.replace(/^https?:\/\//, '')}</span>
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Block 5: Choose Membership Tier */}
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100 pb-2 mb-4">
-                  5. Choose Membership Tier
-                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Basic Card */}
-                  <div 
-                    onClick={() => setSelectedTier('basic')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'basic' 
-                        ? 'border-stone-500 bg-stone-100/50' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-stone-705">Basic Directory</span>
-                      <p className="text-[10px] text-stone-455 mt-1 leading-normal">Free entry. Subject to manual validation staging queue review.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">Free</span>
-                    </div>
-                  </div>
-
-                  {/* Claim Listing Card */}
-                  <div 
-                    onClick={() => setSelectedTier('claim')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'claim' 
-                        ? 'border-emerald-500 bg-emerald-500/5 shadow-xs' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-emerald-705">Claim Listing Plan</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Verified badge, reviews, official website link.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£20</span>
-                      <span className="text-[9px] text-stone-450">/month</span>
-                    </div>
-                  </div>
-
-                  {/* Gold Partner Card */}
-                  <div 
-                    onClick={() => setSelectedTier('gold')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'gold' 
-                        ? 'border-amber-500 bg-amber-500/5 shadow-xs' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-amber-705">Gold Partner</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Priority ranking, full photo gallery, AI enrichments.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£50</span>
-                      <span className="text-[9px] text-stone-450">/month</span>
-                    </div>
-                  </div>
-
-                  {/* Gold & Social Card */}
-                  <div 
-                    onClick={() => setSelectedTier('gold_social')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'gold_social' 
-                        ? 'border-amber-500 bg-amber-500/5 shadow-xs' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-amber-705">Gold & Social Package</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">All Gold features + dedicated monthly social promotion updates.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£150</span>
-                      <span className="text-[9px] text-stone-450">/month</span>
-                    </div>
-                  </div>
-
-                  {/* Featured Partner Card */}
-                  <div 
-                    onClick={() => setSelectedTier('featured')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'featured' 
-                        ? 'border-indigo-600 bg-indigo-500/5 shadow-xs' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-indigo-755">Featured Partner</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Instant activation. Absolute top positioning, standout featured badge.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£100</span>
-                      <span className="text-[9px] text-stone-450">/month</span>
-                    </div>
-                  </div>
-
-                  {/* Featured & Social Card */}
-                  <div 
-                    onClick={() => setSelectedTier('featured_social')}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
-                      selectedTier === 'featured_social' 
-                        ? 'border-indigo-600 bg-indigo-500/5 shadow-xs' 
-                        : 'border-stone-200 hover:border-stone-300 bg-white'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-indigo-755">Featured & Social</span>
-                      <p className="text-[10px] text-stone-500 mt-1 leading-normal">Absolute top positioning + premium monthly marketing campaigns.</p>
-                    </div>
-                    <div className="mt-4 pt-2 border-t border-stone-100">
-                      <span className="text-xs font-extrabold text-stone-900">£200</span>
-                      <span className="text-[9px] text-stone-450">/month</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="border-t border-stone-100 pt-6 flex gap-4">
-                <Link
-                  href="/"
-                  className="flex-1 py-3 border border-stone-250 hover:bg-stone-50 text-stone-700 font-semibold rounded-xl text-xs transition text-center shadow-xs cursor-pointer"
-                >
-                  Cancel
-                </Link>
-                
-                <button
-                  type="submit"
-                  disabled={submitting || checkoutLoading}
-                  className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-900 text-white font-semibold rounded-xl text-xs transition shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-55"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
-                      Submitting Listing...
-                    </>
-                  ) : checkoutLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin text-amber-450" />
-                      Redirecting to payment...
-                    </>
-                  ) : selectedTier === 'basic' ? (
-                    <>
-                      <Store className="h-4 w-4" />
-                      Register Business
-                    </>
-                  ) : (
-                    <>
-                      <Store className="h-4 w-4" />
-                      Pay & Register
-                    </>
-                  )}
-                </button>
-              </div>
-
-            </form>
           </div>
         )}
 

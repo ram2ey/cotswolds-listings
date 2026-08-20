@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
     const startTime = Date.now();
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    // Perform a lightweight query on the businesses table to keep the database active
+    // Perform a lightweight query on the listings table to keep the database active
     const { data, count, error } = await supabase
-      .from('businesses')
+      .from('listings')
       .select('id', { count: 'exact', head: true });
 
     const durationMs = Date.now() - startTime;

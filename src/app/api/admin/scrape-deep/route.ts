@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApifyClient } from 'apify-client';
 import axios from 'axios';
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 // Helper function to generate premium metadata fallback
 function generateMockMetadata(title: string, category: string, subRegion: string): any {
@@ -113,6 +114,10 @@ async function callGeminiAPI(crawledText: string, title: string, category: strin
 }
 
 export async function POST(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const { id } = await request.json();
     if (!id) {

@@ -877,106 +877,202 @@ export default function ListingProfile() {
 
       {/* 4. Paid Claim Modal Dialog */}
       {isClaimModalOpen && (
-        <div className="fixed inset-0 bg-stone-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white border border-stone-200 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative animate-fade-in my-8 text-stone-900">
+        <div className="fixed inset-0 bg-stone-950/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto animate-fade-in">
+          <div className="bg-white border border-stone-200 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl relative animate-scale-in my-8 text-stone-900 flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="border-b border-stone-150 px-6 py-4 flex items-center justify-between bg-stone-50">
+            <div className="border-b border-stone-200/80 px-6 py-4 flex items-center justify-between bg-stone-50/80 shrink-0">
               <div>
-                <h3 className="font-serif font-bold text-lg text-stone-900">
+                <h3 className="font-serif font-bold text-lg text-stone-950">
                   Claim Listing: {listing?.title}
                 </h3>
-                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-0.5">
-                  Step {claimStep} of 4 • {claimStep === 1 ? "Select Plan" : claimStep === 2 ? "Configure Website" : claimStep === 3 ? "Secure Checkout" : "Launching AI Crawl"}
+                <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-0.5">
+                  Step {claimStep} of 3 • {claimStep === 1 ? "Choose Membership Plan" : claimStep === 2 ? "Configure Website" : "Review & Secure Checkout"}
                 </p>
               </div>
               
-              {claimStep < 4 && (
-                <button
-                  onClick={() => setIsClaimModalOpen(false)}
-                  className="text-stone-405 hover:text-stone-700 font-bold text-lg cursor-pointer h-7 w-7 rounded-full flex items-center justify-center hover:bg-stone-200/50"
-                >
-                  ✕
-                </button>
-              )}
+              <button
+                onClick={() => setIsClaimModalOpen(false)}
+                className="text-stone-400 hover:text-stone-700 font-bold text-lg cursor-pointer h-8 w-8 rounded-full flex items-center justify-center hover:bg-stone-200/50 transition pressable"
+              >
+                ✕
+              </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6">
+            {/* Modal Scrollable Body */}
+            <div className="p-6 overflow-y-auto flex-1">
               {claimError && (
                 <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl p-3 flex gap-2 items-center">
                   <span className="font-bold">Error:</span> {claimError}
                 </div>
               )}
+
               {/* STEP 1: Select Plan */}
-              {claimStep === 1 && (
-                <div className="space-y-4">
-                  <p className="text-xs text-stone-605 leading-relaxed">
-                    Verify your ownership and unlock the premium partner experience. Choose a subscription tier to start:
-                  </p>
+              {claimStep === 1 && (() => {
+                const claimPlan = pricingPlans.find(p => p.id === 'claim') || { price_monthly_gbp: 20 };
+                const goldPlan = pricingPlans.find(p => p.id === 'gold') || { price_monthly_gbp: 50 };
+                const featuredPlan = pricingPlans.find(p => p.id === 'featured') || { price_monthly_gbp: 100 };
+                const socialAddonPlan = pricingPlans.find(p => p.id === 'gold_social') || { price_monthly_gbp: 150 };
+                const socialAddonDiff = Number(socialAddonPlan.price_monthly_gbp) - Number(goldPlan.price_monthly_gbp);
 
-                  {/* Dynamic Pricing Cards */}
-                  {pricingPlans.filter(p => p.is_active).map((plan) => {
-                    const isSelected = selectedPlan === plan.id;
-                    const isGold = plan.id === 'gold' || plan.id === 'gold_social';
-                    const isFeatured = plan.id === 'featured' || plan.id === 'featured_social';
-                    const isClaim = plan.id === 'claim';
+                // Current base tier: 'claim', 'gold', 'featured'
+                const currentBase = selectedPlan.startsWith('featured') ? 'featured' : selectedPlan.startsWith('gold') ? 'gold' : 'claim';
+                const hasSocial = selectedPlan.includes('social');
 
-                    return (
+                const handleSelectBase = (base: 'claim' | 'gold' | 'featured') => {
+                  if (base === 'claim') {
+                    setSelectedPlan('claim');
+                  } else if (base === 'gold') {
+                    setSelectedPlan(hasSocial ? 'gold_social' : 'gold');
+                  } else if (base === 'featured') {
+                    setSelectedPlan(hasSocial ? 'featured_social' : 'featured');
+                  }
+                };
+
+                const handleToggleSocial = (checked: boolean) => {
+                  if (currentBase === 'claim') {
+                    setSelectedPlan(checked ? 'gold_social' : 'claim');
+                  } else if (currentBase === 'gold') {
+                    setSelectedPlan(checked ? 'gold_social' : 'gold');
+                  } else if (currentBase === 'featured') {
+                    setSelectedPlan(checked ? 'featured_social' : 'featured');
+                  }
+                };
+
+                return (
+                  <div className="space-y-4">
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      Select a membership tier to unlock verified badges, deep search priority, and AI-powered profile enrichment:
+                    </p>
+
+                    {/* 3 Primary Base Tiers */}
+                    <div className="space-y-3">
+                      {/* Tier 1: Claimed Partner */}
                       <div
-                        key={plan.id}
-                        onClick={() => setSelectedPlan(plan.id)}
-                        className={`p-4 rounded-2xl border-2 cursor-pointer transition ${
-                          isSelected
-                            ? isFeatured
-                              ? 'border-indigo-600 bg-indigo-500/5 shadow-sm'
-                              : isGold
-                              ? 'border-amber-500 bg-amber-500/5 shadow-sm'
-                              : 'border-emerald-500 bg-emerald-500/5 shadow-sm'
+                        onClick={() => handleSelectBase('claim')}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          currentBase === 'claim'
+                            ? 'border-emerald-600 bg-emerald-500/5 shadow-xs'
                             : 'border-stone-200 hover:border-stone-300 bg-white'
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex justify-between items-start">
                           <div>
-                            <span className={`text-sm font-extrabold ${
-                              isFeatured ? 'text-indigo-700' : isGold ? 'text-amber-700' : 'text-emerald-700'
-                            }`}>
-                              {plan.name}
-                            </span>
-                            <p className="text-[10px] text-stone-500 mt-0.5">{plan.description}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-stone-900">Claim Partner</span>
+                              <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
+                                Standard
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-stone-500 mt-1">Verified owner badge, direct phone, WhatsApp & website contact buttons.</p>
                           </div>
-                          <div className="text-right">
-                            <span className={`text-lg font-black ${isFeatured ? 'text-indigo-900' : 'text-stone-900'}`}>
-                              £{plan.price_monthly_gbp}
-                            </span>
-                            <span className="text-[10px] font-normal text-stone-450">/mo</span>
+                          <div className="text-right shrink-0">
+                            <span className="text-base font-black text-stone-900">£{claimPlan.price_monthly_gbp}</span>
+                            <span className="text-[10px] text-stone-400 font-semibold block">/month</span>
                           </div>
                         </div>
-                        <ul className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-stone-600 font-medium">
-                          {plan.features.map((feat, i) => (
-                            <li key={i} className={feat.includes('Social') || feat.includes('Featured') ? 'font-bold text-stone-900' : ''}>
-                              {feat}
-                            </li>
-                          ))}
-                        </ul>
                       </div>
-                    );
-                  })}
 
-                  <button
-                    onClick={() => setClaimStep(2)}
-                    className="w-full py-3 bg-stone-900 hover:bg-stone-850 text-white rounded-xl text-xs font-bold transition shadow-md mt-2 cursor-pointer"
-                  >
-                    Continue with {activePlanObj?.name || 'Selected Plan'}
-                  </button>
-                </div>
-              )}
+                      {/* Tier 2: Gold Partner (Recommended) */}
+                      <div
+                        onClick={() => handleSelectBase('gold')}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          currentBase === 'gold'
+                            ? 'border-amber-500 bg-amber-500/5 shadow-xs'
+                            : 'border-stone-200 hover:border-stone-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-amber-900">Gold Partner</span>
+                              <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-amber-500 text-white rounded-full">
+                                ⭐ Most Popular
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-stone-500 mt-1">
+                              High search rank, Gold verified badge, and automated AI deep extraction for menus, rooms & FAQs.
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-base font-black text-amber-900">£{goldPlan.price_monthly_gbp}</span>
+                            <span className="text-[10px] text-stone-400 font-semibold block">/month</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tier 3: Featured Partner */}
+                      <div
+                        onClick={() => handleSelectBase('featured')}
+                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          currentBase === 'featured'
+                            ? 'border-indigo-600 bg-indigo-500/5 shadow-xs'
+                            : 'border-stone-200 hover:border-stone-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-indigo-950">Featured Partner</span>
+                              <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full">
+                                👑 VIP Placement
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-stone-500 mt-1">
+                              Top search placement, Homepage banner spotlight, and maximum visitor reach.
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-base font-black text-indigo-950">£{featuredPlan.price_monthly_gbp}</span>
+                            <span className="text-[10px] text-stone-400 font-semibold block">/month</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Optional Social Media Marketing Add-On */}
+                    <div className="mt-4 p-4 rounded-2xl border border-indigo-200 bg-indigo-50/50 flex items-center justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl">📢</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-indigo-950">Cotswolds Social Media Campaign</span>
+                            <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-indigo-200 text-indigo-800 rounded">
+                              +£{socialAddonDiff > 0 ? socialAddonDiff : 100}/mo
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-stone-600 mt-0.5">
+                            Dedicated Instagram & Facebook spotlight post to 45,000+ Cotswolds visitors and foodies.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={hasSocial}
+                          onChange={(e) => handleToggleSocial(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+
+                    <button
+                      onClick={() => setClaimStep(2)}
+                      className="pressable w-full py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md mt-4 cursor-pointer"
+                    >
+                      Continue with {activePlanObj?.name || 'Selected Plan'} (Total: £{activePlanObj?.price_monthly_gbp || 20}/mo)
+                    </button>
+                  </div>
+                );
+              })()}
 
               {/* STEP 2: Configure Website */}
               {claimStep === 2 && (
                 <div className="space-y-4">
-                  <p className="text-xs text-stone-605 leading-relaxed">
-                    Please provide your official business website. We will use it to personalise your listing with unique highlights, FAQs, and more.
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    Provide your official business website. Our AI will crawl your pages to extract house specialties, menus, rooms, and FAQs for your listing:
                   </p>
                   
                   <div className="space-y-2">
@@ -995,7 +1091,7 @@ export default function ListingProfile() {
                   <div className="flex gap-3 mt-6">
                     <button
                       onClick={() => setClaimStep(1)}
-                      className="flex-1 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                      className="pressable flex-1 py-3 border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer"
                     >
                       Back
                     </button>
@@ -1008,9 +1104,9 @@ export default function ListingProfile() {
                           setClaimStep(3);
                         }
                       }}
-                      className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer"
+                      className="pressable flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer"
                     >
-                      Proceed to Payment
+                      Review Order
                     </button>
                   </div>
                 </div>
@@ -1020,47 +1116,47 @@ export default function ListingProfile() {
               {claimStep === 3 && (
                 <div className="space-y-5">
                   {/* Order Summary Card */}
-                  <div className="bg-stone-50 border border-stone-250 rounded-2xl p-5 space-y-4">
-                    <h4 className="text-xs uppercase font-extrabold tracking-wider text-stone-400 border-b border-stone-100 pb-2">
+                  <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 space-y-4">
+                    <h4 className="text-[10px] uppercase font-extrabold tracking-wider text-stone-400 border-b border-stone-100 pb-2">
                       Order Summary
                     </h4>
                     
                     <div className="space-y-2.5">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-stone-550 font-medium">Business listing</span>
+                        <span className="text-stone-500 font-medium">Business listing</span>
                         <span className="text-stone-900 font-bold">{listing?.title}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-stone-550 font-medium">Selected Plan</span>
-                        <span className={`font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded border ${
+                        <span className="text-stone-500 font-medium">Selected Plan</span>
+                        <span className={`font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded-full border ${
                           selectedPlan.includes('featured')
-                            ? 'text-indigo-655 bg-indigo-50 border-indigo-100'
+                            ? 'text-indigo-800 bg-indigo-50 border-indigo-200'
                             : selectedPlan.includes('gold')
-                            ? 'text-amber-605 bg-amber-50 border-amber-100'
-                            : 'text-emerald-605 bg-emerald-50 border-emerald-100'
+                            ? 'text-amber-800 bg-amber-50 border-amber-200'
+                            : 'text-emerald-800 bg-emerald-50 border-emerald-200'
                         }`}>
                           {activePlanObj?.name || selectedPlan}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-stone-550 font-medium">Website URL</span>
-                        <span className="text-stone-900 font-medium truncate max-w-[180px]">{websiteInput}</span>
+                        <span className="text-stone-500 font-medium">Website URL</span>
+                        <span className="text-stone-900 font-medium truncate max-w-[200px]">{websiteInput}</span>
                       </div>
-                      <div className="border-t border-stone-150 pt-2.5 flex justify-between items-center">
-                        <span className="text-xs font-bold text-stone-900">Total Price</span>
+                      <div className="border-t border-stone-200/60 pt-2.5 flex justify-between items-center">
+                        <span className="text-xs font-bold text-stone-900">Total Subscription</span>
                         <div className="text-right">
-                          <span className="text-base font-black text-stone-900">£{activePlanObj?.price_monthly_gbp ?? 0}</span>
-                          <span className="text-[10px] font-bold text-stone-450">/month</span>
+                          <span className="text-base font-black text-stone-900">£{activePlanObj?.price_monthly_gbp ?? 20}</span>
+                          <span className="text-[10px] font-bold text-stone-400"> / month</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Stripe Explanation */}
-                  <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-3 items-start text-xs">
-                    <span className="text-lg leading-none mt-0.5">🔒</span>
-                    <p className="text-stone-650 leading-relaxed">
-                      You will be securely redirected to **Stripe Checkout** to finalize your billing. Once completed, your profile will be updated automatically and our AI agent will crawl your website.
+                  <div className="bg-amber-500/5 border border-amber-500/15 rounded-2xl p-4 flex gap-3 items-start text-xs">
+                    <span className="text-base leading-none mt-0.5">🔒</span>
+                    <p className="text-stone-600 leading-relaxed text-[11px]">
+                      You will be securely redirected to <strong>Stripe Checkout</strong>. Billing is monthly and can be cancelled anytime. Your AI crawl and badge status activate immediately after payment.
                     </p>
                   </div>
 
@@ -1068,28 +1164,22 @@ export default function ListingProfile() {
                     <button
                       onClick={() => setClaimStep(2)}
                       disabled={checkoutLoading}
-                      className="flex-1 py-3 border border-stone-250 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                      className="pressable flex-1 py-3 border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-xl text-xs font-bold transition cursor-pointer disabled:opacity-50"
                     >
                       Back
                     </button>
                     <button
                       onClick={handleStripeCheckout}
                       disabled={checkoutLoading}
-                      className="flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center flex items-center justify-center gap-2 disabled:opacity-55"
+                      className="pressable flex-1 py-3 bg-stone-900 hover:bg-stone-850 active:bg-stone-950 text-white rounded-xl text-xs font-bold transition shadow-md cursor-pointer text-center flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {checkoutLoading ? (
                         <>
-                          <Loader2 className="h-4 w-4 animate-spin text-amber-450" />
+                          <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
                           Redirecting to Stripe...
                         </>
                       ) : (
-                        `Pay & Redirect (£${
-                          selectedPlan === 'claim' ? '20' : 
-                          selectedPlan === 'gold' ? '50' : 
-                          selectedPlan === 'gold_social' ? '150' : 
-                          selectedPlan === 'featured' ? '100' : 
-                          '200'
-                        }/mo)`
+                        `Pay & Claim (£${activePlanObj?.price_monthly_gbp ?? 20}/mo)`
                       )}
                     </button>
                   </div>
@@ -1105,3 +1195,4 @@ export default function ListingProfile() {
     </div>
   );
 }
+

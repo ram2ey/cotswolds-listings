@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 // Clean mock data for administrative staging queue testing when keys are unconfigured
 let mockPendingListings = [
@@ -66,6 +67,10 @@ let mockApprovedListings = [
 ];
 
 export async function GET(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = request.nextUrl;
     const type = searchParams.get('type');
@@ -99,6 +104,10 @@ export async function GET(request: NextRequest) {
 
 // POST is used to approve a listing
 export async function POST(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const { id } = await request.json();
     if (!id) {
@@ -134,6 +143,10 @@ export async function POST(request: NextRequest) {
 
 // DELETE is used to reject and delete a listing from the database
 export async function DELETE(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const { searchParams } = request.nextUrl;
     const id = searchParams.get('id');
@@ -170,6 +183,10 @@ export async function DELETE(request: NextRequest) {
 
 // PUT is used to update listing details (tier, website)
 export async function PUT(request: NextRequest) {
+  if (!verifyAdminSession(request)) {
+    return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
+  }
+
   try {
     const { id, tier, website } = await request.json();
     if (!id) {
@@ -210,3 +227,4 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
