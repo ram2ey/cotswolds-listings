@@ -25,7 +25,8 @@ import {
   LayoutGrid,
   List,
   Clock,
-  CheckCheck
+  CheckCheck,
+  Mail
 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/lib/plans';
 import { getErrorMessage } from '@/lib/api-utils';
@@ -44,6 +45,15 @@ interface Listing {
     package_name?: string;
     has_social_addon?: boolean;
   };
+}
+
+interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  created_at: string;
 }
 
 interface ConfirmModalState {
@@ -65,7 +75,7 @@ export default function AdminDashboard() {
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'staging' | 'live' | 'pricing'>('staging');
+  const [activeTab, setActiveTab] = useState<'staging' | 'live' | 'inquiries' | 'pricing'>('staging');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Search & Filter states
@@ -81,6 +91,10 @@ export default function AdminDashboard() {
 
   // Confirmation Modal state
   const [confirmModal, setConfirmModal] = useState<ConfirmModalState | null>(null);
+
+  // Contact Inquiries state
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [loadingInquiries, setLoadingInquiries] = useState<boolean>(false);
 
   // Pricing Plans state
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -173,7 +187,7 @@ export default function AdminDashboard() {
 
   // Fetch listings from the API based on active tab
   useEffect(() => {
-    if (!isAuthenticated || activeTab === 'pricing') return;
+    if (!isAuthenticated || activeTab === 'pricing' || activeTab === 'inquiries') return;
 
     async function fetchListings() {
       try {
@@ -212,6 +226,59 @@ export default function AdminDashboard() {
     }
     fetchListings();
   }, [activeTab, isAuthenticated]);
+
+  // Fetch contact inquiries when the Inquiries tab is opened
+  useEffect(() => {
+    if (!isAuthenticated || activeTab !== 'inquiries') return;
+
+    async function fetchInquiries() {
+      try {
+        setLoadingInquiries(true);
+        const res = await fetch('/api/admin/inquiries');
+        if (!res.ok) {
+          if (res.status === 401) {
+            setIsAuthenticated(false);
+            throw new Error('Administrative session expired.');
+          }
+          throw new Error('Failed to load contact inquiries.');
+        }
+        const data: Inquiry[] = await res.json();
+        setInquiries(data);
+      } catch (err) {
+        showNotification('Could not load contact inquiries: ' + getErrorMessage(err), true);
+      } finally {
+        setLoadingInquiries(false);
+      }
+    }
+    fetchInquiries();
+  }, [activeTab, isAuthenticated]);
+
+  // Dismiss (permanently delete) a contact inquiry
+  const promptDeleteInquiry = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Dismiss inquiry from "${name}"?`,
+      message: 'This will permanently delete this contact message. This action cannot be undone.',
+      confirmLabel: 'Yes, Dismiss Inquiry',
+      isDestructive: true,
+      onConfirm: async () => {
+        setConfirmModal(null);
+        const originalInquiries = [...inquiries];
+        setInquiries(prev => prev.filter(i => i.id !== id));
+
+        try {
+          const res = await fetch(`/api/admin/inquiries?id=${id}`, { method: 'DELETE' });
+          if (!res.ok) {
+            throw new Error('Server returned an error while dismissing the inquiry.');
+          }
+          showNotification('Inquiry dismissed.');
+        } catch {
+          setInquiries(originalInquiries);
+          showNotification('Could not dismiss inquiry. Please try again.', true);
+        }
+      }
+    });
+  };
 
   // Fetch subscription plans
   const fetchPlans = async () => {
@@ -660,6 +727,22 @@ export default function AdminDashboard() {
               Live Directory
             </button>
             <button
+              onClick={() => setActiveTab('inquiries')}
+              className={`py-4 px-1 border-b-2 font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
+                activeTab === 'inquiries'
+                  ? 'border-amber-500 text-stone-950'
+                  : 'border-transparent text-stone-400 hover:text-stone-700'
+              }`}
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Inquiries
+              {inquiries.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[9px] font-black">
+                  {inquiries.length}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setActiveTab('pricing')}
               className={`py-4 px-1 border-b-2 font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 ${
                 activeTab === 'pricing'
@@ -672,7 +755,7 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {activeTab !== 'pricing' && (
+          {(activeTab === 'staging' || activeTab === 'live') && (
             <div className="flex items-center gap-1.5 py-2.5 sm:py-0">
               <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider mr-1">View:</span>
               <button
@@ -920,8 +1003,59 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* INQUIRIES TAB CONTENT */}
+        {activeTab === 'inquiries' && (
+          <div className="space-y-6 animate-fade-in">
+            {loadingInquiries ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-10 w-10 text-amber-600 animate-spin" />
+                <p className="text-xs text-stone-500 font-medium">Loading contact inquiries...</p>
+              </div>
+            ) : inquiries.length === 0 ? (
+              <div className="text-center py-24 bg-white border border-dashed border-stone-200 rounded-2xl">
+                <Mail className="h-12 w-12 text-stone-300 mx-auto mb-3" />
+                <h3 className="text-lg font-serif font-semibold text-stone-900">No Inquiries Yet</h3>
+                <p className="text-xs text-stone-500 mt-2 max-w-xs mx-auto">
+                  Messages submitted through the Contact Us form will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="bg-white border border-stone-200/80 rounded-2xl p-6 shadow-xs">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-bold text-sm text-stone-900">{inquiry.name}</h3>
+                          <span className="text-[10px] text-stone-400 font-medium">
+                            {new Date(inquiry.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </span>
+                        </div>
+                        <a href={`mailto:${inquiry.email}`} className="text-xs text-amber-700 hover:underline font-medium">
+                          {inquiry.email}
+                        </a>
+                        <p className="text-xs font-bold text-stone-700 mt-2">{inquiry.subject}</p>
+                        <p className="text-xs text-stone-600 mt-1.5 leading-relaxed whitespace-pre-line">
+                          {inquiry.message}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => promptDeleteInquiry(inquiry.id, inquiry.name)}
+                        className="pressable shrink-0 p-2 rounded-xl border border-stone-200 hover:bg-rose-50 hover:border-rose-200 text-stone-400 hover:text-rose-600 transition cursor-pointer"
+                        title="Dismiss inquiry"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* STAGING / LIVE DIRECTORY CONTENT */}
-        {activeTab !== 'pricing' && (
+        {(activeTab === 'staging' || activeTab === 'live') && (
           <div className="space-y-6 animate-fade-in">
             {/* Search and Filters Bar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-stone-200/80 shadow-xs">
