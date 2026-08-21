@@ -1,75 +1,52 @@
-import { NextRequest } from 'next/server';
-import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+import { createSupabaseServerClient, isSupabaseConfigured } from './supabase/server';
 
-export const ADMIN_COOKIE_NAME = 'cotswolds_admin_session';
-
-function getAdminSecret(): string {
-  return process.env.ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'cotswoldsadmin';
+export interface AdminUser {
+  id: string;
+  email: string | null;
 }
 
-function getSigningSecret(): string {
-  const secret = process.env.SESSION_SECRET || getAdminSecret();
-  return crypto.createHash('sha256').update(secret).digest('hex');
-}
+// Authorization check beyond "is a valid Supabase Auth user": Supabase Auth's
+// signup endpoint is reachable by anyone with the public anon key, so being
+// authenticated is not enough — the account must also be explicitly listed in
+// admin_users (populated manually via the Supabase dashboard/SQL editor, never
+// through this app). This table has no RLS policies, so only the service-role
+// key below can read it.
+async function isApprovedAdmin(userId: string): Promise<boolean> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) return false;
 
-/**
- * Creates an HMAC-SHA256 signed session token containing timestamp and payload.
- */
-export function createAdminSessionToken(): string {
-  const timestamp = Date.now().toString();
-  const signature = crypto
-    .createHmac('sha256', getSigningSecret())
-    .update(`admin:${timestamp}`)
-    .digest('hex');
-  return `${timestamp}.${signature}`;
-}
+  const admin = createClient(supabaseUrl, serviceKey);
+  const { data } = await admin
+    .from('admin_users')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle();
 
-/**
- * Validates a session token signature and checks if it is not expired (7 days max age).
- */
-export function isValidAdminToken(token: string | null | undefined): boolean {
-  if (!token) return false;
-
-  const parts = token.split('.');
-  if (parts.length !== 2) return false;
-
-  const [timestampStr, signature] = parts;
-  const timestamp = parseInt(timestampStr, 10);
-  if (isNaN(timestamp)) return false;
-
-  // Max age: 7 days in milliseconds
-  const maxAgeMs = 7 * 24 * 60 * 60 * 1000;
-  if (Date.now() - timestamp > maxAgeMs) {
-    return false;
-  }
-
-  const expectedSignature = crypto
-    .createHmac('sha256', getSigningSecret())
-    .update(`admin:${timestampStr}`)
-    .digest('hex');
-
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  return data !== null;
 }
 
 /**
- * Verifies if an incoming NextRequest has valid administrative credentials
- * either via the secure HTTP-only cookie or an Authorization Bearer header.
+ * Returns the current admin user if the request has a valid, approved
+ * Supabase Auth session. Must be called from within a Route Handler.
  */
-export function verifyAdminSession(request: NextRequest): boolean {
-  // 1. Check HTTP-only cookie
-  const cookie = request.cookies.get(ADMIN_COOKIE_NAME);
-  if (cookie?.value && isValidAdminToken(cookie.value)) {
-    return true;
-  }
+export async function getAdminUser(): Promise<AdminUser | null> {
+  if (!isSupabaseConfigured()) return null;
 
-  // 2. Check Authorization Bearer header (for automated scripts or programmatic calls)
-  const authHeader = request.headers.get('authorization');
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const bearerSecret = authHeader.slice(7).trim();
-    if (bearerSecret === getAdminSecret()) {
-      return true;
-    }
-  }
+  const supabase = await createSupabaseServerClient();
+  // getUser() verifies the token against Supabase's auth server rather than
+  // just decoding the cookie locally, so a tampered/expired cookie can't pass.
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return null;
 
-  return false;
+  const approved = await isApprovedAdmin(user.id);
+  if (!approved) return null;
+
+  return { id: user.id, email: user.email ?? null };
+}
+
+export async function verifyAdminSession(): Promise<boolean> {
+  const user = await getAdminUser();
+  return user !== null;
 }

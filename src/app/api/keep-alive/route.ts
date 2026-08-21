@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getErrorMessage } from '@/lib/api-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Perform a lightweight query on the listings table to keep the database active
-    const { data, count, error } = await supabase
+    const { count, error } = await supabase
       .from('listings')
       .select('id', { count: 'exact', head: true });
 
@@ -57,11 +58,11 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       durationMs
     });
-  } catch (err: any) {
-    console.error('Unhandled keep-alive error:', err);
+  } catch (err) {
+    console.error('Unhandled keep-alive error:', getErrorMessage(err));
     return NextResponse.json({
       success: false,
-      error: err.message || 'Internal Server Error',
+      error: getErrorMessage(err) || 'Internal Server Error',
       timestamp: new Date().toISOString()
     }, { status: 500 });
   }

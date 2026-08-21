@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send, CheckCircle2, Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/api-utils";
 
 export default function ContactForm() {
   const [name, setName] = useState("");
@@ -43,8 +44,8 @@ export default function ContactForm() {
       setEmail("");
       setSubject("");
       setMessage("");
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while sending your message.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'An error occurred while sending your message.');
     } finally {
       setSubmitting(false);
     }

@@ -15,6 +15,6 @@ export const isStripeMock = (): boolean => {
 export const stripe = new Stripe(
   isStripeMock() ? 'sk_test_mock_placeholder_key_for_cotswolds_pages' : stripeSecretKey,
   {
-    apiVersion: '2022-11-15' as any, // Standard stable API version
+    apiVersion: '2022-11-15' as Stripe.LatestApiVersion, // Standard stable API version
   }
 );

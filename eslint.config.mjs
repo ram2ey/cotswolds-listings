@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone CommonJS data-seeding script run directly via `node ingest.js`,
+    // outside the Next.js app — not subject to the app's TS/ESM lint rules.
+    "ingest.js",
   ]),
 ]);
 

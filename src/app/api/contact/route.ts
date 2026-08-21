@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { errorResponse, getErrorMessage } from '@/lib/api-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,8 +40,8 @@ export async function POST(request: NextRequest) {
             message,
             created_at: new Date().toISOString()
           });
-      } catch (err: any) {
-        console.warn('Could not store in contact_inquiries table (ignoring if table does not exist):', err.message);
+      } catch (err) {
+        console.warn('Could not store in contact_inquiries table (ignoring if table does not exist):', getErrorMessage(err));
       }
     }
 
@@ -48,11 +49,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Thank you for reaching out! Our team has received your message.'
     });
-  } catch (err: any) {
-    console.error('Error handling contact form submission:', err.message);
-    return NextResponse.json(
-      { error: err.message || 'Failed to submit contact message.' },
-      { status: 500 }
-    );
+  } catch (err) {
+    return errorResponse(err, 500, 'Failed to submit contact message.', 'contact');
   }
 }

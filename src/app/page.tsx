@@ -1,14 +1,27 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { PlusCircle, Star, MapPin, Hotel, Utensils, Compass, HelpCircle, ShieldCheck, Zap, Wrench, Sparkles, Briefcase, Car, Layers, Heart } from "lucide-react";
+import { PlusCircle, MapPin, Hotel, Utensils, Wrench, Sparkles, Briefcase, Car } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
+interface FeaturedListing {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  address: string;
+  town?: string;
+  phone: string;
+  rating: number;
+  images: string[];
+}
+
 // Fetch live Gold Partner featured listings
-async function getFeaturedListings() {
+async function getFeaturedListings(): Promise<FeaturedListing[]> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -184,7 +197,7 @@ export default async function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featured.map((item: any) => (
+              {featured.map((item) => (
                 <div 
                   key={item.id} 
                   className="bg-stone-50 rounded-2xl overflow-hidden border border-stone-200/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-md flex flex-col justify-between shadow-xs"

@@ -1,27 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSubscriptionPlans, updateSubscriptionPlan, DEFAULT_PLANS } from '@/lib/plans';
 import { verifyAdminSession } from '@/lib/admin-auth';
+import { errorResponse } from '@/lib/api-utils';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+export async function GET() {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
   try {
     const plans = await getSubscriptionPlans(true);
     return NextResponse.json(plans);
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || 'Failed to fetch admin pricing plans' },
-      { status: 500 }
-    );
+  } catch (err) {
+    return errorResponse(err, 500, 'Failed to fetch admin pricing plans', 'admin-pricing-get');
   }
 }
 
 export async function PUT(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -70,11 +68,8 @@ export async function PUT(request: NextRequest) {
       message: `Updated pricing for ${updatedPlan.name} to £${updatedPlan.price_monthly_gbp}/mo.`,
       data: updatedPlan,
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || 'Failed to update plan pricing' },
-      { status: 500 }
-    );
+  } catch (err) {
+    return errorResponse(err, 500, 'Failed to update plan pricing', 'admin-pricing-put');
   }
 }
 

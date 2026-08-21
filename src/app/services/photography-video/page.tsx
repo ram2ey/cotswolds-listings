@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
-import { Camera, Play, Image, Video, Compass, Users, Sparkles, Star, Heart, TrendingUp, Layers, ShoppingBag, ArrowRight } from "lucide-react";
+import { Play, Video, Compass, Users, Star, Heart, TrendingUp, Layers, ShoppingBag, ArrowRight } from "lucide-react";
 
 export const metadata = {
   title: "Photography & Video Services | Cotswolds Pages",
@@ -96,7 +96,7 @@ export default function PhotographyVideo() {
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-600 block mb-2">Visual Storytelling</span>
               <h2 className="text-xl sm:text-2xl font-serif font-black text-stone-950 mb-4">The Power of Visual Media in the Cotswolds</h2>
               <p className="text-stone-605 text-xs sm:text-sm leading-relaxed mb-4">
-                We believe that professional photography and video are the most powerful tools for telling your business's unique story. That is why at Cotswold PAGES, we are genuinely passionate about capturing premium visual media and making it fully accessible and affordable for every single member of our local business directory.
+                We believe that professional photography and video are the most powerful tools for telling your business&apos;s unique story. That is why at Cotswold PAGES, we are genuinely passionate about capturing premium visual media and making it fully accessible and affordable for every single member of our local business directory.
               </p>
               <p className="text-stone-500 text-xs sm:text-sm leading-relaxed">
                 In a digital marketplace, text alone is no longer enough to grab attention. High-quality imagery lets you show potential customers the exact faces, dedication, and craftsmanship behind your business before they ever step through your door. Authentic visual content builds instant trust and makes your services completely unforgettable.

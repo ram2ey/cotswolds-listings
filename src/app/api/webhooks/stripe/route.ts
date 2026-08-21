@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { claimAndScrapeListing } from '@/lib/claim-helper';
+import { getErrorMessage } from '@/lib/api-utils';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -17,9 +18,10 @@ export async function POST(request: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+  } catch (err) {
+    const message = getErrorMessage(err);
+    console.error(`Webhook signature verification failed: ${message}`);
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 });
   }
 
   console.log(`[stripe-webhook] Received event: ${event.type}`);
@@ -41,11 +43,11 @@ export async function POST(request: NextRequest) {
 
     // Trigger scraping and AI enrichment asynchronously to avoid Stripe timeout (approx 10s limit)
     claimAndScrapeListing(listingId, tier, website)
-      .then((result) => {
+      .then(() => {
         console.log(`[stripe-webhook] Scrape & claim completed successfully for listing ${listingId}`);
       })
       .catch((error) => {
-        console.error(`[stripe-webhook] Background claim/scrape failed for listing ${listingId}:`, error.message);
+        console.error(`[stripe-webhook] Background claim/scrape failed for listing ${listingId}:`, getErrorMessage(error));
       });
   }
 

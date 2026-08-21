@@ -46,7 +46,7 @@ export default function ContactPage() {
               <div>
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-stone-500">Form Submissions</h4>
                 <p className="text-xs text-stone-500 mt-1 leading-relaxed">
-                  Submissions are routed directly to our admin team's inbox for prompt response.
+                  Submissions are routed directly to our admin team&apos;s inbox for prompt response.
                 </p>
               </div>
             </div>

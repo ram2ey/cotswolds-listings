@@ -3,26 +3,24 @@
 import React, { useState, useEffect } from 'react';
 
 export const dynamic = 'force-dynamic';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { 
-  MapPin, 
-  Phone, 
-  Globe, 
-  MessageSquare, 
-  Mail, 
-  Compass, 
-  ChevronLeft, 
-  ArrowUpRight, 
-  Clock, 
-  Star, 
-  ShieldAlert, 
+import {
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
+  ChevronLeft,
+  Clock,
+  Star,
+  ShieldAlert,
   ExternalLink,
   Loader2
 } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
+import { getErrorMessage } from '@/lib/api-utils';
 
 // Setup Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -53,7 +51,7 @@ interface Listing {
   rating?: number;
   reviews_count?: number;
   tags?: string[];
-  opening_hours?: any;
+  opening_hours?: { day?: string; dayName?: string; hours?: string; hoursText?: string }[];
   premium_metadata?: {
     highlights?: string[];
     faqs?: { question: string; answer: string }[];
@@ -288,7 +286,6 @@ const DEFAULT_CLAIM_PLANS: SubscriptionPlan[] = [
 
 export default function ListingProfile() {
   const params = useParams();
-  const router = useRouter();
   const slug = params?.slug as string;
 
   const [listing, setListing] = useState<Listing | null>(null);
@@ -355,8 +352,8 @@ export default function ListingProfile() {
       } else {
         throw new Error('No redirect URL returned from payment server.');
       }
-    } catch (err: any) {
-      setClaimError(err.message || 'An unexpected error occurred during payment processing.');
+    } catch (err) {
+      setClaimError(getErrorMessage(err) || 'An unexpected error occurred during payment processing.');
       setCheckoutLoading(false);
     }
   };
@@ -399,8 +396,8 @@ export default function ListingProfile() {
             setError("We could not find a listing matching the specified slug.");
           }
         }
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred while retrieval.");
+      } catch (err) {
+        setError(getErrorMessage(err) || "An unexpected error occurred while retrieval.");
       } finally {
         setLoading(false);
       }
@@ -439,13 +436,6 @@ export default function ListingProfile() {
 
   const isGold = listing.tier === 'gold';
   const isFeatured = listing.tier === 'featured';
-  
-  // Format WhatsApp Link
-  const whatsappNumber = listing.whatsapp || listing.phone;
-  const cleanWhatsapp = whatsappNumber ? whatsappNumber.replace(/[^\d]/g, '') : '';
-  const whatsappUrl = cleanWhatsapp
-    ? `https://wa.me/${cleanWhatsapp}?text=Hi%20${encodeURIComponent(listing.title)},%20I%20saw%20your%20profile%20on%20Cotswolds%20Pages%20and%20wanted%20to%20get%20in%20touch!`
-    : '';
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col justify-between">
@@ -855,7 +845,7 @@ export default function ListingProfile() {
                   </div>
 
                   <div className="space-y-2">
-                    {listing.opening_hours.map((item: any, idx: number) => {
+                    {listing.opening_hours.map((item, idx) => {
                       const day = item.day || item.dayName || '';
                       const hours = item.hours || item.hoursText || '';
                       return (

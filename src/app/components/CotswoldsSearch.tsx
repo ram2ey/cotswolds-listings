@@ -3,19 +3,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { 
-  Search, 
-  MapPin, 
-  Compass, 
-  Phone, 
-  Globe, 
-  Navigation, 
+import {
+  Search,
+  MapPin,
+  Compass,
+  Navigation,
   Star,
-  MessageSquare,
   AlertCircle,
   Loader2,
   ChevronDown
 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-utils';
 
 interface Listing {
   id: string;
@@ -37,7 +35,7 @@ interface Listing {
   distance_miles?: number;
   rating?: number;
   reviews_count?: number;
-  opening_hours?: any;
+  opening_hours?: unknown;
 }
 
 // Default coordinates for Bourton-on-the-Water (central point of the Cotswolds)
@@ -64,14 +62,6 @@ const TOWNS = [
   "Cirencester",
   "Burford",
   "Snowshill"
-];
-
-const TOWN_CARDS = [
-  { name: 'Broadway', img: '/broadway.jpeg', gradient: 'from-amber-800/80 to-amber-950/90' },
-  { name: 'Chipping Campden', img: '/chipping-campden.jpeg', gradient: 'from-emerald-800/80 to-emerald-950/90' },
-  { name: 'Stow-on-the-Wold', img: '/stow-on-the-wold.jpeg', gradient: 'from-rose-800/80 to-rose-950/90' },
-  { name: 'Bourton-on-the-Water', img: '/bourton-on-the-water.jpeg', gradient: 'from-slate-700/80 to-slate-900/90' },
-  { name: 'Cirencester', img: '/cirencester.jpeg', gradient: 'from-purple-800/80 to-indigo-950/90' }
 ];
 
 interface CotswoldsSearchProps {
@@ -115,13 +105,20 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
     return ["Select Town", ...Array.from(unique).sort()];
   }, [allListings]);
 
-  // Reset pagination when filters change
-  useEffect(() => {
+  // Reset pagination when filters change (adjusted during render, not in an
+  // effect, to avoid an extra post-commit render pass for a plain derived reset)
+  const filterKey = [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWebsite, sortBy].join('|');
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setVisibleCount(9);
-  }, [selectedCategory, selectedRegion, radius, debouncedKeyword, onlyPremium, hasWebsite, sortBy]);
+  }
 
   // Synchronize state with URL search parameters (triggered by clicking home category/town cards)
-  useEffect(() => {
+  const searchParamsKey = searchParams.toString();
+  const [prevSearchParamsKey, setPrevSearchParamsKey] = useState(searchParamsKey);
+  if (searchParamsKey !== prevSearchParamsKey) {
+    setPrevSearchParamsKey(searchParamsKey);
     const categoryQuery = searchParams.get('category');
     const regionQuery = searchParams.get('town') || searchParams.get('region');
     const keywordQuery = searchParams.get('keyword');
@@ -135,7 +132,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
     if (keywordQuery) {
       setKeyword(keywordQuery);
     }
-  }, [searchParams]);
+  }
 
   // Debounce keyword typing to prevent sluggish re-renders on keystroke
   useEffect(() => {
@@ -224,8 +221,8 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
       }
       const data = await res.json();
       setListings(data);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred while loading listings.");
+    } catch (err) {
+      setError(getErrorMessage(err) || "An unexpected error occurred while loading listings.");
     } finally {
       setLoading(false);
     }
@@ -486,7 +483,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
               
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'proximity' | 'alphabetical' | 'newest')}
                 className="bg-stone-800 text-stone-200 border border-stone-700 rounded-xl px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-amber-500 cursor-pointer w-full"
               >
                 <option value="alphabetical" className="text-stone-900">Alphabetical (A - Z)</option>
@@ -539,8 +536,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
                 <div className="flex overflow-x-auto gap-6 pb-6 pt-2 snap-x snap-mandatory scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-thin scrollbar-thumb-stone-200 scrollbar-track-stone-50">
                   {featuredListings.map((item) => {
                     const isGold = item.tier === 'gold';
-                    const whatsappContact = item.whatsapp || item.phone;
-                    
+
                     return (
                       <div
                         key={`featured-${item.id}`}
@@ -676,8 +672,7 @@ export default function CotswoldsSearch({ hideListings = false }: CotswoldsSearc
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {sortedListings.slice(0, visibleCount).map((item) => {
                   const isGold = item.tier === 'gold';
-                  const whatsappContact = item.whatsapp || item.phone;
-                  
+
                   return (
                     <div
                       key={item.id}

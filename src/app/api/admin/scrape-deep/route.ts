@@ -3,9 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 import { ApifyClient } from 'apify-client';
 import axios from 'axios';
 import { verifyAdminSession } from '@/lib/admin-auth';
+import { errorResponse, getErrorMessage } from '@/lib/api-utils';
+import type { PremiumMetadata } from '@/lib/claim-helper';
 
 // Helper function to generate premium metadata fallback
-function generateMockMetadata(title: string, category: string, subRegion: string): any {
+function generateMockMetadata(title: string, category: string, subRegion: string): PremiumMetadata {
   const isFood = /pub|restaurant|caf|gastropub|inn/i.test(category);
   const isHotel = /hotel|accommodation|b&b|inn/i.test(category);
 
@@ -59,7 +61,7 @@ function generateMockMetadata(title: string, category: string, subRegion: string
 }
 
 // Call Gemini API to extract details from crawled text
-async function callGeminiAPI(crawledText: string, title: string, category: string, subRegion: string): Promise<any> {
+async function callGeminiAPI(crawledText: string, title: string, category: string, subRegion: string): Promise<PremiumMetadata> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your-gemini-api-key-here') {
     console.warn("GEMINI_API_KEY is not configured. Falling back to default premium content.");
@@ -107,14 +109,14 @@ async function callGeminiAPI(crawledText: string, title: string, category: strin
       return JSON.parse(responseText.trim());
     }
     throw new Error("Empty response from Gemini API");
-  } catch (err: any) {
-    console.error("Gemini API call failed, falling back to mock generation:", err.message);
+  } catch (err) {
+    console.error("Gemini API call failed, falling back to mock generation:", getErrorMessage(err));
     return generateMockMetadata(title, category, subRegion);
   }
 }
 
 export async function POST(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -127,7 +129,16 @@ export async function POST(request: NextRequest) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    let listing: any = null;
+    let listing: {
+      title: string;
+      category: string;
+      town: string;
+      website?: string | null;
+      tier?: string;
+      rating?: number | string | null;
+      reviews_count?: number | null;
+      tags?: string[] | null;
+    } | null = null;
 
     // Fetch listing from Supabase or find in mock approved/pending list
     if (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-supabase-url-here')) {
@@ -165,7 +176,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Deep scraping is restricted to premium tiers (Silver & Gold).' }, { status: 400 });
     }
 
-    let premiumMetadata = null;
+    let premiumMetadata: PremiumMetadata | null = null;
 
     const apifyToken = process.env.APIFY_API_TOKEN;
     const isMockApify = !apifyToken || apifyToken === 'your-apify-api-token-here';
@@ -189,13 +200,13 @@ export async function POST(request: NextRequest) {
 
         const { items } = await client.dataset(run.defaultDatasetId).listItems();
         const crawledText = items
-          .map((item: any) => item.text || '')
+          .map((item) => (item as { text?: string }).text || '')
           .join('\n\n')
           .slice(0, 10000); // Grab first 10k chars to fit context safely
 
         premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.town);
-      } catch (err: any) {
-        console.error("Deep website crawl failed. Falling back to structured AI mock:", err.message);
+      } catch (err) {
+        console.error("Deep website crawl failed. Falling back to structured AI mock:", getErrorMessage(err));
         premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
       }
     }
@@ -207,7 +218,7 @@ export async function POST(request: NextRequest) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
       
       // Update DB with the premium data. We also seed reviews count & ratings if they were empty
-      const updates: any = {
+      const updates: Record<string, unknown> = {
         premium_metadata: premiumMetadata
       };
 
@@ -236,7 +247,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: premiumMetadata });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 550 });
+  } catch (err) {
+    return errorResponse(err, 500, 'Deep scrape failed', 'admin-scrape-deep');
   }
 }

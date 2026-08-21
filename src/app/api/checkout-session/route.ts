@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { stripe, isStripeMock } from '@/lib/stripe';
 import { claimAndScrapeListing } from '@/lib/claim-helper';
 import { getSubscriptionPlan } from '@/lib/plans';
+import { errorResponse } from '@/lib/api-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
       const { data, error } = await supabase
         .from('listings')
-        .select('slug')
+        .select('slug, tier')
         .eq('id', listingId)
         .single();
 
@@ -49,6 +50,17 @@ export async function POST(request: NextRequest) {
         console.error('Error fetching listing slug:', error?.message);
         return NextResponse.json({ error: 'Listing not found in database.' }, { status: 404 });
       }
+
+      // Refuse to take payment to "claim" a listing that's already claimed —
+      // the final atomic guard lives in claimAndScrapeListing, but checking
+      // here avoids charging a card for a claim that will be rejected later.
+      if (data.tier && data.tier !== 'basic') {
+        return NextResponse.json(
+          { error: 'This listing has already been claimed. Please contact support if you believe this is an error.' },
+          { status: 409 }
+        );
+      }
+
       slug = data.slug;
     } else {
       slug = 'broadway-hotel-suites-broadway'; // Fallback slug for offline mock testing
@@ -110,12 +122,8 @@ export async function POST(request: NextRequest) {
       mockRedirect: false,
       url: session.url,
     });
-  } catch (err: any) {
-    console.error('Error creating checkout session:', err.message);
-    return NextResponse.json(
-      { error: err.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+  } catch (err) {
+    return errorResponse(err, 500, 'Internal Server Error', 'checkout-session');
   }
 }
 

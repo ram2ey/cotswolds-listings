@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
-import { MessageSquare, Clock, BookOpen, Users, Activity, ArrowRight, Share2 } from "lucide-react";
+import { Clock, BookOpen, Users, Activity, ArrowRight, Share2 } from "lucide-react";
 
 export const metadata = {
   title: "Social Media Services | Cotswolds Pages",
@@ -70,7 +70,7 @@ export default function SocialMediaServices() {
               </div>
             </div>
             <p className="text-stone-700 text-sm sm:text-base leading-relaxed font-normal max-w-3xl mx-auto">
-              Your customers are already on social media scrolling, engaging, and buying. If your business isn't actively communicating on platforms like Facebook, Instagram, X (Twitter), and Pinterest, you are missing out on valuable leads.
+              Your customers are already on social media scrolling, engaging, and buying. If your business isn&apos;t actively communicating on platforms like Facebook, Instagram, X (Twitter), and Pinterest, you are missing out on valuable leads.
             </p>
             <p className="text-stone-500 text-xs sm:text-sm leading-relaxed mt-4 max-w-3xl mx-auto">
               Great social media marketing does more than post updates. It tells your unique story, builds trust, and drives real business success. With Cotswolds Pages, you will have access to an army of Social Media content creators for less than the price that it would take you to hire a single internal specialist.

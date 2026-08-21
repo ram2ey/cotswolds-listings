@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
-import { Search, Settings, HelpCircle, AlertCircle, CheckCircle, Shield, Smartphone, Globe, Landmark, TrendingUp, Zap, ShieldCheck, Heart, LineChart, Layers, ArrowRight } from "lucide-react";
+import { Search, Settings, HelpCircle, AlertCircle, Shield, Smartphone, Globe, TrendingUp, Zap, ShieldCheck, Heart, LineChart, ArrowRight } from "lucide-react";
 
 export const metadata = {
   title: "Search Engine Optimization (SEO) | Cotswolds Pages",
@@ -101,7 +101,7 @@ export default function SearchEngineOptimization() {
               Search Engine Optimisation (SEO) is a game-changing digital marketing strategy that puts your Cotswolds business directly in front of motivated, high-intent local customers.
             </p>
             <p className="text-stone-500 text-xs sm:text-sm leading-relaxed mt-4 max-w-3xl mx-auto">
-              By mastering the core pillars of SEO—including content strategy, local authority building, and the crucial behind-the-scenes magic of Technical SEO—you can dramatically boost your website's search visibility, drive massive waves of free organic traffic, and consistently turn casual clicks into paying customers. Discover exactly how our Technical SEO services fix hidden backend errors, supercharge your loading speeds, and build a flawless foundation that forces Google to rank your website above the competition!
+              By mastering the core pillars of SEO—including content strategy, local authority building, and the crucial behind-the-scenes magic of Technical SEO—you can dramatically boost your website&apos;s search visibility, drive massive waves of free organic traffic, and consistently turn casual clicks into paying customers. Discover exactly how our Technical SEO services fix hidden backend errors, supercharge your loading speeds, and build a flawless foundation that forces Google to rank your website above the competition!
             </p>
           </div>
         </section>
@@ -120,7 +120,7 @@ export default function SearchEngineOptimization() {
                     <h3 className="text-lg font-serif font-bold text-stone-900">What is Technical SEO?</h3>
                   </div>
                   <p className="text-stone-605 text-xs sm:text-sm leading-relaxed">
-                    Technical SEO is the process of optimizing your website's backend infrastructure so search engines can easily find, explore, and index your pages. While on-page SEO focuses on your visible words and images, technical SEO works behind the scenes to fine-tune your site structure. The ultimate goal is to build a flawless foundation that helps your business climb search engine result pages (SERPs).
+                    Technical SEO is the process of optimizing your website&apos;s backend infrastructure so search engines can easily find, explore, and index your pages. While on-page SEO focuses on your visible words and images, technical SEO works behind the scenes to fine-tune your site structure. The ultimate goal is to build a flawless foundation that helps your business climb search engine result pages (SERPs).
                   </p>
                 </div>
               </div>

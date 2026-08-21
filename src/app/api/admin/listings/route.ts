@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAdminSession } from '@/lib/admin-auth';
+import { errorResponse } from '@/lib/api-utils';
 
 // Clean mock data for administrative staging queue testing when keys are unconfigured
 let mockPendingListings = [
@@ -67,7 +68,7 @@ let mockApprovedListings = [
 ];
 
 export async function GET(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -97,14 +98,14 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data || []);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return errorResponse(err, 500, 'Request failed', 'admin-listings');
   }
 }
 
 // POST is used to approve a listing
 export async function POST(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -136,14 +137,14 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return errorResponse(err, 500, 'Request failed', 'admin-listings');
   }
 }
 
 // DELETE is used to reject and delete a listing from the database
 export async function DELETE(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -166,7 +167,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('listings')
       .delete()
       .eq('id', id);
@@ -176,14 +177,14 @@ export async function DELETE(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, message: `Listing ${id} successfully rejected and deleted.` });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return errorResponse(err, 500, 'Request failed', 'admin-listings');
   }
 }
 
 // PUT is used to update listing details (tier, website)
 export async function PUT(request: NextRequest) {
-  if (!verifyAdminSession(request)) {
+  if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: 'Unauthorized administrative access.' }, { status: 401 });
   }
 
@@ -208,7 +209,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     if (tier) updateData.tier = tier;
     if (website !== undefined) updateData.website = website;
 
@@ -223,8 +224,8 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: data?.[0] });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return errorResponse(err, 500, 'Request failed', 'admin-listings');
   }
 }
 

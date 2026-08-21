@@ -3,21 +3,20 @@
 import React, { useState, useEffect } from 'react';
 
 export const dynamic = 'force-dynamic';
-import { 
-  CheckCircle, 
-  Trash2, 
-  MapPin, 
-  Layers, 
-  Phone, 
-  Globe, 
-  Loader2, 
+import {
+  CheckCircle,
+  Trash2,
+  MapPin,
+  Layers,
+  Phone,
+  Globe,
+  Loader2,
   AlertTriangle,
   Inbox,
   Lock,
   CreditCard,
   Save,
   RotateCcw,
-  Sparkles,
   Check,
   LogOut,
   Search,
@@ -25,13 +24,11 @@ import {
   ShieldCheck,
   LayoutGrid,
   List,
-  ExternalLink,
-  TrendingUp,
   Clock,
-  Eye,
   CheckCheck
 } from 'lucide-react';
 import type { SubscriptionPlan } from '@/lib/plans';
+import { getErrorMessage } from '@/lib/api-utils';
 
 interface Listing {
   id: string;
@@ -62,6 +59,7 @@ export default function AdminDashboard() {
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
+  const [emailInput, setEmailInput] = useState<string>("");
   const [passwordInput, setPasswordInput] = useState<string>("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -89,7 +87,6 @@ export default function AdminDashboard() {
   const [loadingPlans, setLoadingPlans] = useState<boolean>(false);
   const [planDrafts, setPlanDrafts] = useState<Record<string, { name: string; price_monthly_gbp: number | string; description: string; is_active: boolean }>>({});
   const [savingPlanId, setSavingPlanId] = useState<string | null>(null);
-  const [previewPlanId, setPreviewPlanId] = useState<string>('gold');
 
   // Quick stats counts
   const [stats, setStats] = useState({ liveCount: 0, pendingCount: 0, promoCount: 0 });
@@ -115,6 +112,14 @@ export default function AdminDashboard() {
     checkAuth();
   }, []);
 
+  // Display an auto-fading notification message
+  const showNotification = (message: string, isError = false) => {
+    setNotification({ message, isError });
+    setTimeout(() => {
+      setNotification(null);
+    }, 4500);
+  };
+
   // Handle password submit
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +130,7 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ email: emailInput, password: passwordInput })
       });
 
       if (!res.ok) {
@@ -136,8 +141,8 @@ export default function AdminDashboard() {
       setIsAuthenticated(true);
       setPasswordInput('');
       showNotification('Administrator authentication verified. Welcome back.');
-    } catch (err: any) {
-      setAuthError(err.message || 'Access denied.');
+    } catch (err) {
+      setAuthError(getErrorMessage(err) || 'Access denied.');
     } finally {
       setLoggingIn(false);
     }
@@ -156,12 +161,15 @@ export default function AdminDashboard() {
     }
   };
 
-  // Reset filters when activeTab changes
-  useEffect(() => {
+  // Reset filters when activeTab changes (adjusted during render, not in an
+  // effect, to avoid an extra post-commit render pass for a plain derived reset)
+  const [prevActiveTab, setPrevActiveTab] = useState(activeTab);
+  if (activeTab !== prevActiveTab) {
+    setPrevActiveTab(activeTab);
     setFilterTier('all');
     setFilterPromo(false);
     setSearchQuery('');
-  }, [activeTab]);
+  }
 
   // Fetch listings from the API based on active tab
   useEffect(() => {
@@ -196,8 +204,8 @@ export default function AdminDashboard() {
             pendingCount: data.length
           }));
         }
-      } catch (err: any) {
-        setError(err.message || 'An unexpected connection error occurred.');
+      } catch (err) {
+        setError(getErrorMessage(err) || 'An unexpected connection error occurred.');
       } finally {
         setLoading(false);
       }
@@ -220,7 +228,7 @@ export default function AdminDashboard() {
       const data: SubscriptionPlan[] = await res.json();
       setPlans(data);
       
-      const drafts: Record<string, any> = {};
+      const drafts: Record<string, { name: string; price_monthly_gbp: number | string; description: string; is_active: boolean }> = {};
       data.forEach(p => {
         drafts[p.id] = {
           name: p.name,
@@ -230,8 +238,8 @@ export default function AdminDashboard() {
         };
       });
       setPlanDrafts(drafts);
-    } catch (err: any) {
-      showNotification('Could not load subscription pricing: ' + err.message, true);
+    } catch (err) {
+      showNotification('Could not load subscription pricing: ' + getErrorMessage(err), true);
     } finally {
       setLoadingPlans(false);
     }
@@ -239,17 +247,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (activeTab === 'pricing' && isAuthenticated) {
-      fetchPlans();
+      // Deferred to a microtask so fetchPlans' own setLoadingPlans(true) doesn't
+      // run synchronously inside the effect body itself.
+      const timer = setTimeout(() => { fetchPlans(); }, 0);
+      return () => clearTimeout(timer);
     }
   }, [activeTab, isAuthenticated]);
-
-  // Display an auto-fading notification message
-  const showNotification = (message: string, isError = false) => {
-    setNotification({ message, isError });
-    setTimeout(() => {
-      setNotification(null);
-    }, 4500);
-  };
 
   // Save changes to a specific subscription plan
   const handleSavePlan = async (id: string) => {
@@ -290,8 +293,8 @@ export default function AdminDashboard() {
         description: draft.description,
         is_active: draft.is_active,
       } : p));
-    } catch (err: any) {
-      showNotification(err.message || 'Error updating pricing plan', true);
+    } catch (err) {
+      showNotification(getErrorMessage(err) || 'Error updating pricing plan', true);
     } finally {
       setSavingPlanId(null);
     }
@@ -318,8 +321,8 @@ export default function AdminDashboard() {
           if (!res.ok) throw new Error('Failed to reset plans');
           showNotification('All subscription plans have been reset to system defaults.');
           await fetchPlans();
-        } catch (err: any) {
-          showNotification(err.message || 'Error resetting pricing plans', true);
+        } catch (err) {
+          showNotification(getErrorMessage(err) || 'Error resetting pricing plans', true);
         } finally {
           setSavingPlanId(null);
         }
@@ -342,7 +345,7 @@ export default function AdminDashboard() {
         throw new Error("Failed to update tier.");
       }
       showNotification(`Membership tier updated to ${tier.toUpperCase()} successfully.`);
-    } catch (err: any) {
+    } catch {
       showNotification("Could not update listing tier. Please try again.", true);
     }
   };
@@ -362,7 +365,7 @@ export default function AdminDashboard() {
         throw new Error("Failed to update website.");
       }
       showNotification("Website URL updated successfully.");
-    } catch (err: any) {
+    } catch {
       showNotification("Could not update website URL. Please try again.", true);
     }
   };
@@ -392,8 +395,8 @@ export default function AdminDashboard() {
       }
 
       showNotification(`Deep crawl and AI analysis completed for "${listing.title}". Metadata saved!`);
-    } catch (err: any) {
-      showNotification(`Deep scrape failed: ${err.message}`, true);
+    } catch (err) {
+      showNotification(`Deep scrape failed: ${getErrorMessage(err)}`, true);
     } finally {
       setActionInProgress(null);
     }
@@ -422,7 +425,7 @@ export default function AdminDashboard() {
       }
 
       showNotification(`Listing "${listingToApprove.title}" has been successfully approved and is now live.`);
-    } catch (err: any) {
+    } catch {
       setListings(originalListings);
       showNotification(`Could not approve listing "${listingToApprove.title}". Please try again.`, true);
     } finally {
@@ -457,7 +460,7 @@ export default function AdminDashboard() {
           }
 
           showNotification(`Listing "${listingToReject.title}" has been permanently purged.`);
-        } catch (err: any) {
+        } catch {
           setListings(originalListings);
           showNotification(`Could not delete listing "${listingToReject.title}". Please try again.`, true);
         } finally {
@@ -494,18 +497,31 @@ export default function AdminDashboard() {
               Cotswolds Admin Portal
             </h2>
             <p className="mt-2 text-xs text-stone-400 leading-relaxed">
-              Shielded Administrative Gateway. Enter your administrator passcode to proceed.
+              Shielded Administrative Gateway. Sign in with your administrator account to proceed.
             </p>
           </div>
-          <form className="mt-8 space-y-5" onSubmit={handleLogin}>
+          <form className="mt-8 space-y-4" onSubmit={handleLogin}>
+            <div className="rounded-md">
+              <input
+                type="email"
+                required
+                disabled={loggingIn}
+                placeholder="Administrator email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                autoComplete="email"
+                className="block w-full rounded-xl border border-stone-700 bg-stone-800/80 px-4 py-3.5 text-sm text-white placeholder-stone-500 focus:border-amber-500 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 transition"
+              />
+            </div>
             <div className="rounded-md">
               <input
                 type="password"
                 required
                 disabled={loggingIn}
-                placeholder="Enter administrator passcode"
+                placeholder="Password"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
+                autoComplete="current-password"
                 className="block w-full rounded-xl border border-stone-700 bg-stone-800/80 px-4 py-3.5 text-sm text-white placeholder-stone-500 focus:border-amber-500 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 transition"
               />
             </div>
@@ -1109,7 +1125,7 @@ export default function AdminDashboard() {
                                   {activeTab === 'live' ? (
                                     <select
                                       value={item.tier || 'basic'}
-                                      onChange={(e) => handleTierChange(item.id, e.target.value as any)}
+                                      onChange={(e) => handleTierChange(item.id, e.target.value as 'basic' | 'claimed' | 'gold' | 'featured')}
                                       className="bg-stone-50 border border-stone-200 rounded-lg px-2.5 py-1 text-xs font-semibold outline-hidden text-stone-800 cursor-pointer"
                                     >
                                       <option value="basic">Basic (Standard)</option>
@@ -1256,7 +1272,7 @@ export default function AdminDashboard() {
                                   <span className="font-semibold text-stone-600">Membership Tier:</span>
                                   <select
                                     value={item.tier || 'basic'}
-                                    onChange={(e) => handleTierChange(item.id, e.target.value as any)}
+                                    onChange={(e) => handleTierChange(item.id, e.target.value as 'basic' | 'claimed' | 'gold' | 'featured')}
                                     className="bg-white border border-stone-200 rounded-lg px-2.5 py-1 text-xs outline-hidden text-stone-800 cursor-pointer font-semibold"
                                   >
                                     <option value="basic">Basic (Standard)</option>

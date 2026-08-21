@@ -1,4 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import { getErrorMessage } from './api-utils';
+
+interface SubscriptionPlanRow {
+  id: string;
+  name: string;
+  description?: string | null;
+  price_monthly_gbp: number | string;
+  features?: string[] | null;
+  is_active?: boolean | null;
+}
 
 export interface SubscriptionPlan {
   id: 'claim' | 'gold' | 'gold_social' | 'featured' | 'featured_social';
@@ -53,7 +63,7 @@ export const DEFAULT_PLANS: SubscriptionPlan[] = [
 ];
 
 // In-memory mock storage for development/offline mode
-let mockPlans: SubscriptionPlan[] = JSON.parse(JSON.stringify(DEFAULT_PLANS));
+const mockPlans: SubscriptionPlan[] = JSON.parse(JSON.stringify(DEFAULT_PLANS));
 
 export async function getSubscriptionPlans(includeInactive = false): Promise<SubscriptionPlan[]> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -76,16 +86,16 @@ export async function getSubscriptionPlans(includeInactive = false): Promise<Sub
       return includeInactive ? mockPlans : mockPlans.filter(p => p.is_active);
     }
 
-    return data.map((item: any) => ({
-      id: item.id,
+    return data.map((item: SubscriptionPlanRow) => ({
+      id: item.id as SubscriptionPlan['id'],
       name: item.name,
       description: item.description || '',
-      price_monthly_gbp: parseFloat(item.price_monthly_gbp),
+      price_monthly_gbp: parseFloat(String(item.price_monthly_gbp)),
       features: item.features || [],
       is_active: item.is_active ?? true,
     }));
-  } catch (err: any) {
-    console.error('Error fetching subscription plans:', err.message);
+  } catch (err) {
+    console.error('Error fetching subscription plans:', getErrorMessage(err));
     return includeInactive ? mockPlans : mockPlans.filter(p => p.is_active);
   }
 }
@@ -118,7 +128,7 @@ export async function updateSubscriptionPlan(
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const dbUpdates: any = { updated_at: new Date().toISOString() };
+  const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.name !== undefined) dbUpdates.name = updates.name;
   if (updates.description !== undefined) dbUpdates.description = updates.description;
   if (updates.price_monthly_gbp !== undefined) dbUpdates.price_monthly_gbp = Number(updates.price_monthly_gbp);

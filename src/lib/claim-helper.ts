@@ -1,9 +1,35 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApifyClient } from 'apify-client';
 import axios from 'axios';
+import { getErrorMessage } from './api-utils';
+
+export interface PremiumMetadata {
+  description: string;
+  highlights: string[];
+  faqs: { question: string; answer: string }[];
+  specialSection: Record<string, unknown>;
+  socialLinks: { instagram: string; facebook: string };
+  package_name?: string;
+  has_social_addon?: boolean;
+}
+
+interface ListingRecord {
+  id?: string;
+  title: string;
+  category: string;
+  town: string;
+  slug: string;
+  website?: string | null;
+  tier?: string;
+  google_place_id?: string | null;
+  rating?: number | string | null;
+  reviews_count?: number | null;
+  tags?: string[] | null;
+  images?: string[] | null;
+}
 
 // Helper function to download and upload images to Supabase Storage on-demand
-export async function downloadAndUploadImage(supabase: any, imageSrc: string, slug: string, idx: number): Promise<string | null> {
+export async function downloadAndUploadImage(supabase: SupabaseClient, imageSrc: string, slug: string, idx: number): Promise<string | null> {
   try {
     const res = await axios.get(imageSrc, { responseType: 'arraybuffer', timeout: 12000 });
     const buffer = Buffer.from(res.data, 'binary');
@@ -12,7 +38,7 @@ export async function downloadAndUploadImage(supabase: any, imageSrc: string, sl
     const extension = contentType.split('/')[1] || 'jpg';
     const filePath = `listings/${slug}-${idx}.${extension}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('listing-images')
       .upload(filePath, buffer, {
         contentType,
@@ -29,14 +55,14 @@ export async function downloadAndUploadImage(supabase: any, imageSrc: string, sl
       .getPublicUrl(filePath);
 
     return publicUrl;
-  } catch (error: any) {
-    console.error(`Error in downloadAndUploadImage for ${slug} at index ${idx}:`, error.message);
+  } catch (error) {
+    console.error(`Error in downloadAndUploadImage for ${slug} at index ${idx}:`, getErrorMessage(error));
     return null;
   }
 }
 
 // Helper function to generate premium metadata fallback
-export function generateMockMetadata(title: string, category: string, subRegion: string): any {
+export function generateMockMetadata(title: string, category: string, subRegion: string): PremiumMetadata {
   const isFood = /pub|restaurant|caf|gastropub|inn/i.test(category);
   const isHotel = /hotel|accommodation|b&b|inn/i.test(category);
 
@@ -90,7 +116,7 @@ export function generateMockMetadata(title: string, category: string, subRegion:
 }
 
 // Call Gemini API to extract details from crawled text
-export async function callGeminiAPI(crawledText: string, title: string, category: string, subRegion: string): Promise<any> {
+export async function callGeminiAPI(crawledText: string, title: string, category: string, subRegion: string): Promise<PremiumMetadata> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your-gemini-api-key-here') {
     console.warn("GEMINI_API_KEY is not configured. Falling back to default premium content.");
@@ -138,14 +164,20 @@ export async function callGeminiAPI(crawledText: string, title: string, category
       return JSON.parse(responseText.trim());
     }
     throw new Error("Empty response from Gemini API");
-  } catch (err: any) {
-    console.error("Gemini API call failed, falling back to mock generation:", err.message);
+  } catch (err) {
+    console.error("Gemini API call failed, falling back to mock generation:", getErrorMessage(err));
     return generateMockMetadata(title, category, subRegion);
   }
 }
 
+interface ClaimResult {
+  success: boolean;
+  tier: string;
+  metadata: PremiumMetadata | null;
+}
+
 // Unified core function to claim/activate listing, trigger web crawl scrape, AI enrichment, and Maps photo scraping
-export async function claimAndScrapeListing(listingId: string, tier: string, website: string): Promise<any> {
+export async function claimAndScrapeListing(listingId: string, tier: string, website: string): Promise<ClaimResult> {
   console.log(`[claimAndScrapeListing] Starting claim/scrape for ID: ${listingId}, Tier: ${tier}, Website: ${website}`);
   
   const validPlans = ['claim', 'gold', 'gold_social', 'featured', 'featured_social'];
@@ -168,8 +200,8 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  let listing: any = null;
-  let isMock = !supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-supabase-url-here');
+  let listing: ListingRecord | null = null;
+  const isMock = !supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-supabase-url-here');
 
   if (isMock) {
     console.log(`[claimAndScrapeListing] Running database MOCK lookup for ID: ${listingId}`);
@@ -184,8 +216,12 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
     };
   } else {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
-    
-    // Update listing tier, website, and set approved status to true
+
+    // Atomic claim guard: only succeeds if the listing is still unclaimed
+    // ('basic'). This prevents anyone from paying to "re-claim" a listing
+    // that's already owned/claimed and silently overwriting its website —
+    // there is no identity/ownership verification in this flow, so once a
+    // listing is claimed, further changes must go through the admin panel.
     const { data, error } = await supabase
       .from('listings')
       .update({
@@ -194,11 +230,21 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
         is_approved: true
       })
       .eq('id', listingId)
+      .eq('tier', 'basic')
       .select()
       .single();
 
-    if (error) {
-      throw new Error(`Failed to update listing: ${error.message}`);
+    if (error || !data) {
+      const { data: existing } = await supabase
+        .from('listings')
+        .select('tier')
+        .eq('id', listingId)
+        .single();
+
+      if (existing && existing.tier && existing.tier !== 'basic') {
+        throw new Error('This listing has already been claimed. Please contact support if you believe this is an error.');
+      }
+      throw new Error(`Failed to update listing: ${error?.message || 'Listing not found'}`);
     }
     listing = data;
   }
@@ -207,7 +253,7 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
     throw new Error('Listing not found');
   }
 
-  let premiumMetadata = null;
+  let premiumMetadata: PremiumMetadata | null = null;
   let premiumImages: string[] = [];
   const apifyToken = process.env.APIFY_API_TOKEN;
   const isMockApify = !apifyToken || apifyToken === 'your-apify-api-token-here';
@@ -238,13 +284,13 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
 
       const { items } = await client.dataset(run.defaultDatasetId).listItems();
       const crawledText = items
-        .map((item: any) => item.text || '')
+        .map((item) => (item as { text?: string }).text || '')
         .join('\n\n')
         .slice(0, 10000); // Grab first 10k chars for safety
 
       premiumMetadata = await callGeminiAPI(crawledText, listing.title, listing.category, listing.town);
-    } catch (err: any) {
-      console.error("[claimAndScrapeListing] Deep website crawl failed, falling back to mock:", err.message);
+    } catch (err) {
+      console.error("[claimAndScrapeListing] Deep website crawl failed, falling back to mock:", getErrorMessage(err));
       premiumMetadata = generateMockMetadata(listing.title, listing.category, listing.town);
     }
 
@@ -265,7 +311,7 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
 
       const { items: mapsItems } = await client.dataset(mapsRun.defaultDatasetId).listItems();
       if (mapsItems && mapsItems.length > 0) {
-        const mapItem = mapsItems[0] as any;
+        const mapItem = mapsItems[0] as { imageUrl?: string; imageUrls?: string[] };
         const rawImageUrls: string[] = [];
         if (mapItem.imageUrl) rawImageUrls.push(mapItem.imageUrl);
         if (mapItem.imageUrls && Array.isArray(mapItem.imageUrls)) {
@@ -289,8 +335,8 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
           premiumImages = targetImages;
         }
       }
-    } catch (err: any) {
-      console.error("[claimAndScrapeListing] Google Maps photo scraping failed:", err.message);
+    } catch (err) {
+      console.error("[claimAndScrapeListing] Google Maps photo scraping failed:", getErrorMessage(err));
     }
   }
 
@@ -304,7 +350,7 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
       has_social_addon: hasSocial
     };
 
-    const updates: any = {
+    const updates: Record<string, unknown> = {
       premium_metadata: finalMetadata
     };
 

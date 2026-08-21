@@ -3,14 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from "../../components/Navbar";
-import { 
-  ArrowLeft, 
-  Store, 
-  MapPin, 
-  Phone, 
-  Globe, 
-  Mail, 
-  MessageSquare, 
+import {
+  ArrowLeft,
+  Store,
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
   Image as ImageIcon,
   CheckCircle,
   AlertCircle,
@@ -20,6 +19,7 @@ import {
   Layers,
   Sparkles
 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/api-utils';
 
 const CATEGORIES = [
   "Construction & Home Maintenance",
@@ -267,8 +267,8 @@ export default function SubmitListing() {
           throw new Error('No redirect URL returned from payment server.');
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'We could not save your submission. Please verify your details, check your network, and try again.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'We could not save your submission. Please verify your details, check your network, and try again.');
     } finally {
       setSubmitting(false);
     }

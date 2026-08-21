@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
-import { Palette, PenTool, Layout, Layers, Heart, MessageSquare, Award, BookOpen, Star, RefreshCw, ArrowRight } from "lucide-react";
+import { Palette, PenTool, Layout, Layers, Heart, MessageSquare, Award, BookOpen, Star, ArrowRight } from "lucide-react";
 
 export const metadata = {
   title: "Graphic Design & Branding | Cotswolds Pages",
@@ -153,7 +153,7 @@ export default function GraphicDesign() {
               The Clear Benefits of Professional Brand Strategy
             </h2>
             <p className="text-stone-500 text-xs mt-2 font-normal">
-              Investing in your business's identity delivers tangible long-term rewards that actively drive your business forward.
+              Investing in your business&apos;s identity delivers tangible long-term rewards that actively drive your business forward.
             </p>
           </div>
 

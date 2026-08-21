@@ -1,7 +1,7 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Link from "next/link";
-import { Video, Camera, Compass, Users, Sparkles, Image, ArrowRight } from "lucide-react";
+import { Camera, Users, Sparkles, Image, ArrowRight } from "lucide-react";
 
 export const metadata = {
   title: "Digital Media Management | Cotswolds Pages",
@@ -123,7 +123,7 @@ export default function DigitalMediaManagement() {
             <div className="absolute inset-0 bg-gradient-to-r from-stone-950 to-stone-900 z-0" />
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="max-w-xl">
-                <h3 className="text-xl sm:text-2xl font-serif font-black mb-3">Partner with us today to turn your business's daily operations into high-converting digital content</h3>
+                <h3 className="text-xl sm:text-2xl font-serif font-black mb-3">Partner with us today to turn your business&apos;s daily operations into high-converting digital content</h3>
                 <p className="text-stone-300 text-xs leading-relaxed font-normal">
                   Contact our content specialists and book a discovery call to kickstart your campaign.
                 </p>
