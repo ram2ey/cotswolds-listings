@@ -31,6 +31,7 @@
   --animate-fade-in-up: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fade-in 0.25s cubic-bezier(0.23, 1, 0.32, 1) forwards;
   --animate-scale-in: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-in-right: slide-in-right 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
   @keyframes fade-in-up {
     from {
@@ -55,6 +56,19 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

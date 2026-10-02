@@ -1,7 +1,7 @@
 import CotswoldsSearch from "./components/CotswoldsSearch";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import { PlusCircle, MapPin, Hotel, Utensils, Wrench, Sparkles, Briefcase, Car } from "lucide-react";
+import { PlusCircle, MapPin, Hotel, Utensils, Wrench, Sparkles, Briefcase, Car, ArrowRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -323,6 +323,93 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* 6. Lana Lotus Craft Artisan Spotlight */}
+      <section className="py-20 bg-[#f7f4ed] border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 text-amber-900 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider mb-2">
+                <Sparkles className="h-3 w-3 text-amber-700" /> Artisan Boutique
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-stone-950">
+                Lana Lotus Craft Candles
+              </h2>
+              <p className="mt-2 text-sm text-stone-600 max-w-xl">
+                Small-batch plant-based candles, wax melts and sachets uniquely decorated with genuine crystals and dried botanicals.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
+                Sale: £39.99 (was £49.99)
+              </span>
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 rounded-full bg-amber-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:bg-amber-700 transition"
+              >
+                <ShoppingBag className="h-3.5 w-3.5" /> Visit Candle Shop <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                slug: "floral-musk",
+                name: "Floral Musk",
+                eyebrow: "Serene & Luxurious",
+                desc: "Cool florals with lily, peony, rose, jasmine and carnation.",
+                stones: "Natural chip stones & dried petals",
+                img: "/shop/floral-musk.jpg",
+              },
+              {
+                slug: "honey-dusk",
+                name: "Honey Dusk",
+                eyebrow: "Warm & Opulent",
+                desc: "Dark honey, warm spices, sandalwood, amber and tonka.",
+                stones: "Natural red agate stones",
+                img: "/shop/honey-dusk.jpg",
+              },
+              {
+                slug: "sunset",
+                name: "Sunset",
+                eyebrow: "Citrus & Energy",
+                desc: "Juicy peach, zesty orange and tart cranberry over frosty ice.",
+                stones: "Natural orange carnelian stones",
+                img: "/shop/sunset.jpg",
+              },
+            ].map((item) => (
+              <Link
+                key={item.slug}
+                href={`/shop/${item.slug}`}
+                className="group flex flex-col bg-white rounded-3xl p-3 border border-stone-200 shadow-xs hover:shadow-xl hover:border-amber-300 transition-all duration-300"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.img}
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <span className="absolute top-3 left-3 bg-white/90 backdrop-blur rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-amber-900">
+                    Artisan 8oz
+                  </span>
+                  <span className="absolute bottom-3 right-3 bg-amber-600 rounded-full px-2.5 py-1 text-[10px] font-black text-white shadow-xs">
+                    £39.99 <span className="line-through font-normal opacity-80 text-[9px]">£49.99</span>
+                  </span>
+                </div>
+                <div className="p-3">
+                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-amber-800">{item.eyebrow}</p>
+                  <h3 className="font-serif text-lg font-bold text-stone-950 mt-1 group-hover:text-amber-800 transition">{item.name}</h3>
+                  <p className="text-xs text-stone-500 mt-1 line-clamp-1">{item.desc}</p>
+                  <p className="text-[11px] text-amber-950/80 bg-amber-50 rounded-lg px-2 py-1 mt-2 line-clamp-1 border border-amber-100">
+                    ✦ {item.stones}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 7. How it Works Section */}
       <section id="how-it-works" className="py-16 bg-amber-900 border-b border-amber-950/30">

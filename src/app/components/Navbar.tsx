@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, PlusCircle, ChevronDown, Share2, Video, Laptop, Search, Palette, Camera } from "lucide-react";
+import CartButton from "./CartButton";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +44,15 @@ export default function Navbar() {
               }`}
             >
               Find Local Business
+            </Link>
+
+            <Link
+              href="/shop"
+              className={`text-xs font-bold transition-colors duration-200 hover:text-stone-950 ${
+                pathname.startsWith("/shop") ? "text-amber-600" : "text-stone-600"
+              }`}
+            >
+              Candle Shop
             </Link>
 
             {/* Dropdown Link for Services */}
@@ -118,6 +128,8 @@ export default function Navbar() {
               <PlusCircle className="h-3.5 w-3.5" />
               Add Your Listing
             </Link>
+
+            <CartButton />
           </div>
 
           {/* Hamburger Menu Toggle */}
@@ -148,6 +160,16 @@ export default function Navbar() {
               }`}
             >
               Find Local Business
+            </Link>
+
+            <Link
+              href="/shop"
+              onClick={() => setIsOpen(false)}
+              className={`block px-3 py-3 rounded-xl text-sm font-bold transition ${
+                pathname.startsWith("/shop") ? "bg-amber-50 text-amber-600" : "text-stone-600 hover:bg-stone-50 hover:text-stone-950"
+              }`}
+            >
+              Candle Shop
             </Link>
 
             {/* Mobile Dropdown Trigger */}
@@ -209,6 +231,10 @@ export default function Navbar() {
             >
               Contact Us
             </Link>
+
+            <div className="pt-2 px-3">
+              <CartButton mobile />
+            </div>
 
             <div className="pt-2 px-3">
               <Link

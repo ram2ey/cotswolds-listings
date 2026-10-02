@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
+import { ShopCartProvider } from "./components/ShopCartProvider";
+import CartDrawer from "./components/CartDrawer";
 
 const playfair = Playfair_Display({
   variable: "--font-serif",
@@ -27,7 +29,12 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">{children}</body>
+      <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
+        <ShopCartProvider>
+          {children}
+          <CartDrawer />
+        </ShopCartProvider>
+      </body>
     </html>
   );
 }

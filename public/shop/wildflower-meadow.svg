@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <defs><linearGradient id="bg" y2="1"><stop stop-color="#e9e0d3"/><stop offset="1" stop-color="#bea9ad"/></linearGradient><filter id="s"><feDropShadow dy="22" stdDeviation="18" flood-opacity=".2"/></filter></defs><rect width="800" height="1000" fill="url(#bg)"/>
+  <g opacity=".6" fill="none" stroke="#fff5ee" stroke-width="7"><path d="M90 900q30-330 120-560M210 900q50-280 180-500M670 910q-35-310-170-530"/><circle cx="221" cy="320" r="35"/><circle cx="448" cy="350" r="26"/><circle cx="535" cy="455" r="42"/></g>
+  <g filter="url(#s)"><path d="M270 360h260l-25 410q-4 55-55 55H350q-51 0-55-55Z" fill="#f7f1eb"/><ellipse cx="400" cy="360" rx="130" ry="30" fill="#ddd2c8"/><ellipse cx="400" cy="365" rx="112" ry="21" fill="#eee1d1"/><path d="M400 354q-22-58 0-105q26 45 0 105" fill="#f3ae40"/><path d="M397 355v-53" stroke="#463a2c" stroke-width="5"/></g>
+  <rect x="310" y="510" width="180" height="145" fill="#faf7f3" stroke="#173c27" stroke-width="2"/><text x="400" y="550" text-anchor="middle" fill="#173c27" font-family="Georgia" font-size="18" letter-spacing="4">COTSWOLDS</text><text x="400" y="584" text-anchor="middle" fill="#173c27" font-family="Georgia" font-size="23">WILDFLOWER</text><text x="400" y="615" text-anchor="middle" fill="#173c27" font-family="Georgia" font-size="19">MEADOW</text>
+</svg>
