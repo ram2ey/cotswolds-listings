@@ -19,11 +19,6 @@ export default function CandleCard({ product }: { product: ShopProduct }) {
 
         {/* Top Badges */}
         <div className="absolute left-3 top-3 flex flex-col gap-1.5 items-start">
-          {product.is_featured && (
-            <span className="rounded-full bg-white/95 px-3 py-1 text-[9px] font-extrabold uppercase tracking-[0.16em] text-amber-900 shadow-sm backdrop-blur">
-              Artisan Pick
-            </span>
-          )}
           {savings > 0 && (
             <span className="rounded-full bg-amber-600 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white shadow-sm flex items-center gap-1">
               <Sparkles className="h-2.5 w-2.5" /> Save {formatGbp(savings)}

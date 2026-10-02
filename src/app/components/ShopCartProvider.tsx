@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ShopProduct } from "@/lib/shop";
+import { isAvailableProduct } from "@/lib/shop";
 
 export interface CartItem {
   cartItemId: string;
@@ -38,7 +39,7 @@ export function ShopCartProvider({ children }: { children: React.ReactNode }) {
         const saved = window.localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          const migrated: CartItem[] = parsed.map((item: Partial<CartItem> & { product: ShopProduct; quantity: number }) => ({
+          const migrated: CartItem[] = parsed.filter((item: CartItem) => item.product && isAvailableProduct(item.product)).map((item: Partial<CartItem> & { product: ShopProduct; quantity: number }) => ({
             cartItemId: item.cartItemId || (item.fragrance ? `${item.product.id}-${item.fragrance}` : item.product.id),
             product: item.product,
             quantity: item.quantity,

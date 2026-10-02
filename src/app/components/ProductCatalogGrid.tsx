@@ -23,7 +23,7 @@ export default function ProductCatalogGrid({ products }: ProductCatalogGridProps
       { label: "Botanical Candles (8oz)", value: "Candles", count: candleCount },
       { label: "Discovery Sets", value: "Wax Melts", count: meltCount },
       { label: "Wax Sachets", value: "Wax Sachets", count: sachetCount },
-    ];
+    ].filter((category) => category.value === "All" || category.count > 0);
   }, [products]);
 
   const filteredProducts = useMemo(() => {

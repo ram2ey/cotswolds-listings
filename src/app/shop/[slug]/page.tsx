@@ -50,11 +50,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             className="aspect-[4/5] h-full w-full object-cover"
           />
 
-          {product.is_featured && (
-            <span className="absolute left-5 top-5 rounded-full bg-white/95 px-3.5 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-amber-900 shadow-sm backdrop-blur">
-              Artisan Signature Pick
-            </span>
-          )}
         </div>
 
         {/* Product Info & Purchase Form */}

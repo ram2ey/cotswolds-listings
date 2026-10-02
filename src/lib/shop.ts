@@ -28,6 +28,9 @@ export interface ShopProduct {
   display_order: number;
 }
 
+const REMOVED_PRODUCT_SLUGS = new Set(["discovery-set", "scented-wax-sachets"]);
+export const isAvailableProduct = (product: ShopProduct) => !REMOVED_PRODUCT_SLUGS.has(product.slug);
+
 export const LANA_LOTUS_PRODUCTS: ShopProduct[] = [
   {
     id: "d1000001-0000-4000-8000-000000000001",
@@ -305,7 +308,7 @@ function configuredSupabase() {
 
 export async function getShopProducts(): Promise<ShopProduct[]> {
   const supabase = configuredSupabase();
-  if (!supabase) return LANA_LOTUS_PRODUCTS;
+  if (!supabase) return LANA_LOTUS_PRODUCTS.filter(isAvailableProduct);
 
   const { data, error } = await supabase
     .from("shop_products")
@@ -316,14 +319,14 @@ export async function getShopProducts(): Promise<ShopProduct[]> {
 
   if (error || !data?.length) {
     if (error) console.warn("Shop catalogue unavailable; using Lana Lotus catalogue:", error.message);
-    return LANA_LOTUS_PRODUCTS;
+    return LANA_LOTUS_PRODUCTS.filter(isAvailableProduct);
   }
 
   return data.map((product) => ({
     ...product,
     price_gbp: Number(product.price_gbp),
     original_price_gbp: Number(product.original_price_gbp || 49.99),
-  })) as ShopProduct[];
+  })).filter(isAvailableProduct) as ShopProduct[];
 }
 
 export async function getShopProductBySlug(slug: string) {
@@ -348,7 +351,7 @@ export async function getCheckoutProductsByIds(ids: string[]): Promise<ShopProdu
     ...product,
     price_gbp: Number(product.price_gbp),
     original_price_gbp: Number(product.original_price_gbp || 49.99),
-  })) as ShopProduct[];
+  })).filter(isAvailableProduct) as ShopProduct[];
 }
 
 export function formatGbp(value: number) {

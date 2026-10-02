@@ -37,10 +37,6 @@ export default async function ShopPage() {
         />
         <div className="relative mx-auto grid min-h-[540px] max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_.9fr] lg:px-8">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-bold text-amber-300 backdrop-blur-md mb-6 border border-white/10">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>Handcrafted by Lana Lotus Craft</span>
-            </div>
 
             <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl text-stone-50">
               Artisan Candles &<br />Botanical Treasures.
