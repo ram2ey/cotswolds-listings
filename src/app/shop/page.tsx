@@ -110,7 +110,7 @@ export default async function ShopPage() {
             {
               icon: PackageCheck,
               title: "Free UK Delivery",
-              text: "Dispatched safely with free UK shipping over £50",
+              text: "Dispatched safely with free UK shipping on every order",
             },
           ].map(({ icon: Icon, title, text }) => (
             <div key={title} className="flex items-center gap-3.5 px-3 py-5 sm:px-5">

@@ -68,11 +68,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Please split this basket into smaller orders." }, { status: 400 });
     }
 
-    const subtotalPence = normalized.reduce((sum, item) => {
-      const product = productMap.get(item.productId)!;
-      return sum + Math.round(product.price_gbp * 100) * item.quantity;
-    }, 0);
-
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -103,8 +98,8 @@ export async function POST(request: NextRequest) {
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            fixed_amount: { amount: subtotalPence >= 5000 ? 0 : 395, currency: "gbp" },
-            display_name: subtotalPence >= 5000 ? "Free UK delivery" : "Standard UK delivery",
+            fixed_amount: { amount: 0, currency: "gbp" },
+            display_name: "Free UK delivery",
             delivery_estimate: {
               minimum: { unit: "business_day", value: 3 },
               maximum: { unit: "business_day", value: 5 },

@@ -121,7 +121,7 @@ export default function CartDrawer() {
                   <strong className="text-base text-stone-950">{formatGbp(subtotal)}</strong>
                 </div>
               </div>
-              <p className="mt-2 text-[11px] leading-5 text-stone-400">Delivery calculated at checkout. Free UK delivery on orders over £50.</p>
+              <p className="mt-2 text-[11px] leading-5 text-stone-400">Free delivery throughout the UK.</p>
               {checkoutError && <p role="alert" className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{checkoutError}</p>}
               <button onClick={checkout} disabled={isCheckingOut} className="mt-4 flex min-h-12 w-full items-center justify-center rounded-full bg-amber-600 px-6 text-sm font-bold text-white shadow-lg shadow-amber-900/10 transition hover:bg-amber-700 disabled:cursor-wait disabled:opacity-60">
                 {isCheckingOut ? "Preparing secure checkout…" : "Secure checkout"}

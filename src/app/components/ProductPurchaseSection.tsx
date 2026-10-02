@@ -113,7 +113,7 @@ export default function ProductPurchaseSection({ product }: { product: ShopProdu
       </div>
 
       <p className="text-center text-[11px] text-stone-400">
-        Free UK Delivery on orders over £50 · Secure checkout powered by Stripe
+        Free UK Delivery · Secure checkout powered by Stripe
       </p>
     </div>
   );
