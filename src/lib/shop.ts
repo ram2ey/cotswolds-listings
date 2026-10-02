@@ -337,6 +337,20 @@ export async function getShopProductsByIds(ids: string[]) {
   return products.filter((product) => wanted.has(product.id));
 }
 
+export async function getCheckoutProductsByIds(ids: string[]): Promise<ShopProduct[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Shop database is not configured.');
+  const { data, error } = await createClient(url, key)
+    .from('shop_products').select('*').in('id', ids).eq('is_active', true);
+  if (error) throw error;
+  return (data || []).map((product) => ({
+    ...product,
+    price_gbp: Number(product.price_gbp),
+    original_price_gbp: Number(product.original_price_gbp || 49.99),
+  })) as ShopProduct[];
+}
+
 export function formatGbp(value: number) {
   return new Intl.NumberFormat("en-GB", {
     style: "currency",

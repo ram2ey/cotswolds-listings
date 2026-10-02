@@ -3,21 +3,19 @@ import { Check, Mail, PackageCheck } from "lucide-react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import ClearCartOnMount from "../../components/ClearCartOnMount";
-import { isStripeMock, stripe } from "@/lib/stripe";
+import { hasStripeSecretKey, stripe } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ session_id?: string; mock?: string; order?: string }>;
+  searchParams: Promise<{ session_id?: string }>;
 }
 
 export default async function OrderSuccessPage({ searchParams }: PageProps) {
   const query = await searchParams;
   let receipt: { orderId: string; email?: string | null; amount?: string; items?: string[] } | null = null;
 
-  if (query.mock === "1" && query.order) {
-    receipt = { orderId: query.order, amount: "Test order" };
-  } else if (query.session_id && !isStripeMock()) {
+  if (query.session_id && hasStripeSecretKey()) {
     try {
       const session = await stripe.checkout.sessions.retrieve(query.session_id, { expand: ["line_items"] });
       if (session.payment_status === "paid" && session.metadata?.shopOrder === "true") {

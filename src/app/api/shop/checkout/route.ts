@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShopProductsByIds } from "@/lib/shop";
-import { isStripeMock, stripe } from "@/lib/stripe";
+import { getCheckoutProductsByIds } from "@/lib/shop";
+import { isStripeConfigured, stripe } from "@/lib/stripe";
 import { getErrorMessage } from "@/lib/api-utils";
 
 interface RequestedItem {
@@ -11,6 +11,15 @@ interface RequestedItem {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isStripeConfigured()) {
+      console.error('[shop-checkout] Stripe credentials are not configured.');
+      return NextResponse.json({ error: 'Checkout is temporarily unavailable.' }, { status: 503 });
+    }
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    if (!supabaseUrl || !process.env.SUPABASE_SERVICE_ROLE_KEY || supabaseUrl.includes('your-project')) {
+      return NextResponse.json({ error: 'Checkout is temporarily unavailable.' }, { status: 503 });
+    }
+
     const body = await request.json();
     const requested: RequestedItem[] = Array.isArray(body.items) ? body.items : [];
 
@@ -21,23 +30,31 @@ export async function POST(request: NextRequest) {
     const normalized = requested.map((item) => ({
       productId: String(item.productId || ""),
       quantity: Math.floor(Number(item.quantity)),
-      fragrance: item.fragrance ? String(item.fragrance).slice(0, 50) : undefined,
+      fragrance: item.fragrance ? String(item.fragrance) : undefined,
     }));
 
     if (normalized.some((item) => !item.productId || !Number.isFinite(item.quantity) || item.quantity < 1 || item.quantity > 10)) {
       return NextResponse.json({ error: "One or more basket quantities are invalid." }, { status: 400 });
     }
+    if (new Set(normalized.map((item) => `${item.productId}:${item.fragrance || ''}`)).size !== normalized.length) {
+      return NextResponse.json({ error: "Your basket contains duplicate items." }, { status: 400 });
+    }
 
     const uniqueProductIds = Array.from(new Set(normalized.map((item) => item.productId)));
-    const products = await getShopProductsByIds(uniqueProductIds);
+    const products = await getCheckoutProductsByIds(uniqueProductIds);
     if (products.length !== uniqueProductIds.length) {
       return NextResponse.json({ error: "One or more products are no longer available." }, { status: 400 });
     }
 
     const productMap = new Map(products.map((product) => [product.id, product]));
+    const quantities = new Map<string, number>();
     for (const item of normalized) {
       const product = productMap.get(item.productId)!;
-      if (!product.is_active || item.quantity > product.stock_quantity) {
+      if (item.fragrance && !product.fragrance_options?.includes(item.fragrance)) {
+        return NextResponse.json({ error: `Invalid fragrance for ${product.name}.` }, { status: 400 });
+      }
+      quantities.set(item.productId, (quantities.get(item.productId) || 0) + item.quantity);
+      if (!product.is_active || quantities.get(item.productId)! > product.stock_quantity) {
         return NextResponse.json({ error: `${product.name} does not have enough stock for that quantity.` }, { status: 409 });
       }
     }
@@ -47,11 +64,8 @@ export async function POST(request: NextRequest) {
     const compactCart = normalized
       .map((item) => `${item.productId}:${item.quantity}${item.fragrance ? `:${item.fragrance}` : ""}`)
       .join(",");
-
-    if (isStripeMock()) {
-      return NextResponse.json({
-        url: `${origin}/shop/order-success?mock=1&order=${orderId}`,
-      });
+    if (compactCart.length > 500) {
+      return NextResponse.json({ error: "Please split this basket into smaller orders." }, { status: 400 });
     }
 
     const subtotalPence = normalized.reduce((sum, item) => {

@@ -12,9 +12,6 @@ function SuccessPageContent() {
   const slug = searchParams?.get('slug') || '';
   const sessionId = searchParams?.get('session_id') || '';
 
-  // Determine if it was a mock activation
-  const isMock = sessionId.startsWith('mock_');
-
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900 font-sans flex flex-col justify-between">
       <Navbar />
@@ -38,11 +35,11 @@ function SuccessPageContent() {
           {/* Header */}
           <div className="text-center space-y-2">
             <h2 className="font-serif text-3xl font-black text-stone-900 tracking-tight">
-              Payment Confirmed!
+              Checkout Complete
             </h2>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-stone-105 border border-stone-200 text-stone-650 rounded-full text-[10px] font-extrabold uppercase tracking-widest shadow-xs">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              Secure Checkout Complete
+              Processing Your Upgrade
             </div>
           </div>
 
@@ -51,8 +48,7 @@ function SuccessPageContent() {
             <div>
               <p className="text-xs font-bold text-stone-450 uppercase tracking-widest">Upgrade Status</p>
               <p className="text-stone-700 text-xs mt-1.5 leading-relaxed">
-                Thank you! Your transaction has been verified. Our AI copywriter and Apify content scraper are executing website analysis in the background. 
-                Your listing details, highlights, and custom menus will refresh shortly.
+                Thank you. We are processing your payment confirmation and listing upgrade. Your listing details will refresh after the payment is confirmed.
               </p>
             </div>
 
@@ -65,14 +61,6 @@ function SuccessPageContent() {
               </div>
             )}
             
-            {isMock && (
-              <div className="border-t border-stone-200/60 pt-3 flex justify-between items-center text-[10px] font-medium text-amber-600">
-                <span>Stripe Environment</span>
-                <span className="font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
-                  Offline Mock Mode Fallback
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Action CTAs */}

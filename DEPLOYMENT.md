@@ -79,7 +79,7 @@ Confirm the following tables exist:
 After the final domain is live:
 
 1. In Stripe Workbench, create a webhook endpoint at `https://YOUR_DOMAIN/api/webhooks/stripe`.
-2. Subscribe it to `checkout.session.completed`.
+2. Subscribe it to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, and `customer.subscription.deleted`.
 3. Copy the endpoint signing secret into `STRIPE_WEBHOOK_SECRET` in Coolify.
 4. Set the live secret key as `STRIPE_SECRET_KEY`.
 5. Redeploy after changing the variables.

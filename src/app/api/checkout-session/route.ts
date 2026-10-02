@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { stripe, isStripeMock } from '@/lib/stripe';
-import { claimAndScrapeListing } from '@/lib/claim-helper';
-import { getSubscriptionPlan } from '@/lib/plans';
+import { stripe, isStripeConfigured } from '@/lib/stripe';
 import { errorResponse } from '@/lib/api-utils';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isStripeConfigured()) {
+      console.error('[checkout-session] Stripe credentials are not configured.');
+      return NextResponse.json({ error: 'Checkout is temporarily unavailable.' }, { status: 503 });
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-project')) {
+      return NextResponse.json({ error: 'Checkout is temporarily unavailable.' }, { status: 503 });
+    }
+
     const { listingId, tier, website } = await request.json();
 
     if (!listingId || !tier || !website) {
@@ -24,22 +33,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const plan = await getSubscriptionPlan(tier);
-    if (!plan || !plan.is_active) {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: plan, error: planError } = await supabase
+      .from('subscription_plans').select('*').eq('id', tier).single();
+    if (planError) throw planError;
+    if (!plan || !plan.is_active || !Number.isFinite(Number(plan.price_monthly_gbp)) || Number(plan.price_monthly_gbp) <= 0) {
       return NextResponse.json(
         { error: 'Selected subscription plan is not available.' },
         { status: 400 }
       );
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const isMockDB = !supabaseUrl || !supabaseServiceKey || supabaseUrl.includes('your-supabase-url-here');
-
     // Fetch listing details to obtain its slug
     let slug = 'unknown';
-    if (!isMockDB) {
-      const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+    {
       const { data, error } = await supabase
         .from('listings')
         .select('slug, tier')
@@ -62,29 +69,9 @@ export async function POST(request: NextRequest) {
       }
 
       slug = data.slug;
-    } else {
-      slug = 'broadway-hotel-suites-broadway'; // Fallback slug for offline mock testing
     }
 
-    const origin = request.headers.get('origin') || 'http://localhost:3000';
-
-    if (isStripeMock()) {
-      console.log(`[checkout-session] Running in MOCK mode. Plan: ${plan.name} (£${plan.price_monthly_gbp}/mo), Website: ${website}`);
-      
-      // For mock mode, run the claim/enrich scrape immediately in the background
-      // so the local DB is updated when they redirect to the success screen
-      claimAndScrapeListing(listingId, tier, website).catch((err) => {
-        console.error('[checkout-session] Mock claim background execution failed:', err.message);
-      });
-
-      const mockSessionId = 'mock_sess_' + Math.random().toString(36).substr(2, 9);
-      const redirectUrl = `${origin}/listings/claim/success?session_id=${mockSessionId}&slug=${slug}`;
-      
-      return NextResponse.json({
-        mockRedirect: true,
-        url: redirectUrl,
-      });
-    }
+    const origin = request.nextUrl.origin;
 
     // Real Stripe Flow with dynamic price_data
     const unitAmountPence = Math.round(plan.price_monthly_gbp * 100);
@@ -114,12 +101,12 @@ export async function POST(request: NextRequest) {
         tier,
         website,
       },
+      subscription_data: { metadata: { listingId, tier, website } },
       success_url: `${origin}/listings/claim/success?session_id={CHECKOUT_SESSION_ID}&slug=${slug}`,
       cancel_url: `${origin}/listings/${slug}`,
     });
 
     return NextResponse.json({
-      mockRedirect: false,
       url: session.url,
     });
   } catch (err) {

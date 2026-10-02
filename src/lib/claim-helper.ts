@@ -177,7 +177,7 @@ interface ClaimResult {
 }
 
 // Unified core function to claim/activate listing, trigger web crawl scrape, AI enrichment, and Maps photo scraping
-export async function claimAndScrapeListing(listingId: string, tier: string, website: string): Promise<ClaimResult> {
+export async function claimAndScrapeListing(listingId: string, tier: string, website: string, alreadyActivated = false, activationOnly = false, stripeSubscriptionId?: string): Promise<ClaimResult> {
   console.log(`[claimAndScrapeListing] Starting claim/scrape for ID: ${listingId}, Tier: ${tier}, Website: ${website}`);
   
   const validPlans = ['claim', 'gold', 'gold_social', 'featured', 'featured_social'];
@@ -222,17 +222,14 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
     // that's already owned/claimed and silently overwriting its website —
     // there is no identity/ownership verification in this flow, so once a
     // listing is claimed, further changes must go through the admin panel.
-    const { data, error } = await supabase
-      .from('listings')
-      .update({
-        tier: dbTier,
-        website,
-        is_approved: true
-      })
-      .eq('id', listingId)
-      .eq('tier', 'basic')
-      .select()
-      .single();
+    const { data, error } = alreadyActivated
+      ? await supabase.from('listings').select().eq('id', listingId).eq('tier', dbTier).single()
+      : await supabase.from('listings')
+        .update({ tier: dbTier, website, is_approved: true, ...(stripeSubscriptionId ? { stripe_subscription_id: stripeSubscriptionId } : {}) })
+        .eq('id', listingId)
+        .eq('tier', 'basic')
+        .select()
+        .single();
 
     if (error || !data) {
       const { data: existing } = await supabase
@@ -252,6 +249,12 @@ export async function claimAndScrapeListing(listingId: string, tier: string, web
   if (!listing) {
     throw new Error('Listing not found');
   }
+
+  if (alreadyActivated && listing.website !== website) {
+    throw new Error('The listing website changed before enrichment.');
+  }
+
+  if (activationOnly) return { success: true, tier, metadata: null };
 
   let premiumMetadata: PremiumMetadata | null = null;
   let premiumImages: string[] = [];

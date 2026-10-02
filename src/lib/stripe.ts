@@ -1,19 +1,16 @@
 import Stripe from 'stripe';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || '';
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
-// Determine if Stripe configuration is missing or using placeholder values
-export const isStripeMock = (): boolean => {
-  return (
-    !stripeSecretKey ||
-    stripeSecretKey.trim() === '' ||
-    stripeSecretKey.includes('your-stripe-secret-key-here')
-  );
-};
+export const hasStripeSecretKey = () => /^sk_(test|live)_[A-Za-z0-9]+$/.test(stripeSecretKey);
+export const hasStripeWebhookSecret = () => /^whsec_[A-Za-z0-9]+$/.test(webhookSecret);
+export const isStripeConfigured = () => hasStripeSecretKey() && hasStripeWebhookSecret();
 
-// Initialize the Stripe client. In mock mode, we pass a dummy key to prevent initialization exceptions.
+// This fallback only lets the module load. Payment routes reject missing
+// configuration before calling Stripe; it never enables a simulated checkout.
 export const stripe = new Stripe(
-  isStripeMock() ? 'sk_test_mock_placeholder_key_for_cotswolds_pages' : stripeSecretKey,
+  hasStripeSecretKey() ? stripeSecretKey : 'sk_test_unconfigured',
   {
     apiVersion: '2022-11-15' as Stripe.LatestApiVersion, // Standard stable API version
   }

@@ -44,6 +44,7 @@ CREATE TABLE listings (
   -- Staging & Tier details
   images TEXT[] DEFAULT '{}'::TEXT[], -- Supabase storage listing-images URLs
   tier membership_tier NOT NULL DEFAULT 'basic', -- Defaulting to 'basic' per global design rules
+  stripe_subscription_id TEXT UNIQUE,
   is_approved BOOLEAN NOT NULL DEFAULT false, -- Defaulting to false (hidden from public until verified)
   
   -- Premium Scraped & Review Data
@@ -276,10 +277,11 @@ CREATE TABLE IF NOT EXISTS shop_order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES shop_orders(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES shop_products(id),
+  fragrance TEXT NOT NULL DEFAULT '',
   product_name TEXT NOT NULL,
   unit_price_pence INTEGER NOT NULL CHECK (unit_price_pence >= 0),
   quantity INTEGER NOT NULL CHECK (quantity > 0),
-  UNIQUE (order_id, product_id)
+  UNIQUE (order_id, product_id, fragrance)
 );
 
 CREATE INDEX IF NOT EXISTS shop_products_active_order_idx ON shop_products(is_active, display_order);
